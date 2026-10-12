@@ -49,7 +49,7 @@ export default function SimuladorPage() {
     # Código de ejemplo para practicar
     total = sum(notas)
     return total / len(notas) if notas else 0`)
-  const [tema, setTema] = useState('vs-dark')
+  const [tema, setTema] = useState('dracula')
   const [errores, setErrores] = useState([])
   const [editorRef, setEditorRef] = useState(null)
   const [monacoRef, setMonacoRef] = useState(null)
