@@ -2,8 +2,8 @@ import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@c
 import './globals.css'
 
 export const metadata = {
-  title: 'PyDefense - Asegura tu sustentación de código Python',
-  description: 'Simula preguntas de sustentación sobre el código Python que generaste con IA antes de presentarlo.',
+  title: 'PyDefense - Practica tu sustentación de código Python',
+  description: 'Practica una sustentación de código Python con preguntas de ejemplo e identifica qué necesitas repasar.',
 }
 
 export default function RootLayout({ children }) {

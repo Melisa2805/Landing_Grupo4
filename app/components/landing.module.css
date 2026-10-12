@@ -1,0 +1,257 @@
+.primaryAction,
+.interactiveCard,
+.option {
+  transition: transform 220ms ease, background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.heroScene {
+  position: relative;
+  isolation: isolate;
+}
+
+.heroScene::before,
+.heroScene::after {
+  content: '';
+  position: absolute;
+  inset: -2rem -0.5rem;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.heroScene::before {
+  background: radial-gradient(ellipse at 82% 35%, rgb(37 99 235 / 13%), transparent 55%), radial-gradient(ellipse at 5% 10%, rgb(30 58 138 / 12%), transparent 50%);
+}
+
+.heroScene::after {
+  background-image: linear-gradient(rgb(96 165 250 / 4%) 1px, transparent 1px), linear-gradient(90deg, rgb(96 165 250 / 4%) 1px, transparent 1px), radial-gradient(circle, rgb(96 165 250 / 24%) 1px, transparent 1.5px);
+  background-size: 3rem 3rem, 3rem 3rem, 9rem 9rem;
+  mask-image: radial-gradient(ellipse at 65% 30%, black, transparent 72%);
+}
+
+.stepsProcess {
+  display: grid;
+  gap: 1.5rem;
+  padding-left: 3rem;
+}
+
+.processStep {
+  position: relative;
+  min-width: 0;
+  --progress-start: scaleY(0);
+}
+
+.processStep:not(:last-child)::before,
+.processStep:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: -1.75rem;
+  top: 2.25rem;
+  bottom: -3.75rem;
+  width: 1px;
+  background: #334155;
+  pointer-events: none;
+}
+
+.processStep:not(:last-child)::after {
+  background: linear-gradient(#3b82f6, rgb(96 165 250 / 30%));
+  transform-origin: top left;
+}
+
+.reveal[data-reveal='visible'] .processStep:not(:last-child)::after {
+  animation: processFill 1200ms ease-out both;
+}
+
+.reveal[data-reveal='visible'] .processStep:nth-child(2)::after { animation-delay: 300ms; }
+
+.processNode {
+  position: absolute;
+  top: 1rem;
+  left: -3rem;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid #334155;
+  border-radius: 50%;
+  background: #0f172a;
+  color: #94a3b8;
+  font: 600 0.75rem ui-monospace, monospace;
+  transition: border-color 220ms ease, color 220ms ease, box-shadow 220ms ease;
+}
+
+.processNode[data-active='true'] {
+  color: #93c5fd;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 5px rgb(37 99 235 / 8%);
+}
+
+.processCard {
+  padding: 1.25rem 1rem;
+  border-top: 1px solid #334155;
+  background: linear-gradient(160deg, rgb(30 58 138 / 9%), transparent 70%);
+}
+
+.processCard[data-expanded='true'] { border-color: #3b82f6; }
+
+.processIcon {
+  display: inline-flex;
+  padding: 0.75rem;
+  border-radius: 50%;
+  background: rgb(37 99 235 / 10%);
+  color: #60a5fa;
+}
+
+.processIcon svg { transition: transform 220ms ease; }
+.processCard:hover .processIcon svg { transform: translateY(-2px) rotate(-3deg); }
+
+.previewSection {
+  padding-block: 2rem;
+  background: radial-gradient(ellipse at 50% 65%, rgb(30 58 138 / 18%), transparent 70%);
+}
+
+.productPreview {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #334155;
+  border-radius: 1rem;
+  background: #0b1223;
+  box-shadow: 0 4px 0 #0f172a, 0 5px 0 #1e293b, 0 24px 60px rgb(2 6 23 / 30%);
+}
+
+.previewToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #1e293b;
+  background: linear-gradient(110deg, #172033, #0f172a);
+}
+
+.previewWorkspace { display: grid; }
+.editorPane { min-width: 0; background: #020617; }
+.editorTab { display: flex; align-items: center; gap: 0.5rem; width: fit-content; padding: 1rem 1.25rem; border-bottom: 1px solid #3b82f6; color: #cbd5e1; font-size: 0.75rem; }
+.editorDot { width: 0.375rem; height: 0.375rem; margin-left: 1rem; border-radius: 50%; background: #475569; }
+.codeEditor { padding: 2rem 1rem; font: 0.6875rem/2.2 ui-monospace, monospace; color: #cbd5e1; }
+.codeLine { display: grid; grid-template-columns: 1rem minmax(0, 1fr); gap: 0.75rem; white-space: normal; }
+.codeLine > span:last-of-type { white-space: pre-wrap; overflow-wrap: anywhere; }
+.lineNumber { color: #475569; user-select: none; }
+.questionPane { min-width: 0; padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; gap: 1.5rem; background: radial-gradient(ellipse at 100% 0, rgb(30 58 138 / 20%), transparent 70%); }
+.sampleAnswer { padding-left: 1rem; border-left: 2px solid rgb(74 222 128 / 45%); }
+
+.exampleInvite { border-block: 1px solid rgb(59 130 246 / 20%); background: radial-gradient(ellipse at 0 50%, rgb(30 58 138 / 20%), transparent 80%); }
+
+@media (min-width: 768px) {
+  .stepsProcess { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; padding-left: 0; }
+  .processStep { --progress-start: scaleX(0); }
+  .processStep:not(:last-child)::before,
+  .processStep:not(:last-child)::after { left: 50%; top: 1.25rem; bottom: auto; width: calc(100% + 2rem); height: 1px; }
+  .processNode { position: relative; top: auto; left: auto; margin: 0 auto 1.5rem; }
+  .processCard { padding: 1.5rem; }
+  .previewWorkspace { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .questionPane { padding: 2rem; border-left: 1px solid #1e293b; }
+  .codeEditor { padding: 3rem 1.5rem; font-size: 0.8125rem; }
+}
+
+@keyframes processFill { from { transform: var(--progress-start); opacity: 0.4; } to { transform: scale(1); opacity: 1; } }
+
+.primaryAction:focus-visible,
+.focusable:focus-visible,
+.option:focus-within {
+  outline: 2px solid #60a5fa;
+  outline-offset: 4px;
+}
+
+@media (hover: hover) {
+  .primaryAction:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgb(37 99 235 / 25%);
+  }
+
+  .interactiveCard:hover,
+  .interactiveCard:focus-within {
+    transform: translateY(-4px);
+    border-color: rgb(59 130 246 / 60%);
+    background-color: rgb(23 37 84 / 40%);
+  }
+
+}
+
+.primaryAction:active {
+  transform: translateY(1px) scale(0.98);
+  background-color: #1d4ed8;
+}
+
+.chevron {
+  transition: transform 220ms ease;
+}
+
+.expansion {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 240ms ease, opacity 240ms ease;
+}
+
+.expansion[data-expanded='true'] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.dialog {
+  width: min(36rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  overflow-y: auto;
+}
+
+.dialog::backdrop {
+  background: rgb(2 6 23 / 80%);
+  backdrop-filter: blur(4px);
+}
+
+.dialog[open],
+.feedback {
+  animation: appear 220ms ease both;
+}
+
+/* Content stays visible without JavaScript or IntersectionObserver. */
+.reveal[data-reveal='pending'] {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.reveal[data-reveal='visible'] {
+  animation: appear 300ms ease both;
+}
+
+@keyframes appear {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryAction,
+  .interactiveCard,
+  .option,
+  .chevron,
+  .expansion,
+  .dialog[open],
+  .feedback,
+  .reveal[data-reveal] {
+    animation: none;
+    transition: none;
+    transform: none;
+  }
+
+  .reveal[data-reveal='pending'] {
+    opacity: 1;
+  }
+
+  .processNode,
+  .processIcon svg { transition: none; }
+  .processCard:hover .processIcon svg { transform: none; }
+  .reveal[data-reveal='visible'] .processStep:not(:last-child)::after { animation: none; }
+}
