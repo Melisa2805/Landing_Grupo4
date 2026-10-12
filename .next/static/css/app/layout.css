@@ -596,8 +596,8 @@ video {
 .h-8 {
   height: 2rem;
 }
-.h-80 {
-  height: 20rem;
+.h-3\.5 {
+  height: 0.875rem;
 }
 .min-h-28 {
   min-height: 7rem;
@@ -625,6 +625,9 @@ video {
 }
 .w-full {
   width: 100%;
+}
+.w-3\.5 {
+  width: 0.875rem;
 }
 .min-w-0 {
   min-width: 0px;
@@ -668,9 +671,6 @@ video {
 }
 .cursor-pointer {
   cursor: pointer;
-}
-.resize-none {
-  resize: none;
 }
 .resize-y {
   resize: vertical;
@@ -812,6 +812,10 @@ video {
 .border-slate-800 {
   --tw-border-opacity: 1;
   border-color: rgb(30 41 59 / var(--tw-border-opacity, 1));
+}
+.bg-\[\#1e1e1e\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(30 30 30 / var(--tw-bg-opacity, 1));
 }
 .bg-blue-500\/60 {
   background-color: rgb(59 130 246 / 0.6);

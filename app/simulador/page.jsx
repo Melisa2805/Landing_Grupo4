@@ -2,13 +2,14 @@
 
 import { useState } from 'react'
 import Editor from '@monaco-editor/react'
-import { Code2, HelpCircle } from 'lucide-react'
+import { Code2, HelpCircle, Palette } from 'lucide-react'
 
 export default function SimuladorPage() {
   const [codigo, setCodigo] = useState(`def calcular_promedio(notas):
     # Código de ejemplo para practicar
     total = sum(notas)
     return total / len(notas) if notas else 0`)
+  const [tema, setTema] = useState('vs-dark') // Estado para el tema
   const [cargando, setCargando] = useState(false)
   const [preguntas, setPreguntas] = useState(null)
   const [respuestas, setRespuestas] = useState({})
@@ -54,15 +55,31 @@ export default function SimuladorPage() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Panel Izquierdo: Editor de Código estilo VS Code */}
+        {/* Panel Izquierdo: Editor de Código */}
         <div className="space-y-4">
-          <label className="text-sm font-semibold text-slate-300 block">Código Python (.py)</label>
+          <div className="flex justify-between items-center">
+            <label className="text-sm font-semibold text-slate-300 block">Código Python (.py)</label>
+            
+            {/* SELECTOR DE TEMAS */}
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <Palette className="w-3.5 h-3.5" />
+              <select
+                value={tema}
+                onChange={(e) => setTema(e.target.value)}
+                className="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-300 focus:outline-none focus:border-blue-500 cursor-pointer"
+              >
+                <option value="vs-dark">Oscuro (VS Code)</option>
+                <option value="vs">Claro (VS Code)</option>
+                <option value="hc-black">Alto Contraste</option>
+              </select>
+            </div>
+          </div>
           
           <div className="border border-slate-800 rounded-xl overflow-hidden shadow-lg bg-[#1e1e1e]">
             <Editor
               height="320px"
               defaultLanguage="python"
-              theme="vs-dark"
+              theme={tema} // Utiliza el tema seleccionado dinámicamente
               value={codigo}
               onChange={(value) => setCodigo(value || '')}
               options={{
