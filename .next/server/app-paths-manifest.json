@@ -1,5 +1,4 @@
 {
   "/page": "app/page.js",
-  "/simulador/page": "app/simulador/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js"
 }

@@ -1,10 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Terminal, Send, CheckCircle, HelpCircle, Code2 } from 'lucide-react'
+import Editor from '@monaco-editor/react'
+import { Code2, HelpCircle } from 'lucide-react'
 
 export default function SimuladorPage() {
-  const [codigo, setCodigo] = useState('')
+  const [codigo, setCodigo] = useState(`def calcular_promedio(notas):
+    # Código de ejemplo para practicar
+    total = sum(notas)
+    return total / len(notas) if notas else 0`)
   const [cargando, setCargando] = useState(false)
   const [preguntas, setPreguntas] = useState(null)
   const [respuestas, setRespuestas] = useState({})
@@ -43,20 +47,37 @@ export default function SimuladorPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Code2 className="text-blue-500" /> Simulador de Sustentación MVP
           </h1>
-          <p className="text-sm text-slate-400">Pega el código Python que quieres practicar, incluido código desarrollado con apoyo de IA. Este MVP usa preguntas y retroalimentación de ejemplo; no analiza tu código con IA ni evalúa tu comprensión.</p>
+          <p className="text-sm text-slate-400">
+            Pega el código Python que quieres practicar, incluido código desarrollado con apoyo de IA. Este MVP usa preguntas y retroalimentación de ejemplo; no analiza tu código con IA ni evalúa tu comprensión.
+          </p>
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Panel Izquierdo: Entrada de Código */}
+        {/* Panel Izquierdo: Editor de Código estilo VS Code */}
         <div className="space-y-4">
           <label className="text-sm font-semibold text-slate-300 block">Código Python (.py)</label>
-          <textarea
-            value={codigo}
-            onChange={(e) => setCodigo(e.target.value)}
-            placeholder={`def calcular_promedio(notas):\n    # Código de ejemplo para practicar\n    total = sum(notas)\n    return total / len(notas) if notas else 0`}
-            className="w-full h-80 bg-slate-950 font-mono text-sm p-4 rounded-xl border border-slate-800 text-green-400 focus:outline-none focus:border-blue-500 resize-none"
-          />
+          
+          <div className="border border-slate-800 rounded-xl overflow-hidden shadow-lg bg-[#1e1e1e]">
+            <Editor
+              height="320px"
+              defaultLanguage="python"
+              theme="vs-dark"
+              value={codigo}
+              onChange={(value) => setCodigo(value || '')}
+              options={{
+                minimap: { enabled: false },
+                fontSize: 13,
+                lineNumbers: 'on',
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                tabSize: 4,
+                insertSpaces: true,
+                padding: { top: 12, bottom: 12 },
+              }}
+            />
+          </div>
+
           <button
             onClick={handleSimular}
             disabled={cargando || !codigo.trim()}
