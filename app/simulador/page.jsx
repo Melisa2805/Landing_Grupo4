@@ -1,19 +1,46 @@
 'use client'
 
 import { useState } from 'react'
-import Editor from '@monaco-editor/react'
+import Editor, { loader } from '@monaco-editor/react'
 import { Code2, HelpCircle, Palette } from 'lucide-react'
+
+// Diccionario con los nombres de temas populares
+const TEMAS_DISPONIBLES = {
+  'vs-dark': 'Oscuro (VS Code)',
+  'vs': 'Claro (VS Code)',
+  'hc-black': 'Alto Contraste',
+  'dracula': 'Dracula',
+  'monokai': 'Monokai',
+  'github-dark': 'GitHub Dark',
+  'night-owl': 'Night Owl',
+  'solarized-dark': 'Solarized Dark',
+}
 
 export default function SimuladorPage() {
   const [codigo, setCodigo] = useState(`def calcular_promedio(notas):
     # Código de ejemplo para practicar
     total = sum(notas)
     return total / len(notas) if notas else 0`)
-  const [tema, setTema] = useState('vs-dark') // Estado para el tema
+  const [tema, setTema] = useState('vs-dark')
   const [cargando, setCargando] = useState(false)
   const [preguntas, setPreguntas] = useState(null)
   const [respuestas, setRespuestas] = useState({})
   const [evaluacion, setEvaluacion] = useState(null)
+
+  // Carga dinámica de temas de monaco-themes
+  const handleEditorWillMount = (monaco) => {
+    if (['dracula', 'monokai', 'github-dark', 'night-owl', 'solarized-dark'].includes(tema)) {
+      import(`monaco-themes/themes/${TEMAS_DISPONIBLES[tema] === 'Dracula' ? 'Dracula' : tema === 'monokai' ? 'Monokai' : tema === 'github-dark' ? 'GitHub Dark' : tema === 'night-owl' ? 'Night Owl' : 'Solarized-dark'}.json`)
+        .then((data) => {
+          monaco.editor.defineTheme(tema, data)
+        })
+        .catch((e) => console.error('Error cargando tema:', e))
+    }
+  }
+
+  const handleCambioTema = (nuevoTema) => {
+    setTema(nuevoTema)
+  }
 
   const handleSimular = async () => {
     if (!codigo.trim()) return
@@ -65,12 +92,12 @@ export default function SimuladorPage() {
               <Palette className="w-3.5 h-3.5" />
               <select
                 value={tema}
-                onChange={(e) => setTema(e.target.value)}
+                onChange={(e) => handleCambioTema(e.target.value)}
                 className="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-300 focus:outline-none focus:border-blue-500 cursor-pointer"
               >
-                <option value="vs-dark">Oscuro (VS Code)</option>
-                <option value="vs">Claro (VS Code)</option>
-                <option value="hc-black">Alto Contraste</option>
+                {Object.entries(TEMAS_DISPONIBLES).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -79,8 +106,9 @@ export default function SimuladorPage() {
             <Editor
               height="320px"
               defaultLanguage="python"
-              theme={tema} // Utiliza el tema seleccionado dinámicamente
+              theme={tema}
               value={codigo}
+              beforeMount={handleEditorWillMount}
               onChange={(value) => setCodigo(value || '')}
               options={{
                 minimap: { enabled: false },
