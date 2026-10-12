@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Editor from '@monaco-editor/react'
-import { Code2, HelpCircle, Palette } from 'lucide-react'
+import { Code2, HelpCircle, Palette, AlertOctagon, CheckCircle2 } from 'lucide-react'
 
 // Definición nativa del tema Dracula
 const draculaTheme = {
@@ -21,7 +21,6 @@ const draculaTheme = {
     'editor.selectionBackground': '#44475a',
     'editor.lineHighlightBackground': '#44475a',
     'editorCursor.foreground': '#f8f8f0',
-    'editorWhitespace.foreground': '#6272a4',
   },
 }
 
@@ -51,16 +50,101 @@ export default function SimuladorPage() {
     total = sum(notas)
     return total / len(notas) if notas else 0`)
   const [tema, setTema] = useState('vs-dark')
+  const [errores, setErrores] = useState([])
+  const [editorRef, setEditorRef] = useState(null)
+  const [monacoRef, setMonacoRef] = useState(null)
   const [cargando, setCargando] = useState(false)
   const [preguntas, setPreguntas] = useState(null)
   const [respuestas, setRespuestas] = useState({})
   const [evaluacion, setEvaluacion] = useState(null)
 
-  // Registramos los temas personalizados directamente en Monaco
+  // Registramos los temas en Monaco
   const handleEditorWillMount = (monaco) => {
     monaco.editor.defineTheme('dracula', draculaTheme)
     monaco.editor.defineTheme('monokai', monokaiTheme)
   }
+
+  // Guardamos las referencias al montar el editor
+  const handleEditorDidMount = (editor, monaco) => {
+    setEditorRef(editor)
+    setMonacoRef(monaco)
+  }
+
+  // Validador de reglas básicas de sintaxis e indentación en Python
+  const validarSintaxisPython = (codeStr) => {
+    if (!monacoRef || !editorRef) return
+
+    const lineas = codeStr.split('\n')
+    const nuevosErrores = []
+
+    lineas.forEach((lineaText, index) => {
+      const numLinea = index + 1
+      const lineaTrim = lineaText.trim()
+
+      if (!lineaTrim || lineaTrim.startsWith('#')) return
+
+      // 1. Validar si faltan dos puntos al final de estructuras de control (def, if, for, while, else, elif, try, except, class)
+      const palabrasClaveEstructuras = /^(def|if|for|while|else|elif|try|except|class)\b/
+      if (palabrasClaveEstructuras.test(lineaTrim) && !lineaTrim.endsWith(':')) {
+        nuevosErrores.push({
+          startLineNumber: numLinea,
+          startColumn: 1,
+          endLineNumber: numLinea,
+          endColumn: lineaText.length + 1,
+          message: `Falta ':' al final de la instrucción '${lineaTrim.split(' ')[0]}'.`,
+          severity: monacoRef.MarkerSeverity.Error,
+        })
+      }
+
+      // 2. Validar paréntesis, llaves y corchetes no cerrados en la misma línea
+      const abiertosP = (lineaText.match(/\(/g) || []).length;
+      const cerradosP = (lineaText.match(/\)/g) || []).length;
+      if (abiertosP !== cerradosP) {
+        nuevosErrores.push({
+          startLineNumber: numLinea,
+          startColumn: 1,
+          endLineNumber: numLinea,
+          endColumn: lineaText.length + 1,
+          message: 'Paréntesis desbalanceados (revisa si olvidaste cerrar un paréntesis).',
+          severity: monacoRef.MarkerSeverity.Error,
+        });
+      }
+
+      // 3. Validar indentación tras dos puntos
+      if (index > 0) {
+        const lineaAnterior = lineas[index - 1].trim()
+        if (lineaAnterior.endsWith(':') && !lineaAnterior.startsWith('#')) {
+          const espaciosAnteriores = lineas[index - 1].match(/^\s*/)[0].length
+          const espaciosActuales = lineaText.match(/^\s*/)[0].length
+          if (espaciosActuales <= espaciosAnteriores) {
+            nuevosErrores.push({
+              startLineNumber: numLinea,
+              startColumn: 1,
+              endLineNumber: numLinea,
+              endColumn: lineaText.length + 1,
+              message: 'Error de Indentación: se esperaba un bloque con sangría después del de los dos puntos (:).',
+              severity: monacoRef.MarkerSeverity.Error,
+            })
+          }
+        }
+      }
+    })
+
+    // Publicamos los subrayados rojos directamente dentro del modelo de Monaco Editor
+    const model = editorRef.getModel()
+    if (model) {
+      monacoRef.editor.setModelMarkers(model, 'python-validator', nuevosErrores)
+    }
+
+    setErrores(nuevosErrores)
+  }
+
+  // Ejecuta la validación cada vez que cambia el código o se carga el editor
+  useEffect(() => {
+    if (editorRef && monacoRef) {
+      validarSintaxisPython(codigo)
+    }
+  }, [codigo, editorRef, monacoRef])
 
   const handleSimular = async () => {
     if (!codigo.trim()) return
@@ -83,8 +167,9 @@ export default function SimuladorPage() {
 
   const handleEnviarRespuestas = () => {
     setEvaluacion({
-      puntaje: "8/10",
-      retroalimentación: "Ejemplo de retroalimentación: repasa cómo explicarías el bucle principal, el filtrado de datos y la complejidad espacial. Este texto es fijo y no evalúa tus respuestas."
+      puntaje: '8/10',
+      retroalimentación:
+        'Ejemplo de retroalimentación: repasa cómo explicarías el bucle principal, el filtrado de datos y la complejidad espacial. Este texto es fijo y no evalúa tus respuestas.',
     })
   }
 
@@ -102,13 +187,13 @@ export default function SimuladorPage() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Panel Izquierdo: Editor de Código */}
+        {/* Panel Izquierdo: Editor de Código + Verificación de Errores */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <label className="text-sm font-semibold text-slate-300 block">Código Python (.py)</label>
-            
-            {/* SELECTOR DE TEMAS */}
-            <div className="flex items-center gap-2 text-xs text-slate-400">
+
+            {/* Selector de Tema */}
+            <div className="flex items-center gap-1.5 text-xs text-slate-400">
               <Palette className="w-3.5 h-3.5" />
               <select
                 value={tema}
@@ -123,14 +208,15 @@ export default function SimuladorPage() {
               </select>
             </div>
           </div>
-          
+
           <div className="border border-slate-800 rounded-xl overflow-hidden shadow-lg bg-[#1e1e1e]">
             <Editor
-              height="320px"
+              height="280px"
               defaultLanguage="python"
               theme={tema}
               value={codigo}
               beforeMount={handleEditorWillMount}
+              onMount={handleEditorDidMount}
               onChange={(value) => setCodigo(value || '')}
               options={{
                 minimap: { enabled: false },
@@ -143,6 +229,28 @@ export default function SimuladorPage() {
                 padding: { top: 12, bottom: 12 },
               }}
             />
+          </div>
+
+          {/* PANEL DE ESTADO DE ERRORES EN TIEMPO REAL */}
+          <div className="p-3 rounded-xl border text-xs space-y-1 bg-slate-950 border-slate-800">
+            {errores.length > 0 ? (
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-red-400 font-semibold">
+                  <AlertOctagon className="w-4 h-4" /> Se detectaron {errores.length} problema(s) de sintaxis/estructura:
+                </div>
+                <ul className="pl-6 list-disc space-y-0.5 text-slate-400 font-mono">
+                  {errores.map((err, i) => (
+                    <li key={i}>
+                      Línea {err.startLineNumber}: {err.message}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-green-400">
+                <CheckCircle2 className="w-4 h-4" /> Sintaxis válida (sin errores detectados)
+              </div>
+            )}
           </div>
 
           <button
