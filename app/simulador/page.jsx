@@ -1,19 +1,48 @@
 'use client'
 
 import { useState } from 'react'
-import Editor, { loader } from '@monaco-editor/react'
+import Editor from '@monaco-editor/react'
 import { Code2, HelpCircle, Palette } from 'lucide-react'
 
-// Diccionario con los nombres de temas populares
-const TEMAS_DISPONIBLES = {
-  'vs-dark': 'Oscuro (VS Code)',
-  'vs': 'Claro (VS Code)',
-  'hc-black': 'Alto Contraste',
-  'dracula': 'Dracula',
-  'monokai': 'Monokai',
-  'github-dark': 'GitHub Dark',
-  'night-owl': 'Night Owl',
-  'solarized-dark': 'Solarized Dark',
+// Definición nativa del tema Dracula
+const draculaTheme = {
+  base: 'vs-dark',
+  inherit: true,
+  rules: [
+    { token: 'comment', foreground: '6272a4', fontStyle: 'italic' },
+    { token: 'keyword', foreground: 'ff79c6' },
+    { token: 'string', foreground: 'f1fa8c' },
+    { token: 'number', foreground: 'bd93f9' },
+    { token: 'identifier', foreground: '50fa7b' },
+  ],
+  colors: {
+    'editor.background': '#282a36',
+    'editor.foreground': '#f8f8f2',
+    'editor.selectionBackground': '#44475a',
+    'editor.lineHighlightBackground': '#44475a',
+    'editorCursor.foreground': '#f8f8f0',
+    'editorWhitespace.foreground': '#6272a4',
+  },
+}
+
+// Definición nativa del tema Monokai
+const monokaiTheme = {
+  base: 'vs-dark',
+  inherit: true,
+  rules: [
+    { token: 'comment', foreground: '75715e', fontStyle: 'italic' },
+    { token: 'keyword', foreground: 'f92672' },
+    { token: 'string', foreground: 'e6db74' },
+    { token: 'number', foreground: 'ae81ff' },
+    { token: 'identifier', foreground: 'a6e22e' },
+  ],
+  colors: {
+    'editor.background': '#272822',
+    'editor.foreground': '#f8f8f2',
+    'editor.selectionBackground': '#49483e',
+    'editor.lineHighlightBackground': '#3e3d32',
+    'editorCursor.foreground': '#f8f8f0',
+  },
 }
 
 export default function SimuladorPage() {
@@ -27,19 +56,10 @@ export default function SimuladorPage() {
   const [respuestas, setRespuestas] = useState({})
   const [evaluacion, setEvaluacion] = useState(null)
 
-  // Carga dinámica de temas de monaco-themes
+  // Registramos los temas personalizados directamente en Monaco
   const handleEditorWillMount = (monaco) => {
-    if (['dracula', 'monokai', 'github-dark', 'night-owl', 'solarized-dark'].includes(tema)) {
-      import(`monaco-themes/themes/${TEMAS_DISPONIBLES[tema] === 'Dracula' ? 'Dracula' : tema === 'monokai' ? 'Monokai' : tema === 'github-dark' ? 'GitHub Dark' : tema === 'night-owl' ? 'Night Owl' : 'Solarized-dark'}.json`)
-        .then((data) => {
-          monaco.editor.defineTheme(tema, data)
-        })
-        .catch((e) => console.error('Error cargando tema:', e))
-    }
-  }
-
-  const handleCambioTema = (nuevoTema) => {
-    setTema(nuevoTema)
+    monaco.editor.defineTheme('dracula', draculaTheme)
+    monaco.editor.defineTheme('monokai', monokaiTheme)
   }
 
   const handleSimular = async () => {
@@ -92,12 +112,14 @@ export default function SimuladorPage() {
               <Palette className="w-3.5 h-3.5" />
               <select
                 value={tema}
-                onChange={(e) => handleCambioTema(e.target.value)}
+                onChange={(e) => setTema(e.target.value)}
                 className="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-300 focus:outline-none focus:border-blue-500 cursor-pointer"
               >
-                {Object.entries(TEMAS_DISPONIBLES).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
+                <option value="vs-dark">Oscuro (VS Code)</option>
+                <option value="vs">Claro (VS Code)</option>
+                <option value="hc-black">Alto Contraste</option>
+                <option value="dracula">Dracula</option>
+                <option value="monokai">Monokai</option>
               </select>
             </div>
           </div>

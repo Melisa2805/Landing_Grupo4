@@ -2,15 +2,13 @@
   "node": {
     "1cc3d7943bc1b5f7d3d96a636fd61c7bfd0013ee": {
       "workers": {
-        "app/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5Croxan%5C%5CDocuments%5C%5CDise%C3%B1o%20en%20TI%5C%5CLanding_Grupo4%5C%5Cnode_modules%5C%5C%40clerk%5C%5Cnextjs%5C%5Cdist%5C%5Cesm%5C%5Capp-router%5C%5Cserver-actions.js%22%2C%5B%22invalidateCacheAction%22%5D%5D%5D&__client_imported__=true!",
-        "app/simulador/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5Croxan%5C%5CDocuments%5C%5CDise%C3%B1o%20en%20TI%5C%5CLanding_Grupo4%5C%5Cnode_modules%5C%5C%40clerk%5C%5Cnextjs%5C%5Cdist%5C%5Cesm%5C%5Capp-router%5C%5Cserver-actions.js%22%2C%5B%22invalidateCacheAction%22%5D%5D%5D&__client_imported__=true!"
+        "app/not-found": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5Croxan%5C%5CDocuments%5C%5CDise%C3%B1o%20en%20TI%5C%5CLanding_Grupo4%5C%5Cnode_modules%5C%5C%40clerk%5C%5Cnextjs%5C%5Cdist%5C%5Cesm%5C%5Capp-router%5C%5Cserver-actions.js%22%2C%5B%22invalidateCacheAction%22%5D%5D%5D&__client_imported__=true!"
       },
       "layer": {
-        "app/page": "action-browser",
-        "app/simulador/page": "action-browser"
+        "app/not-found": "action-browser"
       }
     }
   },
   "edge": {},
-  "encryptionKey": "k+D/ciflHbZrXvhv4RYbChddh8CerLzKMU/wIVB+qoo="
+  "encryptionKey": "uwmBa43p1iC5ET/gJ9WtCWnkGOeIErAYG1HgnYVvBdo="
 }
