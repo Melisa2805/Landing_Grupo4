@@ -32,7 +32,7 @@ export default function SimuladorPage() {
   const handleEnviarRespuestas = () => {
     setEvaluacion({
       puntaje: "8/10",
-      retroalimentación: "Demuestras buen entendimiento del bucle principal y manejo de estructuras. Revisa la línea donde se filtran los datos para explicar mejor la complejidad espacial."
+      retroalimentación: "Ejemplo de retroalimentación: repasa cómo explicarías el bucle principal, el filtrado de datos y la complejidad espacial. Este texto es fijo y no evalúa tus respuestas."
     })
   }
 
@@ -43,7 +43,7 @@ export default function SimuladorPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Code2 className="text-blue-500" /> Simulador de Sustentación MVP
           </h1>
-          <p className="text-sm text-slate-400">Pega el código Python que generaste con IA para comenzar el test de comprensión.</p>
+          <p className="text-sm text-slate-400">Pega el código Python que quieres practicar, incluido código desarrollado con apoyo de IA. Este MVP usa preguntas y retroalimentación de ejemplo; no analiza tu código con IA ni evalúa tu comprensión.</p>
         </div>
       </div>
 
@@ -54,7 +54,7 @@ export default function SimuladorPage() {
           <textarea
             value={codigo}
             onChange={(e) => setCodigo(e.target.value)}
-            placeholder={`def calcular_promedio(notas):\n    # Código generado por IA\n    total = sum(notas)\n    return total / len(notas) if notas else 0`}
+            placeholder={`def calcular_promedio(notas):\n    # Código de ejemplo para practicar\n    total = sum(notas)\n    return total / len(notas) if notas else 0`}
             className="w-full h-80 bg-slate-950 font-mono text-sm p-4 rounded-xl border border-slate-800 text-green-400 focus:outline-none focus:border-blue-500 resize-none"
           />
           <button
@@ -62,25 +62,25 @@ export default function SimuladorPage() {
             disabled={cargando || !codigo.trim()}
             className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2"
           >
-            {cargando ? 'Analizando sintaxis y generando preguntas...' : 'Generar Preguntas de Sustentación'}
+            {cargando ? 'Preparando preguntas de ejemplo...' : 'Practicar preguntas de sustentación'}
           </button>
         </div>
 
         {/* Panel Derecho: Preguntas Generadas */}
         <div className="space-y-4 bg-slate-900/40 border border-slate-800 p-6 rounded-xl">
           <h2 className="text-lg font-bold flex items-center gap-2">
-            <HelpCircle className="text-blue-400" /> Preguntas del Evaluador
+            <HelpCircle className="text-blue-400" /> Preguntas de práctica
           </h2>
 
           {!preguntas && !cargando && (
             <div className="text-center py-16 text-slate-500 text-sm">
-              Ingresa tu código en el panel izquierdo y haz clic en "Generar Preguntas" para iniciar la simulación.
+              Ingresa tu código en el panel izquierdo y haz clic en "Practicar preguntas de sustentación" para iniciar la simulación.
             </div>
           )}
 
           {cargando && (
             <div className="text-center py-16 text-blue-400 text-sm animate-pulse">
-              Extrayendo lógica, funciones y posibles preguntas de examen...
+              Preparando posibles preguntas para practicar...
             </div>
           )}
 
@@ -104,13 +104,13 @@ export default function SimuladorPage() {
                   onClick={handleEnviarRespuestas}
                   className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded-lg text-sm transition"
                 >
-                  Enviar Respuestas para Evaluación
+                  Ver retroalimentación de ejemplo
                 </button>
               ) : (
                 <div className="bg-green-950/40 border border-green-800 p-4 rounded-lg space-y-2 text-xs">
                   <div className="flex justify-between font-bold text-green-400">
-                    <span>Resultado de la Simulación</span>
-                    <span>Puntaje: {evaluacion.puntaje}</span>
+                    <span>Resultado ilustrativo</span>
+                    <span>Puntaje de ejemplo: {evaluacion.puntaje}</span>
                   </div>
                   <p className="text-slate-300">{evaluacion.retroalimentación}</p>
                 </div>

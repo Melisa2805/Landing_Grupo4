@@ -4,8 +4,8 @@ export async function POST(req) {
   try {
     const { codigo } = await req.json()
 
-    // Lógica para analizar el código Python recibido
-    // Aquí puedes conectar la API Key de OpenAI / Anthropic / Gemini si lo deseas
+    // MVP actual: devuelve preguntas simuladas de ejemplo.
+    // Una versión futura podría analizar el código recibido.
     
     const preguntasSimuladas = [
       {
@@ -17,13 +17,13 @@ export async function POST(req) {
         contexto: "Manejo de excepciones o retornos"
       },
       {
-        pregunta: "¿Cuál es la complejidad temporal (Big O) del bucle o lógica principal que generaste?",
+        pregunta: "¿Cuál es la complejidad temporal (Big O) del bucle o lógica principal de tu código?",
         contexto: "Rendimiento y eficiencia del código"
       }
     ]
 
     return NextResponse.json({ preguntas: preguntasSimuladas })
   } catch (error) {
-    return NextResponse.json({ error: 'Error procesando el código' }, { status: 500 })
+    return NextResponse.json({ error: 'Error preparando la simulación' }, { status: 500 })
   }
 }
