@@ -57,6 +57,8 @@ export default function SimuladorPage() {
   const [preguntas, setPreguntas] = useState(null)
   const [respuestas, setRespuestas] = useState({})
   const [evaluacion, setEvaluacion] = useState(null)
+  const [errorApi, setErrorApi] = useState(null)
+  const [evaluando, setEvaluando] = useState(false)
 
   // Registramos los temas en Monaco
   const handleEditorWillMount = (monaco) => {
@@ -149,6 +151,7 @@ export default function SimuladorPage() {
   const handleSimular = async () => {
     if (!codigo.trim()) return
     setCargando(true)
+    setErrorApi(null)
 
     try {
       const res = await fetch('/api/generar-preguntas', {
@@ -157,20 +160,37 @@ export default function SimuladorPage() {
         body: JSON.stringify({ codigo }),
       })
       const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error generando preguntas')
       setPreguntas(data.preguntas)
+      setRespuestas({})
+      setEvaluacion(null)
     } catch (e) {
       console.error(e)
+      setErrorApi(e.message)
     } finally {
       setCargando(false)
     }
   }
 
-  const handleEnviarRespuestas = () => {
-    setEvaluacion({
-      puntaje: '8/10',
-      retroalimentación:
-        'Ejemplo de retroalimentación: repasa cómo explicarías el bucle principal, el filtrado de datos y la complejidad espacial. Este texto es fijo y no evalúa tus respuestas.',
-    })
+  const handleEnviarRespuestas = async () => {
+    setEvaluando(true)
+    setErrorApi(null)
+
+    try {
+      const res = await fetch('/api/evaluar-respuestas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigo, preguntas, respuestas }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error evaluando respuestas')
+      setEvaluacion(data)
+    } catch (e) {
+      console.error(e)
+      setErrorApi(e.message)
+    } finally {
+      setEvaluando(false)
+    }
   }
 
   return (
@@ -181,7 +201,7 @@ export default function SimuladorPage() {
             <Code2 className="text-blue-500" /> Simulador de Sustentación MVP
           </h1>
           <p className="text-sm text-slate-400">
-            Pega el código Python que quieres practicar, incluido código desarrollado con apoyo de IA. Este MVP usa preguntas y retroalimentación de ejemplo; no analiza tu código con IA ni evalúa tu comprensión.
+            Pega el código Python que quieres practicar, incluido código desarrollado con apoyo de IA. Un LLM analiza tu código y genera 3 preguntas de sustentación; al responderlas, recibes un puntaje y retroalimentación sobre tu comprensión.
           </p>
         </div>
       </div>
@@ -258,7 +278,7 @@ export default function SimuladorPage() {
             disabled={cargando || !codigo.trim()}
             className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2"
           >
-            {cargando ? 'Preparando preguntas de ejemplo...' : 'Practicar preguntas de sustentación'}
+            {cargando ? 'Analizando tu código...' : 'Practicar preguntas de sustentación'}
           </button>
         </div>
 
@@ -267,6 +287,12 @@ export default function SimuladorPage() {
           <h2 className="text-lg font-bold flex items-center gap-2">
             <HelpCircle className="text-blue-400" /> Preguntas de práctica
           </h2>
+
+          {errorApi && (
+            <div className="text-xs text-red-400 bg-red-950/40 border border-red-900 rounded-lg p-3">
+              {errorApi}
+            </div>
+          )}
 
           {!preguntas && !cargando && (
             <div className="text-center py-16 text-slate-500 text-sm">
@@ -286,10 +312,17 @@ export default function SimuladorPage() {
                 <div key={idx} className="space-y-2 bg-slate-950 p-4 rounded-lg border border-slate-800">
                   <p className="text-sm font-semibold text-slate-200">{idx + 1}. {q.pregunta}</p>
                   <p className="text-xs text-slate-500 font-mono">Relacionado con: {q.contexto}</p>
+                  {evaluacion?.detalle?.[idx] && (
+                    <p className={`text-xs ${evaluacion.detalle[idx].correcta ? 'text-green-400' : 'text-amber-400'}`}>
+                      {evaluacion.detalle[idx].correcta ? '✔' : '✖'} {evaluacion.detalle[idx].comentario}
+                    </p>
+                  )}
                   <input
                     type="text"
                     placeholder="Escribe tu respuesta aquí..."
-                    onChange={(e) => setRespuestas({ ...respuestas, [idx]: e.target.value })}
+                    value={respuestas[idx] || ''}
+                    disabled={evaluando || !!evaluacion}
+                    onChange={(e) => setRespuestas((prev) => ({ ...prev, [idx]: e.target.value }))}
                     className="w-full bg-slate-900 border border-slate-800 rounded px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -298,17 +331,18 @@ export default function SimuladorPage() {
               {!evaluacion ? (
                 <button
                   onClick={handleEnviarRespuestas}
-                  className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded-lg text-sm transition"
+                  disabled={evaluando}
+                  className="w-full bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-bold py-2 rounded-lg text-sm transition"
                 >
-                  Ver retroalimentación de ejemplo
+                  {evaluando ? 'Evaluando tus respuestas...' : 'Enviar respuestas y ver retroalimentación'}
                 </button>
               ) : (
                 <div className="bg-green-950/40 border border-green-800 p-4 rounded-lg space-y-2 text-xs">
                   <div className="flex justify-between font-bold text-green-400">
-                    <span>Resultado ilustrativo</span>
-                    <span>Puntaje de ejemplo: {evaluacion.puntaje}</span>
+                    <span>Retroalimentación</span>
+                    <span>Puntaje: {evaluacion.puntaje}/10</span>
                   </div>
-                  <p className="text-slate-300">{evaluacion.retroalimentación}</p>
+                  <p className="text-slate-300">{evaluacion.retroalimentacion}</p>
                 </div>
               )}
             </div>
