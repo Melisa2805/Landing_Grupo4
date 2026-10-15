@@ -1,5 +1,6 @@
 import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import './globals.css'
+import LogoLink from './components/logo-link'
 
 export const metadata = {
   title: 'PyDefense - Practica tu sustentación de código Python',
@@ -12,10 +13,7 @@ export default function RootLayout({ children }) {
       <html lang="es">
         <body>
           <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-xl">
-            <div className="flex items-center gap-2">
-              <span className="bg-blue-600 text-white font-black px-3 py-1 rounded-lg text-xl">Py</span>
-              <span className="font-bold text-xl tracking-tight text-white">Defense</span>
-            </div>
+            <LogoLink />
             <div>
               <SignedOut>
                 <SignInButton mode="modal">
