@@ -2,11 +2,13 @@ import Link from 'next/link'
 import { ShieldCheck, Code2, HelpCircle, ArrowRight } from 'lucide-react'
 import { HowItWorks, ExampleQuestion, MiniQuiz, Reveal } from './components/landing-interactions'
 import { HeroVisual, InteractiveComparison } from './components/landing-showcase'
+import ScrollToTop from './components/scroll-to-top'
 import styles from './components/landing.module.css'
 
 export default function LandingPage() {
   return (
     <main className="max-w-6xl mx-auto px-6 py-12 space-y-16 md:space-y-24">
+      <ScrollToTop />
       <Reveal className={`${styles.heroScene} grid lg:grid-cols-[1.2fr_1fr] items-center gap-10 lg:gap-12 pt-8 pb-10`}>
         <div className="text-center lg:text-left space-y-6 min-w-0">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-950/80 border border-blue-800 text-blue-400 text-xs font-semibold uppercase tracking-wider">
