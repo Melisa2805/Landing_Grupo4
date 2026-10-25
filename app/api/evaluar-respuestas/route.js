@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { chatCompletion, extraerJSON } from '../../../lib/llm'
 import { contextoRAG, calcularEvaluacion } from '../../../lib/knowledge'
+import { analizarPython } from '../../../lib/python-static'
+import { REGLAS_COMUNES } from '../../../lib/pedagogia'
+import { comprobarCoherencia } from '../../../lib/evaluacion'
 
 const MAX_CODIGO = 20000
 const MAX_RESPUESTA = 2000
@@ -43,16 +46,18 @@ export async function POST(req) {
       respuesta: (respuestas?.[i] ?? '').slice(0, MAX_RESPUESTA).trim(),
     }))
 
+    const analisis = await analizarPython(codigo)
     const respuestaLLM = await chatCompletion({
-      system: `${SYSTEM_PROMPT}\nReferencia del servidor:\n${contextoRAG(codigo)}`,
-      user: JSON.stringify({ codigo, items }),
+      system: `${REGLAS_COMUNES}\n${SYSTEM_PROMPT}\nReferencia del servidor:\n${contextoRAG(codigo)}`,
+      user: JSON.stringify({ codigo, items, analisis }),
       temperature: 0.2,
     })
 
     const parsed = extraerJSON(respuestaLLM)
+    comprobarCoherencia(parsed, analisis)
     return NextResponse.json(calcularEvaluacion(parsed, items))
   } catch (error) {
-    console.error('[evaluar-respuestas]', error)
+    console.error('[evaluar-respuestas]', error?.code || 'ERROR_EVALUACION')
     return NextResponse.json({ error: 'No se pudo evaluar. Intenta de nuevo.' }, { status: 500 })
   }
 }

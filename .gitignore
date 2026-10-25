@@ -4,3 +4,4 @@ node_modules
 .env.development.local
 .env
 s
+.pydefense-sessions/

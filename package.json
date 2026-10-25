@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "test": "npm run test:rag && npm run test:adaptativo && npm run test:interfaz",
+    "test:interfaz": "node --experimental-vm-modules tests/interfaz.test.cjs",
     "test:rag": "node --experimental-vm-modules tests/rag.test.cjs",
     "dev": "next dev",
     "build": "next build",
