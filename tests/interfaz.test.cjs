@@ -40,3 +40,17 @@ test('contrato de interfaz: columnas escritorio, apilado móvil, borrador, foco 
   for (const token of ['max-w-[1680px]', 'lg:grid-cols-2', 'min-w-0', "localStorage.setItem", 'aria-busy', 'foco.current?.focus()', "enviar('entregar')", "enviar('continuar')", 'solicitud.current']) assert.ok(source.includes(token), token)
   assert.ok(source.indexOf('Tu solución Python') < source.indexOf('aria-label="Sustentación"'))
 })
+
+test('v3: omisión y métricas insuficientes no se renderizan como cero ni porcentaje', async () => {
+  const e = await entorno()
+  const { Diagnostico, Retroalimentacion } = await e.importar('app/simulador/components.jsx')
+  const { diagnosticar } = await e.importar('lib/pedagogia.js')
+  const registro = { omitida: true, puntaje: null, criterios: [], feedback: { aciertos: [], pendientes: ['Sin evidencia.'], pista: null } }
+  const html = renderToStaticMarkup(React.createElement(Diagnostico, { resultado: { promedio: null, ...diagnosticar([], ['proposito']), hechos: [] } }))
+  assert.ok(html.includes('Sin estimación suficiente')); assert.ok(!html.includes('%')); assert.ok(!html.includes('0/10'))
+  const retro = renderToStaticMarkup(React.createElement(Retroalimentacion, { registro }))
+  assert.ok(!retro.includes('0/10'))
+  const page = await fs.readFile('app/simulador/page.jsx', 'utf8')
+  assert.ok(!/Contrato del problema|setContrato|sesion\?\.contrato|guardado\.contrato/.test(page))
+  for (const texto of ['Saltar pregunta', 'Necesito una aclaración', 'Comprobar corrección']) assert.ok(page.includes(texto))
+})

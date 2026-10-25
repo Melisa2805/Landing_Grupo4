@@ -3,14 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "npm run test:rag && npm run test:adaptativo && npm run test:interfaz",
+    "test": "npm run test:rag && npm run test:adaptativo && npm run test:pedagogia && npm run test:interfaz && npm run test:estabilidad",
+    "test:pedagogia": "node --experimental-vm-modules tests/pedagogia-v3.test.cjs",
     "test:interfaz": "node --experimental-vm-modules tests/interfaz.test.cjs",
     "test:rag": "node --experimental-vm-modules tests/rag.test.cjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:adaptativo": "node --experimental-vm-modules tests/adaptativo.test.cjs"
+    "test:adaptativo": "node --experimental-vm-modules tests/adaptativo.test.cjs",
+    "test:estabilidad": "node --experimental-vm-modules tests/estabilidad.test.cjs",
+    "test:proveedor": "node --experimental-vm-modules scripts/comprobar-proveedor.cjs",
+    "test:recorrido": "node tests/recorrido.cjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.0.0",

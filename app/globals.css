@@ -7,3 +7,8 @@ body {
   color: #f8fafc;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
+
+/* Keep the focused stage title visible below the sticky navigation. */
+.simulador [tabindex="-1"] {
+  scroll-margin-top: 7rem;
+}
