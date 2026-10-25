@@ -7,16 +7,18 @@ const temporales = []
 after(async () => { await Promise.all(temporales.map((p) => fs.rm(p, { recursive: true, force: true }))) })
 
 const raiz = path.resolve(__dirname, '..')
-async function entorno({ env, transport, pythonDisponible = true } = {}) {
+async function entorno({ env, transport, pythonDisponible = true, reloj } = {}) {
   const sessionDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pydefense-test-'))
   temporales.push(sessionDir)
   const variables = { ...(env || { LLM_BASE_URL: 'https://llm.test/v1', LLM_MODEL: 'modelo-simulado', LLM_API_KEY: 'clave-ficticia-tests' }), PYDEFENSE_SESSION_DIR: env?.PYDEFENSE_SESSION_DIR || sessionDir }
   const llamadas = []
+  const registros = []
   let salida
   const contexto = vm.createContext({
     process: { env: variables, cwd: () => raiz },
     AbortSignal, Buffer,
-    console: { error() {} },
+    ...(reloj ? { Date: class extends Date { static now() { return reloj() } } } : {}),
+    console: { error(...args) { registros.push(args) } },
     fetch: async (url, opciones) => {
       if (transport) return transport(url, opciones)
       if (salida instanceof Error) throw salida
@@ -71,7 +73,7 @@ async function entorno({ env, transport, pythonDisponible = true } = {}) {
     if (modulo.status !== 'evaluated') await modulo.evaluate()
     return modulo.namespace
   }
-  return { importar, llamadas, env: variables, responder: (s) => { salida = s } }
+  return { importar, llamadas, registros, env: variables, responder: (s) => { salida = s } }
 }
 
 module.exports = { entorno }
