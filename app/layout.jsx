@@ -12,7 +12,7 @@ export default function RootLayout({ children }) {
     <ClerkProvider>
       <html lang="es">
         <body>
-          <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-xl">
+          <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-4 flex flex-wrap gap-3 justify-between items-center max-w-7xl mx-auto rounded-b-xl">
             <LogoLink />
             <div>
               <SignedOut>

@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { chatCompletion, extraerJSON } from '../../../lib/llm'
 import { contextoRAG } from '../../../lib/knowledge'
+import { analizarPython } from '../../../lib/python-static'
+import { REGLAS_COMUNES } from '../../../lib/pedagogia'
+import { comprobarCoherencia } from '../../../lib/evaluacion'
 
 const NUM_PREGUNTAS = 3
 const MAX_CODIGO = 20000
@@ -25,9 +28,10 @@ export async function POST(req) {
       return NextResponse.json({ error: 'El código es demasiado largo' }, { status: 413 })
     }
 
+    const analisis = await analizarPython(codigo)
     const respuesta = await chatCompletion({
-      system: `${SYSTEM_PROMPT}\nReferencia del servidor:\n${contextoRAG(codigo)}`,
-      user: JSON.stringify({ codigo }),
+      system: `${REGLAS_COMUNES}\n${SYSTEM_PROMPT}\nReferencia del servidor:\n${contextoRAG(codigo)}`,
+      user: JSON.stringify({ codigo, analisis }),
     })
 
     const parsed = extraerJSON(respuesta)
@@ -41,10 +45,11 @@ export async function POST(req) {
     if (preguntas.length < NUM_PREGUNTAS || distintas.size !== NUM_PREGUNTAS) {
       throw new Error(`El LLM devolvió ${preguntas.length} preguntas válidas en vez de ${NUM_PREGUNTAS}`)
     }
+    comprobarCoherencia(preguntas, analisis)
 
     return NextResponse.json({ preguntas })
   } catch (error) {
-    console.error('[generar-preguntas]', error)
+    console.error('[generar-preguntas]', error?.code || 'ERROR_GENERACION')
     return NextResponse.json({ error: 'No se pudieron generar las preguntas. Intenta de nuevo.' }, { status: 500 })
   }
 }
