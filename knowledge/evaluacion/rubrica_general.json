@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "proposito": "Evaluar la comprensión de decisiones presentes en el código aportado sin exigir conocimientos que no sean pertinentes.",
+  "dimensiones": [
+    {"id": "comportamiento", "nombre": "Comprensión del comportamiento", "peso": 0.4, "criterios": ["Explica el flujo de ejecución y el significado de variables relevantes", "Predice resultados concretos con entradas válidas y casos límite"]},
+    {"id": "razonamiento", "nombre": "Razonamiento sobre modificaciones", "peso": 0.35, "criterios": ["Anticipa consecuencias de modificar una condición, operación o estructura", "Justifica su explicación con relaciones causales observables en el código"]},
+    {"id": "decisiones", "nombre": "Justificación y límites", "peso": 0.25, "criterios": ["Justifica una elección implementada", "Reconoce restricciones, casos no cubiertos o efectos secundarios cuando correspondan"]}
+  ],
+  "escala_por_dimension": {"0": "Ausente, evasiva o incorrecta", "1": "Parcial, con una idea relevante pero errores sustanciales", "2": "Correcta y sustentada en el código"},
+  "reglas": [
+    "Generar exactamente tres preguntas distintas sobre decisiones reales del código.",
+    "No repetir preguntas de las fuentes ni preguntar definiciones aisladas.",
+    "No exigir pruebas formales de algoritmos avanzados para código introductorio.",
+    "Evaluar respuestas semánticamente equivalentes, no coincidencia literal.",
+    "Una respuesta que acierta por azar sin justificación no demuestra comprensión plena.",
+    "No penalizar decisiones válidas sólo porque difieren de un estilo preferido.",
+    "Si el código contiene errores, reconocerlos y enfocar al menos una pregunta en su efecto sin asumir que la implementación es correcta.",
+    "En caso de ambigüedad por dependencias o contexto faltante, hacer explícito el supuesto y no inventar comportamiento.",
+    "Registrar nivel de conocimiento y dificultad por separado."
+    ,"Para algoritmos complejos, distinguir preguntas sobre ejecución de preguntas sobre correctitud formal o análisis asintótico.",
+    "No exigir demostraciones formales cuando el código y las competencias recuperadas sean introductorios.",
+    "Si el contenido recuperado es matemático y el código no implementa ese algoritmo, no forzar preguntas sobre ese contenido."
+  ],
+  "seleccion_preguntas": ["Explicar una decisión concreta", "Predecir comportamiento o efecto de un cambio", "Identificar un límite, condición de corrección o alternativa pertinente"]
+}
