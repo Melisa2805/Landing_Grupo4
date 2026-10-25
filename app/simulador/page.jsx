@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Editor from '@monaco-editor/react'
-import { Code2, HelpCircle, Palette, AlertOctagon, CheckCircle2 } from 'lucide-react'
+import { Code2, HelpCircle } from 'lucide-react'
 
 // Definición nativa del tema Dracula
 const draculaTheme = {
@@ -44,310 +44,143 @@ const monokaiTheme = {
   },
 }
 
+function EnunciadoEjercicio({ texto }) {
+  return texto.split(/(```[^\n]*\n[\s\S]*?\n```)/g).filter(Boolean).map((parte, i) =>
+    parte.startsWith('```')
+      ? <pre key={i} className="overflow-x-auto rounded-lg bg-slate-950 p-3 text-xs text-slate-200"><code>{parte.replace(/^```[^\n]*\n/, '').replace(/\n```$/, '')}</code></pre>
+      : <p key={i} className="whitespace-pre-wrap">{parte}</p>
+  )
+}
+
+function esperadoBreve(valor) {
+  return typeof valor === 'string' && /^-?\d+\.\d{6,}$/.test(valor)
+    ? `≈ ${Number(valor).toLocaleString('es-CO', { maximumFractionDigits: 3 })}`
+    : valor
+}
+
 export default function SimuladorPage() {
   const [codigo, setCodigo] = useState(`def calcular_promedio(notas):
-    # Código de ejemplo para practicar
     total = sum(notas)
     return total / len(notas) if notas else 0`)
   const [tema, setTema] = useState('dracula')
-  const [errores, setErrores] = useState([])
-  const [editorRef, setEditorRef] = useState(null)
-  const [monacoRef, setMonacoRef] = useState(null)
-  const [cargando, setCargando] = useState(false)
-  const [preguntas, setPreguntas] = useState(null)
-  const [respuestas, setRespuestas] = useState({})
-  const [evaluacion, setEvaluacion] = useState(null)
-  const [errorApi, setErrorApi] = useState(null)
-  const [evaluando, setEvaluando] = useState(false)
+  const [sesion, setSesion] = useState(null)
+  const [respuesta, setRespuesta] = useState('')
+  const [ocupado, setOcupado] = useState(false)
+  const [error, setError] = useState('')
+  const solicitud = useRef(null)
+  const foco = useRef(null)
+  useEffect(() => () => { solicitud.current?.abort(); solicitud.current = null }, [])
+  useEffect(() => { foco.current?.focus() }, [sesion?.fase, sesion?.numero])
 
-  // Registramos los temas en Monaco
-  const handleEditorWillMount = (monaco) => {
-    monaco.editor.defineTheme('dracula', draculaTheme)
-    monaco.editor.defineTheme('monokai', monokaiTheme)
+  function reiniciar() {
+    solicitud.current?.abort()
+    solicitud.current = null
+    setOcupado(false)
+    setSesion(null)
+    setRespuesta('')
+    setError('')
   }
-
-  // Guardamos las referencias al montar el editor
-  const handleEditorDidMount = (editor, monaco) => {
-    setEditorRef(editor)
-    setMonacoRef(monaco)
-  }
-
-  // Validador de reglas básicas de sintaxis e indentación en Python
-  const validarSintaxisPython = (codeStr) => {
-    if (!monacoRef || !editorRef) return
-
-    const lineas = codeStr.split('\n')
-    const nuevosErrores = []
-
-    lineas.forEach((lineaText, index) => {
-      const numLinea = index + 1
-      const lineaTrim = lineaText.trim()
-
-      if (!lineaTrim || lineaTrim.startsWith('#')) return
-
-      // 1. Validar si faltan dos puntos al final de estructuras de control (def, if, for, while, else, elif, try, except, class)
-      const palabrasClaveEstructuras = /^(def|if|for|while|else|elif|try|except|class)\b/
-      if (palabrasClaveEstructuras.test(lineaTrim) && !lineaTrim.endsWith(':')) {
-        nuevosErrores.push({
-          startLineNumber: numLinea,
-          startColumn: 1,
-          endLineNumber: numLinea,
-          endColumn: lineaText.length + 1,
-          message: `Falta ':' al final de la instrucción '${lineaTrim.split(' ')[0]}'.`,
-          severity: monacoRef.MarkerSeverity.Error,
-        })
-      }
-
-      // 2. Validar paréntesis, llaves y corchetes no cerrados en la misma línea
-      const abiertosP = (lineaText.match(/\(/g) || []).length;
-      const cerradosP = (lineaText.match(/\)/g) || []).length;
-      if (abiertosP !== cerradosP) {
-        nuevosErrores.push({
-          startLineNumber: numLinea,
-          startColumn: 1,
-          endLineNumber: numLinea,
-          endColumn: lineaText.length + 1,
-          message: 'Paréntesis desbalanceados (revisa si olvidaste cerrar un paréntesis).',
-          severity: monacoRef.MarkerSeverity.Error,
-        });
-      }
-
-      // 3. Validar indentación tras dos puntos
-      if (index > 0) {
-        const lineaAnterior = lineas[index - 1].trim()
-        if (lineaAnterior.endsWith(':') && !lineaAnterior.startsWith('#')) {
-          const espaciosAnteriores = lineas[index - 1].match(/^\s*/)[0].length
-          const espaciosActuales = lineaText.match(/^\s*/)[0].length
-          if (espaciosActuales <= espaciosAnteriores) {
-            nuevosErrores.push({
-              startLineNumber: numLinea,
-              startColumn: 1,
-              endLineNumber: numLinea,
-              endColumn: lineaText.length + 1,
-              message: 'Error de Indentación: se esperaba un bloque con sangría después del de los dos puntos (:).',
-              severity: monacoRef.MarkerSeverity.Error,
-            })
-          }
-        }
-      }
-    })
-
-    // Publicamos los subrayados rojos directamente dentro del modelo de Monaco Editor
-    const model = editorRef.getModel()
-    if (model) {
-      monacoRef.editor.setModelMarkers(model, 'python-validator', nuevosErrores)
-    }
-
-    setErrores(nuevosErrores)
-  }
-
-  // Ejecuta la validación cada vez que cambia el código o se carga el editor
-  useEffect(() => {
-    if (editorRef && monacoRef) {
-      validarSintaxisPython(codigo)
-    }
-  }, [codigo, editorRef, monacoRef])
-
-  const handleSimular = async () => {
-    if (!codigo.trim()) return
-    setCargando(true)
-    setErrorApi(null)
-
+  async function enviar(accion) {
+    // El ref cierra el intervalo entre el clic y el siguiente render de React.
+    if (solicitud.current) return
+    const controller = new AbortController()
+    solicitud.current = controller
+    setOcupado(true)
+    setError('')
+    const timeout = setTimeout(() => controller.abort(), 55000)
     try {
-      const res = await fetch('/api/generar-preguntas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ codigo }),
+      const res = await fetch('/api/sustentacion', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal,
+        body: JSON.stringify(accion === 'iniciar' ? { accion, codigo } : { accion, token: sesion.token, ...(accion === 'responder' ? { respuesta } : {}) }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error generando preguntas')
-      setPreguntas(data.preguntas)
-      setRespuestas({})
-      setEvaluacion(null)
+      if (!res.ok) throw new Error(data.error || 'No se pudo completar el paso.')
+      if (!data.token || !['pregunta', 'feedback', 'final'].includes(data.fase) || !Array.isArray(data.historial) || (data.fase === 'pregunta' && typeof data.pregunta !== 'string')) throw new Error('Respuesta incompleta del servidor. Reintenta.')
+      if (solicitud.current !== controller) return
+      const esperadas = accion === 'iniciar' ? 0 : sesion.historial.length + (accion === 'responder' ? 1 : 0)
+      if (data.historial.length !== esperadas || (accion === 'responder' && data.fase !== 'feedback') ||
+          (accion !== 'iniciar' && sesion.historial.some((h, i) => h.pregunta !== data.historial[i]?.pregunta || h.respuesta !== data.historial[i]?.respuesta))) {
+        throw new Error('El servidor devolvió un progreso inconsistente. Tu respuesta se conserva; reintenta.')
+      }
+      setSesion(data)
+      if (accion !== 'responder') setRespuesta('')
     } catch (e) {
-      console.error(e)
-      setErrorApi(e.message)
+      if (solicitud.current === controller) setError(e.name === 'AbortError' ? 'Se agotó el tiempo. Tu respuesta se conserva; vuelve a intentar.' : e.message)
     } finally {
-      setCargando(false)
+      clearTimeout(timeout)
+      if (solicitud.current === controller) { solicitud.current = null; setOcupado(false) }
     }
   }
-
-  const handleEnviarRespuestas = async () => {
-    setEvaluando(true)
-    setErrorApi(null)
-
-    try {
-      const res = await fetch('/api/evaluar-respuestas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ codigo, preguntas, respuestas }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error evaluando respuestas')
-      setEvaluacion(data)
-    } catch (e) {
-      console.error(e)
-      setErrorApi(e.message)
-    } finally {
-      setEvaluando(false)
-    }
-  }
-
+  const ultimo = sesion?.historial.at(-1)
+  const resultado = sesion?.resultado
+  const boton = 'w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-white'
   return (
     <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
-      <div className="border-b border-slate-800 pb-4 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Code2 className="text-blue-500" /> Simulador de Sustentación MVP
-          </h1>
-          <p className="text-sm text-slate-400">
-            Pega el código Python que quieres practicar, incluido código desarrollado con apoyo de IA. Un LLM analiza tu código y genera 3 preguntas de sustentación; al responderlas, recibes un puntaje y retroalimentación sobre tu comprensión.
-          </p>
-        </div>
-      </div>
-
+      <header className="border-b border-slate-800 pb-4">
+        <h1 className="text-2xl font-bold flex items-center gap-2"><Code2 className="text-blue-500" /> Simulador de Sustentación</h1>
+        <p className="text-sm text-slate-400">Explica tu código paso a paso. Recibirás retroalimentación en cada respuesta y un ejercicio final. Objetivo: 3 preguntas; hasta 5 si necesitas reforzar algún tema.</p>
+      </header>
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Panel Izquierdo: Editor de Código + Verificación de Errores */}
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-semibold text-slate-300 block">Código Python (.py)</label>
-
-            {/* Selector de Tema */}
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
-              <Palette className="w-3.5 h-3.5" />
-              <select
-                value={tema}
-                onChange={(e) => setTema(e.target.value)}
-                className="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-300 focus:outline-none focus:border-blue-500 cursor-pointer"
-              >
-                <option value="vs-dark">Oscuro (VS Code)</option>
-                <option value="vs">Claro (VS Code)</option>
-                <option value="hc-black">Alto Contraste</option>
-                <option value="dracula">Dracula</option>
-                <option value="monokai">Monokai</option>
-              </select>
-            </div>
+          <div className="flex justify-between items-center gap-3">
+            <h2 className="text-sm font-semibold">Código Python (.py)</h2>
+            <label className="text-xs">Tema <select value={tema} onChange={(e) => setTema(e.target.value)} className="bg-slate-900 border border-slate-700 rounded p-1">
+              <option value="vs-dark">Oscuro</option><option value="vs">Claro</option><option value="hc-black">Alto contraste</option><option value="dracula">Dracula</option><option value="monokai">Monokai</option>
+            </select></label>
           </div>
-
-          <div className="border border-slate-800 rounded-xl overflow-hidden shadow-lg bg-[#1e1e1e]">
-            <Editor
-              height="280px"
-              defaultLanguage="python"
-              theme={tema}
-              value={codigo}
-              beforeMount={handleEditorWillMount}
-              onMount={handleEditorDidMount}
+          <div className="border border-slate-800 rounded-xl overflow-hidden">
+            <Editor height="320px" defaultLanguage="python" theme={tema} value={codigo}
+              beforeMount={(monaco) => { monaco.editor.defineTheme('dracula', draculaTheme); monaco.editor.defineTheme('monokai', monokaiTheme) }}
               onChange={(value) => setCodigo(value || '')}
-              options={{
-                minimap: { enabled: false },
-                fontSize: 13,
-                lineNumbers: 'on',
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                tabSize: 4,
-                insertSpaces: true,
-                padding: { top: 12, bottom: 12 },
-              }}
-            />
+              options={{ readOnly: !!sesion || ocupado, ariaLabel: 'Código Python para sustentar', minimap: { enabled: false }, fontSize: 13, automaticLayout: true, tabSize: 4, scrollBeyondLastLine: false }} />
           </div>
-
-          {/* PANEL DE ESTADO DE ERRORES EN TIEMPO REAL */}
-          <div className="p-3 rounded-xl border text-xs space-y-1 bg-slate-950 border-slate-800">
-            {errores.length > 0 ? (
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-red-400 font-semibold">
-                  <AlertOctagon className="w-4 h-4" /> Se detectaron {errores.length} problema(s) de sintaxis/estructura:
-                </div>
-                <ul className="pl-6 list-disc space-y-0.5 text-slate-400 font-mono">
-                  {errores.map((err, i) => (
-                    <li key={i}>
-                      Línea {err.startLineNumber}: {err.message}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 text-green-400">
-                <CheckCircle2 className="w-4 h-4" /> Sintaxis válida (sin errores detectados)
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={handleSimular}
-            disabled={cargando || !codigo.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2"
-          >
-            {cargando ? 'Analizando tu código...' : 'Practicar preguntas de sustentación'}
-          </button>
+          <p className="text-xs text-slate-400">No se ejecuta tu código ni se valida su sintaxis. Las observaciones del tutor sobre posibles errores son inferencias.</p>
+          <p className="text-xs text-slate-400">{codigo.length}/12000 caracteres. {sesion ? 'Código fijado para esta sesión. Reinicia para editarlo.' : 'La sesión dura hasta 2 horas; al recargar se pierde el progreso.'}</p>
+          {!sesion && <button className={boton} disabled={ocupado || !codigo.trim() || codigo.length > 12000} onClick={() => enviar('iniciar')}>Comenzar sustentación</button>}
+          {(sesion || ocupado) && <button className="border border-slate-600 rounded-xl p-3 w-full" onClick={reiniciar}>Reiniciar y editar código</button>}
         </div>
-
-        {/* Panel Derecho: Preguntas Generadas */}
-        <div className="space-y-4 bg-slate-900/40 border border-slate-800 p-6 rounded-xl">
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <HelpCircle className="text-blue-400" /> Preguntas de práctica
-          </h2>
-
-          {errorApi && (
-            <div className="text-xs text-red-400 bg-red-950/40 border border-red-900 rounded-lg p-3">
-              {errorApi}
+        <section aria-label="Sustentación" aria-busy={ocupado} className="space-y-4 bg-slate-900/40 border border-slate-800 p-6 rounded-xl">
+          <h2 className="text-lg font-bold flex items-center gap-2"><HelpCircle className="text-blue-400" /> Práctica guiada</h2>
+          {error && <p role="alert" className="text-red-300">{error}</p>}
+          <p role="status" className="text-sm text-slate-400">{ocupado ? 'Procesando el paso…' : sesion ? `${sesion.historial.length} respuestas evaluadas · objetivo 3 · máximo 5` : 'Pega tu código y comienza la práctica.'}</p>
+          {sesion?.fase === 'pregunta' && <div className="space-y-3">
+            <h3 ref={foco} tabIndex={-1} className="font-semibold">Pregunta {sesion.numero}: {sesion.pregunta}</h3>
+            <label htmlFor="respuesta" className="block text-sm">Tu explicación</label>
+            <textarea id="respuesta" rows={7} maxLength={4000} value={respuesta} disabled={ocupado} onChange={(e) => setRespuesta(e.target.value)} className="w-full bg-slate-950 border border-slate-600 rounded p-3 text-sm" />
+            <p className="text-xs text-slate-400">{respuesta.length}/4000 caracteres</p>
+            <button className={boton} disabled={ocupado || !respuesta.trim()} onClick={() => enviar('responder')}>Enviar respuesta</button>
+          </div>}
+          {sesion?.fase === 'feedback' && ultimo && <div className="space-y-3">
+            <h3 ref={foco} tabIndex={-1} className="font-semibold">Pregunta {sesion.numero} · {ultimo.feedback.estado} · {ultimo.puntaje}/10</h3>
+            <p><strong>Acierto:</strong> {ultimo.feedback.acierto}</p>
+            <p><strong>Omisión o error:</strong> {ultimo.feedback.omision}</p>
+            <p><strong>Pista:</strong> {ultimo.feedback.pista}</p>
+            <button className={boton} disabled={ocupado} onClick={() => enviar('continuar')}>Continuar</button>
+          </div>}
+          {resultado && <div className="space-y-4">
+            <h3 ref={foco} tabIndex={-1} className="text-lg font-bold">Resultado: {resultado.puntaje}/10</h3>
+            <p className="text-xs text-slate-400">Se ponderan únicamente las dimensiones preguntadas. La evaluación es orientativa y generada por IA.</p>
+            <h4 className="font-semibold">Fortalezas observadas</h4>
+            {resultado.fortalezas.length ? <ul className="list-disc pl-5">{resultado.fortalezas.map((f, i) => <li key={i}>{f}</li>)}</ul> : <p>Aún no hay evidencia suficiente de fortalezas.</p>}
+            <h4 className="font-semibold">Dificultades observadas durante la práctica</h4>
+            {resultado.debilidades.length ? <ul className="list-disc pl-5">{resultado.debilidades.map((d) => <li key={d.pregunta}>Pregunta {d.pregunta}: {d.texto} <q>{d.evidencia}</q></li>)}</ul> : <p>No se observaron debilidades suficientes; sigue con un reto de consolidación.</p>}
+            <div className="border border-blue-800 rounded p-4 space-y-2">
+              <h4 className="font-semibold">{resultado.ejercicio.tipo}</h4>
+              {resultado.ejercicio.origen > 0 && <p className="text-xs">Basado en la respuesta {resultado.ejercicio.origen}.</p>}
+              <p><strong>Objetivo:</strong> {resultado.ejercicio.objetivo}</p>
+              <EnunciadoEjercicio texto={resultado.ejercicio.enunciado} />
+              <p><strong>Verifica:</strong> {resultado.ejercicio.condicion}</p>
+              <ul className="list-disc pl-5">{resultado.ejercicio.casos.map((c, i) => <li key={i}>Entrada: {c.entrada}. Esperado: {esperadoBreve(c.esperado)}.</li>)}</ul>
             </div>
-          )}
-
-          {!preguntas && !cargando && (
-            <div className="text-center py-16 text-slate-500 text-sm">
-              Ingresa tu código en el panel izquierdo y haz clic en "Practicar preguntas de sustentación" para iniciar la simulación.
-            </div>
-          )}
-
-          {cargando && (
-            <div className="text-center py-16 text-blue-400 text-sm animate-pulse">
-              Preparando posibles preguntas para practicar...
-            </div>
-          )}
-
-          {preguntas && (
-            <div className="space-y-6">
-              {preguntas.map((q, idx) => (
-                <div key={idx} className="space-y-2 bg-slate-950 p-4 rounded-lg border border-slate-800">
-                  <p className="text-sm font-semibold text-slate-200">{idx + 1}. {q.pregunta}</p>
-                  <p className="text-xs text-slate-500 font-mono">Relacionado con: {q.contexto}</p>
-                  {evaluacion?.detalle?.[idx] && (
-                    <p className={`text-xs ${evaluacion.detalle[idx].correcta ? 'text-green-400' : 'text-amber-400'}`}>
-                      {evaluacion.detalle[idx].correcta ? '✔' : '✖'} {evaluacion.detalle[idx].comentario}
-                    </p>
-                  )}
-                  <input
-                    type="text"
-                    placeholder="Escribe tu respuesta aquí..."
-                    value={respuestas[idx] || ''}
-                    disabled={evaluando || !!evaluacion}
-                    onChange={(e) => setRespuestas((prev) => ({ ...prev, [idx]: e.target.value }))}
-                    className="w-full bg-slate-900 border border-slate-800 rounded px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-              ))}
-
-              {!evaluacion ? (
-                <button
-                  onClick={handleEnviarRespuestas}
-                  disabled={evaluando}
-                  className="w-full bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-bold py-2 rounded-lg text-sm transition"
-                >
-                  {evaluando ? 'Evaluando tus respuestas...' : 'Enviar respuestas y ver retroalimentación'}
-                </button>
-              ) : (
-                <div className="bg-green-950/40 border border-green-800 p-4 rounded-lg space-y-2 text-xs">
-                  <div className="flex justify-between font-bold text-green-400">
-                    <span>Retroalimentación</span>
-                    <span>Puntaje: {evaluacion.puntaje}/10</span>
-                  </div>
-                  <p className="text-slate-300">{evaluacion.retroalimentacion}</p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+          </div>}
+          {!!sesion?.historial.length && <details className="border-t border-slate-700 pt-3">
+            <summary className="cursor-pointer">Historial de respuestas y retroalimentaciones</summary>
+            <ol className="space-y-4 mt-3">{sesion.historial.map((h, i) => <li key={i} className="text-sm space-y-1">
+              <p className="font-semibold">{i + 1}. {h.pregunta}</p><p className="whitespace-pre-wrap">{h.respuesta}</p>
+              <p>{h.feedback.estado} · {h.puntaje}/10</p><p>{h.feedback.acierto}</p><p>{h.feedback.omision}</p><p>Pista: {h.feedback.pista}</p>
+            </li>)}</ol>
+          </details>}
+        </section>
       </div>
     </main>
   )
