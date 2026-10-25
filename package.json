@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:adaptativo": "node --experimental-vm-modules tests/adaptativo.test.cjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.0.0",

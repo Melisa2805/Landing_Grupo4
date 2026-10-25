@@ -1,52 +1,7 @@
 // Sin dependencias ni red: módulos reales, transporte LLM y NextResponse simulados.
 const { test } = require('node:test')
 const assert = require('node:assert/strict')
-const fs = require('node:fs/promises')
-const path = require('node:path')
-const vm = require('node:vm')
-
-const raiz = path.resolve(__dirname, '..')
-async function entorno() {
-  const llamadas = []
-  let salida
-  const contexto = vm.createContext({
-    process: { env: { LLM_BASE_URL: 'https://llm.test/v1', LLM_MODEL: 'modelo-simulado' } },
-    AbortSignal,
-    console: { error() {} },
-    fetch: async (url, opciones) => {
-      llamadas.push({ url, ...JSON.parse(opciones.body) })
-      return { ok: true, json: async () => ({ choices: [{ message: { content: JSON.stringify(salida) } }] }) }
-    },
-  })
-  const cache = new Map()
-  async function cargar(nombre) {
-    if (cache.has(nombre)) return cache.get(nombre)
-    let modulo
-    if (nombre === 'next/server') {
-      modulo = new vm.SyntheticModule(['NextResponse'], function () {
-        this.setExport('NextResponse', { json: (data, opciones) => Response.json(data, opciones) })
-      }, { context: contexto })
-    } else if (nombre.endsWith('.json')) {
-      const data = JSON.parse(await fs.readFile(nombre, 'utf8'))
-      modulo = new vm.SyntheticModule(['default'], function () { this.setExport('default', data) }, { context: contexto })
-    } else {
-      modulo = new vm.SourceTextModule(await fs.readFile(nombre, 'utf8'), { context: contexto, identifier: nombre })
-    }
-    cache.set(nombre, modulo)
-    await modulo.link(async (specifier, padre) => {
-      if (specifier === 'next/server') return cargar(specifier)
-      const destino = path.resolve(path.dirname(padre.identifier), specifier)
-      return cargar(path.extname(destino) ? destino : `${destino}.js`)
-    })
-    return modulo
-  }
-  async function importar(nombre) {
-    const modulo = await cargar(path.join(raiz, nombre))
-    if (modulo.status !== 'evaluated') await modulo.evaluate()
-    return modulo.namespace
-  }
-  return { importar, llamadas, responder: (s) => { salida = s } }
-}
+const { entorno } = require('./entorno.cjs')
 
 const codigo = 'def doble(x):\n    return x * 2'
 const preguntas = [
