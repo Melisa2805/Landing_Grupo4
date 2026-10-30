@@ -1,0 +1,11 @@
+const { test } = require('node:test'); const assert = require('node:assert/strict')
+const { entorno } = require('./entorno.cjs')
+test('v1 → v2', async () => {
+  const e = await entorno()
+  const { MIGRACIONES } = await e.importar('lib/esquema.js')
+  await e.db.transaccion(async (tx) => { await tx.exec('CREATE TABLE esquema_migraciones (version integer PRIMARY KEY, aplicada_en timestamptz NOT NULL)'); await tx.exec(MIGRACIONES[0][1]); await tx.query("INSERT INTO esquema_migraciones VALUES (1, now())") })
+  await e.db.query("INSERT INTO usuarios (id, clerk_id, creado_en) VALUES ('00000000-0000-4000-8000-000000000001', 'u', now())")
+  await (await e.importar('lib/db.js')).baseDatos()
+  assert.deepEqual((await e.db.query('SELECT version FROM esquema_migraciones ORDER BY version')).rows.map((r) => r.version), [1, 2])
+  assert.equal((await e.db.query('SELECT count(*)::int n FROM usuarios')).rows[0].n, 1)
+})

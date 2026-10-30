@@ -7,6 +7,8 @@ resource.setrlimit(resource.RLIMIT_FSIZE, (0, 0))
 resource.setrlimit(resource.RLIMIT_NOFILE, (16, 16))
 
 import ast
+import builtins
+import copy
 import json
 import sys
 
@@ -19,6 +21,95 @@ def body_nodes(fn):
             continue
         yield node
         pending.extend(ast.iter_child_nodes(node))
+
+
+BUILTINS = set(dir(builtins))
+
+
+def without_docstrings(tree):
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node.body:
+            first = node.body[0]
+            if isinstance(first, ast.Expr) and isinstance(first.value, ast.Constant) and isinstance(first.value.value, str):
+                node.body = node.body[1:] or [ast.Pass()]
+    return tree
+
+
+class Canonical(ast.NodeTransformer):
+    """Renames names bound by the program and replaces literals by their type.
+    Builtins, attributes and operators are kept: they carry the behaviour."""
+
+    def __init__(self, bound):
+        self.names = {}
+        self.bound = bound
+
+    def rename(self, name):
+        if name not in self.bound:
+            return name
+        return self.names.setdefault(name, f"v{len(self.names)}")
+
+    def visit_Name(self, node):
+        return ast.copy_location(ast.Name(id=self.rename(node.id), ctx=node.ctx), node)
+
+    def visit_arg(self, node):
+        node.arg = self.rename(node.arg)
+        node.annotation = None
+        return node
+
+    def visit_FunctionDef(self, node):
+        node.name = self.rename(node.name)
+        self.generic_visit(node)
+        return node
+
+    visit_AsyncFunctionDef = visit_FunctionDef
+
+    def visit_ClassDef(self, node):
+        node.name = self.rename(node.name)
+        self.generic_visit(node)
+        return node
+
+    def visit_Constant(self, node):
+        kind = "bool" if isinstance(node.value, bool) else "none" if node.value is None else "num" if isinstance(node.value, (int, float, complex)) else type(node.value).__name__
+        return ast.copy_location(ast.Name(id=f"CONST_{kind}", ctx=ast.Load()), node)
+
+
+def normalized(tree):
+    """Representations used for code-novelty fingerprints. They are hashed by
+    the server and never stored or sent to the tutor. Equal AST dumps do not
+    prove semantic equivalence; they only detect cosmetic variations."""
+    clean = without_docstrings(tree)
+    primary = ast.dump(clean, include_attributes=False)
+    bound = set()
+    for node in ast.walk(clean):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            bound.add(node.name)
+        elif isinstance(node, ast.arg):
+            bound.add(node.arg)
+        elif isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+            bound.add(node.id)
+        elif isinstance(node, ast.alias):
+            bound.add((node.asname or node.name).split(".")[0])
+    structural = ast.dump(Canonical(bound).visit(copy.deepcopy(clean)), include_attributes=False)
+    nodes = list(ast.walk(clean))
+    calls = sorted({n.func.id for n in nodes if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in BUILTINS and n.func.id not in bound})
+    operators = sorted({type(n.op).__name__ for n in nodes if isinstance(n, (ast.BinOp, ast.UnaryOp, ast.AugAssign, ast.BoolOp))}
+                       | {type(op).__name__ for n in nodes if isinstance(n, ast.Compare) for op in n.ops})
+    functions = [n for n in nodes if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+
+    def depth(node, level=0):
+        children = [c for c in ast.iter_child_nodes(node) if isinstance(c, (ast.If, ast.For, ast.While, ast.With, ast.Try, ast.FunctionDef))]
+        return max([level] + [depth(c, level + 1) for c in children])
+
+    descriptors = {
+        "funciones": len(functions), "clases": sum(isinstance(n, ast.ClassDef) for n in nodes),
+        "ciclosFor": sum(isinstance(n, ast.For) for n in nodes), "ciclosWhile": sum(isinstance(n, ast.While) for n in nodes),
+        "condicionales": sum(isinstance(n, (ast.If, ast.IfExp)) for n in nodes),
+        "comprensiones": sum(isinstance(n, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)) for n in nodes),
+        "retornos": sum(isinstance(n, ast.Return) for n in nodes), "instrucciones": sum(isinstance(n, ast.stmt) for n in nodes),
+        "recursiva": any(isinstance(c, ast.Call) and isinstance(c.func, ast.Name) and c.func.id == f.name for f in functions for c in body_nodes(f)),
+        "incorporadas": calls, "operadores": operators, "anidamiento": depth(clean),
+    }
+    return {"metodo": "ast-v1", "primaria": primary, "estructural": structural, "descriptores": descriptors}
 
 
 def analyze(source):
@@ -162,7 +253,7 @@ def analyze(source):
         if len(tree.body) == 1 and ast.dump(fn) == ast.dump(expected):
             patterns['costo_envio'] = {'funcion': fn.name, 'dominio': 'enteros no negativos', 'metodo': 'Partición estática exhaustiva: 0, 1..3 y >=4.'}
     return {"estado": "valida", "conceptos": concepts or ["operaciones"], "hechos": facts, "referencias": references, "patrones": patterns,
-            "funciones": functions, "fragmentos": source.splitlines()[:40],
+            "funciones": functions, "fragmentos": source.splitlines()[:40], "normalizado": normalized(tree),
             "importaciones": any(isinstance(n, (ast.Import, ast.ImportFrom)) for n in nodes),
             "entradaTeclado": any(isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "input" for n in nodes)}
 

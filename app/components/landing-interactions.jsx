@@ -12,14 +12,14 @@ const steps = [
     detail: 'Puedes usar un fragmento o un script de tu entrega.',
   },
   {
-    title: 'Practica preguntas', icon: HelpCircle,
-    description: 'Responde preguntas similares a una sustentación.',
-    detail: 'Ensaya tu explicación con tus propias palabras.',
+    title: 'Responde hasta tres preguntas', icon: HelpCircle,
+    description: 'Antes de cada una indicas qué tan seguro te sientes.',
+    detail: 'Explica con tus palabras. Puedes cerrar después de cada retroalimentación o decir que aún no has visto un tema.',
   },
   {
     title: 'Detecta qué debes repasar', icon: Lightbulb,
-    description: 'Identifica qué decisiones todavía te cuesta explicar.',
-    detail: 'Si dudas, vuelve a esa parte del código y repasa su propósito.',
+    description: 'Recibes lo que explicaste, lo que falta y un siguiente paso.',
+    detail: 'No hay nota ni porcentaje. Si el tutor se equivoca, puedes pedir que lo revise.',
   },
 ]
 
@@ -87,7 +87,7 @@ export function ExampleQuestion() {
       <div className={`${styles.exampleInvite} p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6`}>
         <div className="space-y-3">
           <h2 className="text-2xl font-bold">Practica con tu propio código</h2>
-          <p className="text-sm text-slate-400">Simula una sustentación y prepara tu explicación.</p>
+          <p className="text-sm text-slate-400">Hasta tres preguntas sobre tu programa y un cierre con lo que descubriste.</p>
         </div>
         <div className="flex flex-col items-center gap-3 md:shrink-0">
           <Link href="/simulador" className={`${styles.primaryAction} flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-3 text-center font-semibold`}>Quiero probar con mi código <ArrowRight aria-hidden="true" className="w-5 h-5 shrink-0" /></Link>
@@ -130,8 +130,8 @@ export function MiniQuiz() {
   return (
     <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6 max-w-3xl mx-auto">
       <div className="space-y-2">
-        <h2 className="text-3xl font-bold">Pruébalo tú</h2>
-        <p className="text-sm text-slate-400">Lee el fragmento y elige una respuesta. Puedes intentarlo de nuevo.</p>
+        <h2 className="text-3xl font-bold">Muestra opcional</h2>
+        <p className="text-sm text-slate-400">Un ejemplo de selección múltiple para calentar. No es una práctica con tu código: allí respondes con tus propias palabras.</p>
       </div>
       <pre className="overflow-x-auto rounded-xl bg-slate-950 border border-slate-800 p-4 text-sm text-blue-300"><code>{'for nota in notas:\n    if nota >= 3:\n        aprobados.append(nota)'}</code></pre>
       <fieldset className="space-y-3">

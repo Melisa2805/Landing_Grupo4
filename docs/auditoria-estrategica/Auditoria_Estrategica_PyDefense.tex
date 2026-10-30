@@ -1,0 +1,831 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage[margin=2cm]{geometry}
+\usepackage{longtable,array,booktabs,pdflscape}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!45!black,urlcolor=blue!45!black,citecolor=blue!45!black,pdftitle={Auditoría estratégica y funcional de PyDefense},pdfauthor={Auditoría documental para el Grupo 4}}
+\urlstyle{same}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\src}[2]{\nolinkurl{#1}, líneas #2}
+\newcommand{\xl}[3]{\textbf{#1}, hoja «#2», #3}
+\newcommand{\hip}{\textit{Hipótesis de diseño por validar.}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\emergencystretch}{3em}
+\setcounter{tocdepth}{1}
+
+\begin{document}
+\begin{titlepage}
+\centering
+\vspace*{1.5cm}
+{\Huge\bfseries PyDefense\par}
+\vspace{0.7cm}
+{\LARGE Auditoría estratégica y funcional\par}
+\vspace{0.4cm}
+{\Large Propuesta de la siguiente iteración y protocolo de retorno espontáneo\par}
+\vspace{1.5cm}
+{\large Para el equipo fundador y desarrollador del Grupo 4\par}
+{\large y el profesor Santiago Jaramillo Campo\par}
+\vfill
+\begin{tabular}{P{3.2cm}P{11cm}}
+Fecha de cierre & 30 de octubre de 2026; zona de informe: America/Bogota.\\
+Versión & 1.0; investigación, diagnóstico y especificación documental.\\
+Repositorio & \url{https://github.com/Melisa2805/Landing_Grupo4}\\
+Rama & \texttt{main}; HEAD local y remoto coincidentes al consultar GitHub.\\
+Commit & \nolinkurl{284e13c52a08fd1100fb6e2cdf4833fecc0f6f90}\\
+Estado inicial & Árbol de trabajo limpio. Ningún cambio local previo detectado.\\
+Alcance & Producto, pedagogía, UX, negocio, arquitectura, seguridad y experimento exploratorio con cinco estudiantes.\\
+Restricción & No se implementó producto, no se modificaron pruebas, configuración ni despliegues.\\
+Entrega & Único archivo LaTeX autónomo. Sin PDF: no hay compilador LaTeX instalado; no se instalaron dependencias.\\
+\end{tabular}
+\vfill
+{\small Las propuestas no constituyen resultados de una intervención. Una prueba automatizada aprobada no demuestra aprendizaje ni retención.}
+\end{titlepage}
+\tableofcontents
+
+\chapter{Resumen ejecutivo}
+\label{ch:resumen}
+PyDefense tiene una oportunidad concreta: ayudar a un estudiante que utilizó IA a descubrir una explicación que todavía no puede sostener sobre su propio programa, antes de una entrega real. La evidencia cualitativa respalda interés en el feedback, pero no demuestra frecuencia suficiente, aprendizaje, disposición a pagar ni retorno. La evidencia histórica es \textbf{cinco probadores nombrados y cuatro puntajes registrados; 0 de 4 alcanzaron 7/10}. No hay un quinto puntaje que permita convertir ese resultado en 0 de 5 (\xl{E3}{1 · Entrega 3}{C35--C37}).
+
+La orientación del profesor cambia la decisión: \textbf{al menos 3 de 5 participantes elegibles deben regresar voluntariamente con un programa genuinamente nuevo en siete días, sin recordatorios}. Las notas y la confianza previa son auxiliares. El principal riesgo estratégico consiste en optimizar un examinador cuyo propio sistema decide preguntas y calificaciones, en lugar de comprobar que el estudiante lo necesita nuevamente.
+
+El producto actual contiene trabajo reutilizable: preguntas secuenciales, feedback inmediato, omisiones sin nota, aclaraciones limitadas, análisis estático acotado, recuperación e idempotencia local. La primera pregunta y las siguientes del recorrido principal se seleccionan mediante plantillas y reglas del servidor; el LLM evalúa las respuestas. No es correcto describir todo el flujo actual como generación libre de preguntas por IA. Las dos API heredadas sí llaman al LLM para generar o evaluar en lote.
+
+\textbf{Cinco decisiones recomendadas:}
+\begin{enumerate}
+\item \textbf{No iniciar todavía el experimento.} Incorporar identificación efectiva con Clerk en cada recurso, autorización por propietario, eventos y sesiones en almacenamiento persistente compartido, deduplicación y una regla auditable de código nuevo. El middleware actual no exige login. En Vercel, el estado completo viaja cifrado en el token: eso permite recuperar una sesión, pero no construir el registro de retorno que exige el profesor.
+\item \textbf{Priorizar programación introductoria y un máximo de tres preguntas decidido por la plataforma.} Mantener selección contextual dentro de ese límite y permitir cerrar después del feedback de cualquier pregunta. Eliminar el selector 1--5. No prometer cinco minutos sin medirlos. La práctica de transferencia debe ser opcional y ceñida a un único vacío.
+\item \textbf{Retirar nota 0--10 y porcentaje de dominio de la experiencia y del contrato nuevo.} Sustituirlos por una evidencia localizada, una duda concreta y un siguiente paso. Mantener estados cualitativos observables e incertidumbre; no convertirlos en una certificación ni en otro porcentaje. La señal histórica favorable al feedback con puntaje merece atención, pero no aísla el valor de la cifra frente al de la explicación.
+\item \textbf{Reemplazar la apelación por reparación de la conversación.} Una aclaración breve sobre el sentido de la respuesta y un reporte de error factual deben permitir rectificar al tutor sin recalificar ni presionar al estudiante. Conservar verificadores internos, trazabilidad de versiones y la posibilidad de declarar «no verificado».
+\item \textbf{Congelar una versión verificable antes de las cinco primeras sesiones.} Incluir plantillas, reglas de selección, contrato de temas, prompts, proveedor y modelo efectivos, política de cierre y esquema de eventos. Recoger confianza 1--5 antes de revelar cada pregunta. No cambiar el tratamiento ni contactar a los participantes durante su ventana; analizar el recuento persistido al concluir las cinco ventanas.
+\end{enumerate}
+
+Hay dos riesgos técnicos adicionales para resolver antes de exponer el experimento: una clave con formato de secreto de Clerk aparece en el historial de Git y la dependencia Next.js 14.1.4 queda en el rango de un aviso oficial de denegación de servicio. No se verificó que la clave siga activa ni se intentó explotarla. La rotación, la actualización y la revisión de accesos son trabajo posterior autorizado, no acciones de esta auditoría.
+
+Se ejecutaron \textbf{72 pruebas existentes, todas aprobadas}, con transporte de IA simulado. La suite de interfaz inicialmente no arrancó por ausencia de React; se ejecutó satisfactoriamente cuando aparecieron dependencias en el entorno durante la auditoría. El auditor no instaló paquetes. No se ejecutaron build, navegador ni proveedor real; móvil, portapapeles y producción no se verificaron visualmente. La siguiente iteración debe conservar las regresiones cubiertas y añadir identidad, medición, concurrencia distribuida y pertinencia pedagógica. La regla final es 0--1: pivotar; 2: ajustar; 3--5: continuar. Con datos censurados o contaminados, se informa la invalidez de la prueba, sin forzar una conclusión de producto.
+
+\chapter{Pregunta rectora, metodología y límites}
+\label{ch:metodo}
+\textbf{Pregunta rectora:} ¿qué recorrido mínimo permite a cinco estudiantes reconocer un vacío útil sobre código propio y decidir regresar con otro programa, sin que una nota, un recordatorio o una falla de instrumentación explique el resultado?
+
+Se siguieron diez pasos: inventario; reconstrucción de estados y contratos; extracción de los libros; mapeo de valor; comparación multicriterio; diseño de experiencia; operacionalización experimental; factibilidad por archivo; priorización por dependencias; revisión de coherencia. La inspección fue de solo lectura, salvo la creación de este documento y los archivos temporales que las pruebas existentes generan y eliminan en \nolinkurl{/tmp}. No se ejecutó código estudiantil ni se envió código o respuestas a un proveedor de IA. El pequeño ejemplo factorial se calculó localmente con una función sintética escrita literalmente para comprobar la afirmación del encargo.
+
+\section{Jerarquía y tipos de evidencia}
+Prevalecen el encargo actual y su protocolo atribuido al profesor. El repositorio determina el estado actual; E3, E2R, E2 y E1 documentan la evolución. Los enunciados de las rúbricas son requisitos académicos históricos, no nuevas órdenes de ejecución. No se siguieron enlaces privados de entrevistas ni se supuso que las afirmaciones de una celda equivalieran a observación directa del auditor.
+
+\begin{longtable}{P{2.8cm}P{6.2cm}P{7cm}}
+\toprule Tipo & Uso legítimo & Límite \\\midrule\endhead
+Confirmado en código & Función, estado o contrato con ruta y líneas. Confianza alta sobre la implementación inspeccionada. & No prueba despliegue, experiencia visual ni efecto en estudiantes.\\
+Verificado localmente & Prueba existente con doble del LLM o cálculo sintético; comando y resultado registrados. & No mide exactitud real del modelo ni desempeño de producción.\\
+Documentado históricamente & Libro, hoja y celda; confianza alta en que el documento lo dice. & Puede contener supuestos o autoinformes; confianza limitada en generalización.\\
+Reportado en prueba & Feedback resumido en E3. & No se observaron grabaciones ni se replicó la sesión.\\
+Inferencia & Consecuencia razonada de fuentes, separada de observación. & Requiere confirmar las condiciones de uso real.\\
+Hipótesis nueva & Regla propuesta o beneficio esperado de diseño. & Debe validarse; no garantiza elevar retorno.\\
+No verificado & Acceso, dato o ejecución ausente. & No se convierte en hallazgo afirmativo.\\\bottomrule
+\end{longtable}
+
+\section{Identidad de las fuentes y cobertura}
+E1 = \nolinkurl{Entregable 1- Grupo 4.xlsx}; E2 = \nolinkurl{Entregable 2- Grupo 4.xlsx}; E2R = \nolinkurl{Revisión_Entregable_2_Grupo_4.xlsx}; E3 = \nolinkurl{Entregable 3- Grupo 4.xlsx}. Los cuatro existen en \nolinkurl{/home/melisamo2305/Descargas/}. El nombre real de E2 no contiene «(1)»; se utilizó el archivo indicado por el usuario, no se inventó una quinta versión.
+
+Se inspeccionaron las 18 hojas: cinco de E1, cinco de E2, cinco de E2R y tres de E3, incluidas sus rúbricas. Se extrajeron celdas de OOXML con la biblioteca estándar de Python; no hizo falta instalar openpyxl. La extracción conserva coordenadas y distingue celdas de plantilla, respuestas y valores calculados almacenados. Las cifras de mercado se revisaron como supuestos, sin afirmar que su fuente secundaria SNIES estuviera validada.
+
+La correspondencia se conoce mediante el apartado 3 del encargo, no mediante un correo original con encabezados, fecha y autoría verificables. Se cita como \textbf{P, protocolo suministrado}. El hash remoto se verificó con la API de GitHub y coincide con el local. No hay instrucciones AGENTS.md aplicables detectadas en el proyecto o los ancestros consultados. No se usaron agentes delegados.
+
+\section{Límites que afectan conclusiones}
+Al inicio no había \texttt{node\_modules}; durante el trabajo aparecieron dependencias y cambios de metadatos peer en \nolinkurl{package-lock.json}, sin cambios de versiones. No fueron producidos por los comandos de esta auditoría y se preservaron sin atribuirles un autor no verificado. Esto permitió ejecutar las cinco pruebas de interfaz pendientes. El auditor no instaló paquetes ni generó build. No hay compiladores \texttt{pdflatex}, \texttt{xelatex}, \texttt{lualatex}, \texttt{latex} o \texttt{tectonic} en PATH. Los flujos visuales y números de clics son reconstrucciones estáticas, no mediciones de usabilidad. Los tiempos de espera del código son límites, no latencias observadas.
+
+No hay acceso verificado a la configuración de Vercel/Clerk. Una consulta de deployments de GitHub fue rechazada por la lista de endpoints admitidos del conector; no fue una denegación de autorización del usuario. El nombre \texttt{pydefense-dev}, el despliegue efectivo, las cuotas y el proveedor/modelo de producción quedan \textbf{no verificados}. No se inspeccionaron valores de variables de entorno en producción ni se hicieron llamadas a IA real. Se consultaron documentación oficial de Clerk, avisos de Next.js y precios públicos de Groq para contrastar hechos externos, sin enviar contenido del repositorio.
+
+\chapter{Reconstrucción del modelo de negocio}
+\label{ch:negocio}
+\section{ICP, trabajo y fuerzas de adopción}
+El ICP vigente es el estudiante universitario de programación introductoria que utiliza IA y debe explicar código Python propio. El JTBD de E3 es verificar que entiende lo que desarrolló y poder sustentarlo con seguridad (\xl{E3}{1 · Entrega 3}{C8--C13}). La tarea funcional es reconocer decisiones y comportamientos que puede explicar; la emocional es reducir incertidumbre sin vergüenza; la social es sostener el razonamiento como propio. No se propone detectar plagio ni evaluar integridad académica.
+
+El \textit{push} es una sustentación próxima y el temor a una pregunta inesperada. El \textit{pull} es descubrir a tiempo qué repasar. La ansiedad combina tiempo adicional y sensación de examen; el hábito es generar con IA y revisar superficialmente. Estas fuerzas ya estaban en \xl{E1}{2 · ICP + JTBD}{B19--B28} y se mantienen en \xl{E2}{3 · Market Product Fit}{C6--C7}. La fricción no empieza en un botón: una plataforma que exige cinco explicaciones, apelaciones y otra solución completa puede contradecir el motivo original de adopción.
+
+El problema más valioso sugerido por las entrevistas es \textbf{descubrir un vacío específico antes de presentar un programa real}. Su frecuencia no está medida. Reclutar con una entrega pendiente crea una oportunidad de uso y debe declararse como condición de la muestra, no como retención de estudiantes en cualquier semana.
+
+\section{Promesa, primer valor y retorno natural}
+El hook es pegar código y ensayar una explicación. El momento de valor ocurre cuando una observación comprensible conecta una frase del estudiante con una operación real y permite decidir qué repasar. «No había notado que estaba confundiendo la suma con el promedio» es un ejemplo de ese momento, no una cita histórica ni un resultado producido en esta auditoría.
+
+E2 estimó 3--5 minutos \textit{más carga y feedback}, y lo declaró pendiente de validación (\xl{E2}{3 · Market Product Fit}{C12,C17}). La métrica propuesta distingue llegada, primer feedback disponible, primer feedback visto y primer feedback declarado útil. Solo esta última aproxima valor percibido; no es aprendizaje demostrado. El retorno natural depende de una nueva tarea, no de mejorar una calificación (\xl{E3}{1 · Entrega 3}{C20--C22}).
+
+\section{Alternativas y diferencia verificable}
+El estudiante puede pedir preguntas a un asistente general, revisar ejemplos/documentación, ensayar con un compañero o monitor, o no practicar. PyDefense ofrece un recorrido ya preparado, preguntas relacionadas con estructuras concretas y algunas comprobaciones estáticas que acotan errores. Esa es una diferencia de producto visible en \src{lib/pedagogia.js}{16--109} y \src{lib/python-static.py}{24--167}. No se probó que resulte más útil que una conversación bien instruida con ChatGPT. No hay ventaja competitiva exclusiva demostrada; E1 lo reconocía (\xl{E1}{3 · Tarpit}{C6--D6,C12--D12}).
+
+Comparar herramientas en cinco personas durante esta prueba fragmentaría la hipótesis. Después del día 7, se puede preguntar qué habrían usado para la misma necesidad, qué aporta PyDefense y por qué regresaron o no. Una comparación controlada de utilidad pertenece a una investigación posterior, con criterios y muestra propios.
+
+\section{Tarpit y coherencia comercial}
+E1 reportó cinco banderas rojas (\xl{E1}{3 · Tarpit}{E6--E12,C14--C16}): competencia insuficientemente explorada, cambio de hábito, frecuencia desconocida, pago sin validar y diferenciación débil. El retorno busca disminuir la incertidumbre sobre hábito y utilidad repetida, pero no resuelve por sí solo pago o mercado.
+
+E3 asumió B2C, 35.000 clientes potenciales, captura del 10\%, 3.500 capturables, USD 10/año de ARPU y USD 35.000/año (\xl{E3}{1 · Entrega 3}{C60,C63--D70}). La multiplicación es coherente; sus entradas no son demanda validada. Sistemas y carreras afines son un universo más amplio que principiantes que usan IA y deben sustentar Python. Una referencia genérica a SNIES no aporta aquí cohorte, año ni filtro. Tampoco el pago de Daniel por ChatGPT prueba pago por PyDefense. Publicidad añade distracción y datos de terceros; pagos o B2B no son necesarios para este experimento. Se posponen.
+
+\chapter{Evolución de entregables y contradicciones}
+\label{ch:evolucion}
+\begin{longtable}{P{2.2cm}P{5.5cm}P{5cm}P{3.1cm}}
+\toprule Etapa & Fuente exacta y declaración & Estado y contradicción & Decisión \\\midrule\endhead
+E1 & «1 · Decisión de área», D6--D8,E6--E8; «2 · ICP + JTBD», C4,B19; «3 · Tarpit», C14. & Exploración de productividad, concentración y verificación de trabajos con IA; cinco riesgos, público amplio. & Mantener el problema; acotar la prueba.\\
+E2 original & «1 · ICP + JTBD revisado», D8,D25; «2 · Hipótesis MVP», C4--C8,C19,C21--C22. & Terminal, Python, tres preguntas; 3 de 5 con 2 de 3 correctas. C20 no nombra probadores. & Registro histórico, no protocolo vigente.\\
+E2R & «2 · Hipótesis MVP», C4,C15,C19--C20; «4 · Cambios y Reflexión», C12--D13. & Web y propuesta de tres agentes CrewAI/Ollama/Qwen; pendiente de validación. C10 conserva el recorte anterior. & No atribuir agentes al código actual.\\
+E3 & «1 · Entrega 3», C27--D32. & Tres preguntas; éxito si 60\% logra 7/10. Métrica endógena; D30 explica cambio de unidad. & Sustituir por retorno, sin reinterpretar resultados antiguos.\\
+E3, resultados & «1 · Entrega 3», C35--C39. & Cinco nombres, cuatro notas: 3,2,4,6; 0 de 4 supera umbral. C38 reconoce pivote; C39 decide ajustar por dificultad. & Registrar decisión histórica discordante, no simular cumplimiento del umbral.\\
+E3, login & «1 · Entrega 3», C44,C53; «2 · Landing y Reflexión», C6. & Afirma protección con Clerk y acceso sin login. Quitar Deployment Protection de Vercel no equivale a desactivar/proteger Clerk. & Identidad real y autorización de API antes de prueba.\\
+E3, aprendizaje & «2 · Landing y Reflexión», C18--C21,C29. & Feedback útil reportado; complejidad desalineada, solicitud de progreso, fallo al pegar. No es estudio de aprendizaje ni retorno. & Mantener feedback; verificar fricciones actuales.\\
+Código actual & \src{lib/sustentacion.js}{99--197}; \src{lib/pedagogia.js}{16--150}. & Secuencia de hasta cinco preguntas; adaptación local, revisión, diagnóstico y programación final. Supera el alcance de E3. & Simplificar sin reconstruir capacidades que ya funcionan.\\
+Protocolo P & Encargo, apartados 3 y 3.1--3.2. & Retorno espontáneo con código nuevo, 3/5 en siete días, confianza previa, identidad y persistencia. & Norma del próximo experimento.\\\bottomrule
+\end{longtable}
+
+\textbf{Registro histórico preciso.} Laura Correa: 3/10; Jorge Assis: 2/10; Juan Diego Villa: 4/10; David Forero: 6/10. Gabriel Morales está nombrado y tiene feedback cualitativo, pero no un puntaje registrado en C36. El 0\% de C37 describe esos cuatro resultados; no permite inferir éxito o fracaso de cinco ni comparar con el retorno futuro.
+
+E3 atribuye valor a una retroalimentación humana y con puntaje. Esa formulación impide afirmar que los usuarios pidieron eliminar la nota. La recomendación de retirarla se apoya en su falta de validez como medida de comprensión, el nuevo criterio de negocio y el costo de la disputa; se conserva el beneficio de explicación y cierre. Es una hipótesis de diseño, no un consenso empírico del grupo de probadores.
+
+\chapter{Auditoría del producto actual}
+\label{ch:actual}
+\section{Inventario y arquitectura efectiva}
+El proyecto contiene dos pantallas de aplicación, tres Route Handlers y once módulos JavaScript de lógica más el analizador Python. \src{package.json}{19--30} declara Next.js 14.1.4, React 18, Clerk y Monaco; el lockfile del commit auditado resuelve React 18.3.1, Clerk 5.7.6 y Monaco React 4.7.0 (\src{package-lock.json}{72--73,185--186,1099--1100,1444--1445}). No aparece cliente de base de datos. No hay rutas locales de sign-in dedicadas: se utiliza el modal de Clerk en el layout. Esto no certifica su configuración remota.
+
+En la tabla A, la presencia de una capacidad se sustenta en código; su beneficio y aporte al retorno son inferencias de producto, salvo el feedback cualitativo documentado en E3. Ninguna capacidad tiene aquí un efecto causal demostrado sobre retención. Costos y fricciones describen operaciones observables o hipótesis expresamente identificadas en los hallazgos y comparaciones posteriores.
+
+\begin{landscape}
+\small
+\begin{longtable}{P{0.8cm}P{3cm}P{5.1cm}P{4cm}P{3.6cm}P{2.5cm}P{4.4cm}}
+\caption{A. Inventario de capacidades, valor y recomendación}\label{tab:inventario}\\
+\toprule ID & Capacidad actual & Evidencia en código & Valor para usuario / trabajo & Fricción, costo y riesgo & Estado & Decisión / vínculo con retorno \\\midrule\endfirsthead
+\toprule ID & Capacidad actual & Evidencia en código & Valor para usuario / trabajo & Fricción, costo y riesgo & Estado & Decisión / vínculo con retorno \\\midrule\endhead
+C01 & Landing, CTA y vista ilustrativa & \src{app/page.jsx}{14--55,61--94} & Entender qué ensayar y acceder al simulador. & «Rápida» sin medición; terminal de ejemplo puede confundir. & Código; UX no verificada. & Mantener promesa y CTA; corregir fidelidad al flujo. Retorno indirecto.\\
+C02 & Acordeones, mini-quiz, modal, comparación y animaciones & \src{app/components/landing-interactions.jsx}{8--185}; \src{app/components/landing-showcase.jsx}{7--192} & Probar una idea sin subir datos; aclarar funcionamiento. & Redundancia de ejemplos, distracción; mini-quiz no representa respuesta libre. & Código; sin eventos. & Simplificar a una muestra opcional. No contar como práctica ni primer valor con código propio.\\
+C03 & Logo, retorno arriba y estilos responsivos & \src{app/components/logo-link.jsx}{7--24}; \src{app/components/scroll-to-top.jsx}{6--10}; \src{app/components/landing.module.css}{146--167,235--257} & Navegación, foco, legibilidad. & Scroll forzado; accesibilidad visual no probada aquí. & Análisis estático. & Mantener; revisión visual posterior, sin rediseño ornamental previo.\\
+C04 & Modal Clerk y estados de cabecera & \src{app/layout.jsx}{12--36}; \src{middleware.js}{1--7} & Identificación opcional de la interfaz. & «Administrador / Usuario» añade confusión; no protege recursos. & Confirmado; login real no verificado. & Simplificar copia y exigir identidad/propiedad en servidor. Esencial para medir retorno.\\
+C05 & Entrada de código, Monaco, textarea y temas & \src{app/simulador/page.jsx}{69--73,203--214} & Pegar/editar hasta 12.000 caracteres, alternativa si editor tarda. & 480 px de editor; temas antes de valor. No hay cargador de archivos .py. & Código; pegar y móvil no verificados. & Mantener pegar y fallback; reubicar temas. No agregar subida por inercia.\\
+C06 & Selector 1--5; predeterminado 5 & \src{app/simulador/page.jsx}{79,217}; \src{lib/sustentacion.js}{103--104} & Control del esfuerzo potencial. & Decisión pedagógica sin información; variación del tratamiento. & Confirmado. & Eliminar selector y autoridad del cliente; política fija de máximo tres, con cierre voluntario.\\
+C07 & Borrador, reintento, recuperación y reinicio & \src{app/simulador/page.jsx}{92--180,221--227} & Evitar perder código/respuesta. & localStorage con código, respuestas y token; no aislado por usuario ni borrado explícito al salir. Reinicio conserva código. & Confirmado en código; recuperación cubierta con dobles. & Mantener recuperación con identidad; separar borrador de eventos. Nueva práctica no prueba código nuevo.\\
+C08 & Estados y API principal & \src{app/api/sustentacion/route.js}{6--58}; \src{lib/sustentacion.js}{99--197} & Secuencia estable, feedback antes de continuar. & Cuerpo hasta 350 KB; sin control de usuario; sin registro analítico persistente. & Confirmado y pruebas locales. & Mantener estructura; añadir autorización, eventos y transacciones compartidas.\\
+C09 & Sintaxis y hechos AST / fallback textual & \src{lib/python-static.js}{7--22}; \src{lib/python-static.py}{24--167}; \src{lib/python-fallback.js}{9--58} & No confundir ciertos errores con conducta real; no ejecutar código. & Pruebas muy acotadas; Python puede faltar; plantillas exactas no cubren programas generales. & Confirmado y pruebas locales. & Mantener límites explícitos, filtrar temas por contexto; no prometer ejecución.\\
+C10 & Perfil derivado del código & \src{lib/perfil.js}{14--28} & Distingue familia promedio, DAG y general. & Familia algorítmica no demuestra conocimiento del autor. & Confirmado. & Simplificar al ICP y añadir temas declarados; calibración curricular ausente.\\
+C11 & Primera pregunta conceptual y selección adaptativa & \src{lib/pedagogia.js}{16--21,52--109} & Propósito primero; luego casos y decisiones con referencias. & Primera pregunta genérica; candidatos limitados; adaptación no considera nivel declarado/confianza. & Confirmado, sin generación LLM en estos pasos. & Mantener reglas locales y enriquecer referencias verificables dentro de temas permitidos.\\
+C12 & Saltar, «no sé», aclaración y corregir sintaxis & \src{lib/sustentacion.js}{144--160,200--207}; \src{app/simulador/page.jsx}{218,228--237} & Control y reparación sin fabricar error conceptual. & Omitir consume cupo; aclaraciones hasta dos; corrección puede ser imposible sin parser. & Confirmado y pruebas locales. & Mantener; añadir motivo «no he visto este tema» y no penalizarlo; no duplicar funciones existentes.\\
+C13 & Evaluación, citas, feedback y revisión de afirmaciones & \src{lib/evaluacion.js}{23--118}; \src{lib/afirmaciones.js}{16--60}; \src{lib/contratos-ia.js}{3--88} & Reconocer acierto, localizar vacío y respaldar feedback. & 1 llamada LLM/respuesta evaluable; normalización y heurísticas no garantizan verdad. & Confirmado con dobles; exactitud real no verificada. & Mantener validación; retirar aritmética y no conceder evidencia parcial por cita inexistente.\\
+C14 & Apelación de evaluación & \src{app/simulador/page.jsx}{243--248}; \src{lib/sustentacion.js}{161--177} & Rectificar un error percibido. & Hasta dos llamadas extra por pregunta, historial y diagnóstico cambian; UI muestra último feedback aunque se revise otro anterior. & Confirmado. & Sustituir por reparación contextual y error factual, sin nota.\\
+C15 & Promedio y dominio estimado & \src{lib/sustentacion.js}{38--51,65--73}; \src{lib/pedagogia.js}{23--46}; \src{app/simulador/components.jsx}{16--32} & Resumen y sensación de avance. & Pesos y umbrales internos sin validez de dominio; dos indicadores pueden confundir. & Confirmado; no aprendizaje demostrado. & Eliminar escala pública y agregados del contrato nuevo; conservar observaciones y límites.\\
+C16 & Ejercicio y evaluación final & \src{lib/pedagogia.js}{111--150}; \src{lib/evaluacion.js}{121--175}; \src{app/simulador/page.jsx}{250--263} & Transferir una idea; comparar estructura y razonamiento. & Requiere escribir programa para llegar a fase final; puede exceder nivel; solución inválida también termina. & Confirmado; elección DAG/promedio ya existe. & Reubicar como opcional; cierre útil previo; un solo vacío, sin nueva nota.\\
+C17 & Historial de respuestas y versiones & \src{app/simulador/page.jsx}{264}; \src{app/simulador/components.jsx}{3--12}; \src{lib/sustentacion.js}{154,172--176} & Revisar explicaciones y rectificaciones. & Información sensible; historia de una sesión, no perfil entre dispositivos. & Confirmado. & Mantener bajo demanda y con retención; progreso longitudinal P2.\\
+C18 & Almacén local / token portátil cifrado & \src{lib/session-store.js}{5--39,56--69}; \src{lib/sustentacion.js}{9--34,75--98} & Recuperación hasta expiración de dos horas. & Sin propietario Clerk; en Vercel no hay persistencia central ni bloqueo compartido. & Confirmado y pruebas de recuperación. & Sustituir fuente de verdad; preservar interfaces de dominio. P0 de medición.\\
+C19 & Recuperación de 92 competencias y rúbrica & \src{lib/knowledge.js}{1--43,71--154}; \nolinkurl{knowledge/schema.json} y ocho niveles. & Referencia contextual para evaluación. & Hasta cinco registros por patrones; puede recuperar contenidos avanzados; no es búsqueda vectorial. & Confirmado; 92 verificados. & Mantener catálogo, filtrar subconjunto introductorio; no construir otro RAG.\\
+C20 & Cliente LLM, formato, límites y errores & \src{lib/llm.js}{15--74,79--105}; \src{app/api/sustentacion/route.js}{46--56} & Errores recuperables sin perder respuesta; JSON estructurado. & Modelo por entorno; 45 s de timeout; pausa 429 solo por proceso; sin métricas de tokens persistidas. & Confirmado con dobles. & Mantener proveedor; añadir manifiesto, cuotas compartidas y telemetría mínima.\\
+C21 & API de preguntas/evaluación en lote & \src{app/api/generar-preguntas/route.js}{8--55}; \src{app/api/evaluar-respuestas/route.js}{8--63} & Compatibilidad histórica de tres preguntas. & Públicas, sin caller de UI actual, contratos y límites distintos; costo duplicado potencial. & Rutas existentes; tráfico externo no verificado. & Retirar tras comprobar consumidores; proteger desde P0 si siguen expuestas.\\
+C22 & Pruebas, fixtures y documento previo & \nolinkurl{tests/*.cjs}; \src{docs/AUDITORIA_ESTABILIDAD.md}{70--78}; \src{scripts/comprobar-proveedor.cjs}{1--39} & Evitar regresiones de estado, evidencia y errores. & Dobles no prueban desempeño real; proveedor live consume API. & 72 pasan; interfaz reintentada tras aparecer dependencias. & Mantener cobertura; ampliar solo brechas relevantes; no ejecutar live en esta auditoría.\\\bottomrule
+\end{longtable}
+\end{landscape}
+
+\section{Recorrido actual: pasos, entradas y alternativas}
+\begin{center}
+\fbox{\parbox{0.92\textwidth}{Landing \(\to\) simulador sin sesión \(\to\) iniciar \(\to\) pregunta \(\to\) feedback \(\to\) continuar \(\to\) otra pregunta o diagnóstico/práctica \(\to\) entregar programa \(\to\) final.\\
+Desde pregunta: aclarar conserva pregunta; saltar produce feedback sin nota; sintaxis inválida habilita corregir. Desde feedback: revisar puede sustituir una evaluación previa. Recuperar restaura el estado disponible. Reiniciar vuelve a entrada conservando el código.}}
+\end{center}
+La landing conduce mediante un CTA a \texttt{/simulador}. El código de promedio viene prellenado. Pegar código propio requiere foco y pegado; elegir máximo es opcional porque el valor inicial es cinco. No hay paso obligatorio de login ni confianza previa. Iniciar analiza y perfila localmente; no llama al LLM. La pregunta inicial pide propósito, datos y estrategia; en sintaxis inválida pide corregir. El editor queda bloqueado durante la sesión salvo corrección sintáctica.
+
+Cada respuesta evaluable exige escribir y enviar; una llamada LLM valida criterios y afirmaciones. El feedback siempre precede a «Continuar». Saltar consume un cupo, mantiene nota nula y no demuestra error. «No sé» tampoco es cero. Aclarar no cambia pregunta y tiene límite de dos; una petición textual corta puede reconocerse como aclaración. Estos comportamientos ya están implementados y cubiertos por pruebas.
+
+Con \(q\) preguntas, el camino desde la landing al diagnóstico requiere aproximadamente \(2+2q\) activaciones de navegación/acción: CTA, comenzar, enviar y continuar por pregunta. Con cinco: 12, más foco, pegado, escritura y controles opcionales. Llegar a la fase final exige además escribir otra solución y enviarla: una activación adicional y una tarea considerable. Desde entrada directa al simulador se resta una activación. Son conteos del camino nominal, no medición de clics reales ni esfuerzo total.
+
+El cierre automático ocurre al máximo elegido, después de dos preguntas con sintaxis inválida o desde tres si todos los conceptos resultan confirmados (\src{lib/sustentacion.js}{70--73}). No hay botón de terminar con resumen después de un feedback temprano. «Iniciar nueva práctica» permite salir, pero reinicia sin ese cierre. En la fase práctica, un programa sintácticamente inválido produce un diagnóstico de error y de todos modos conduce a final (\src{lib/evaluacion.js}{137--138}; \src{lib/sustentacion.js}{182--187}).
+
+\section{Latencia, abandono y claridad}
+El cliente aborta a 55 s, el LLM a 45 s y la ruta declara 60 s; el parser tiene 3 s. No son un compromiso de tiempo a valor. La primera pregunta local puede ser rápida, pero el primer feedback útil depende del tiempo de explicar y del proveedor. El botón bloqueado y el estado «Procesando el paso» previenen doble envío desde una pestaña; no sustituyen deduplicación distribuida. Tras timeout se conserva el borrador y se ofrece recuperación. En 429 se muestra espera y se preserva la respuesta. Los mensajes de almacenamiento y credenciales incluyen detalles administrativos que conviene separar de la microcopia estudiantil (\src{app/api/sustentacion/route.js}{13--17}).
+
+La landing no garantiza evaluación objetiva ni aprobación: habla de práctica y ejemplos. Sin embargo, no anticipa la programación final y presenta una terminal ilustrativa sin CLI implementada (\src{app/components/landing-showcase.jsx}{177--187}). La mejora es alinear la muestra con el recorrido web y el cierre propuesto, sin afirmar que toda la landing es engañosa.
+
+\section{Hallazgos críticos con impacto y validación}
+\textbf{H01: autenticación opcional.} Evidencia: \src{middleware.js}{1--7}, layout y API sin lectura de usuario. Estado: confirmado en código, corroborado por guía oficial de Clerk v5 \cite{clerk5}. Impacto: no se puede identificar retorno ni autorizar propiedad. Recomendación: identidad en el Route Handler y en la capa de acceso a sesión; no basta ocultar botones. Validación: petición anónima rechazada antes de cualquier llamada LLM; usuario B no recupera sesión de A.
+
+\textbf{H02: recuperación no equivale a persistencia de investigación.} En Vercel, guardar no escribe y el bloqueo se omite; un token transporta el estado completo. La caché de hasta 128 sesiones solo cubre una instancia. Estado: confirmado; las duplicaciones entre instancias son una inferencia del diseño, no un incidente observado. Impacto: no hay censo auditable, y un token antiguo puede reabrir un estado en una instancia sin memoria. Recomendación: almacenamiento compartido transaccional, no usar logs de Vercel ni localStorage como métrica. Validación: reintentos concurrentes entre instancias producen un único evento y transición.
+
+\textbf{H03: adaptación al programa, no al estudiante.} El perfil infiere dificultad algorítmica solo si detecta DAG; la recuperación incluye hasta cinco competencias sin filtro curricular. No hay input de temas estudiados ni escala 1--5. Impacto: un novato con código de IA puede recibir profundidad indebida. Recomendación: contrato introductorio y una selección breve de temas ya cursados. Validación: cinco perfiles contrastantes del capítulo \ref{ch:pedagogia}; ningún Big O por un ciclo aislado.
+
+\textbf{H04: certeza numérica insuficientemente fundada.} Promedio aritmético y estimación con pesos temporales existen; la estimación global exige dos habilidades por concepto, una cautela real. Aun así, no hay calibración externa que justifique «dominio». Impacto: falsa seguridad o disputa. Recomendación: observaciones cualitativas con evidencia y límites. Validación: resumen no afirma capacidades no observadas y permite identificar un siguiente paso sin cifra.
+
+\textbf{H05: el circuito de revisión es costoso y modifica el recorrido.} Dos revisiones por pregunta, solo en feedback; original y motivo se conservan, se recalculan cierre y diagnóstico. La nota anterior no se envía al modelo, lo cual reduce anclaje. El resultado de una revisión de pregunta previa no sustituye el bloque principal del último feedback, de modo que la rectificación puede requerir abrir historial. Impacto: carga de navegar y discutir. Recomendación: reparación en el contexto de la pregunta afectada sin recalificación. Validación: rectificación visible, una sola operación, sin cambiar el numerador de retorno.
+
+\textbf{H06: control de cita no equivale a evidencia semántica.} \src{lib/evaluacion.js}{23--35} limita a nivel 1 una cita inexistente, y \src{lib/afirmaciones.js}{24--30} elimina afirmaciones sin cita localizada. Estado: confirmado y cubierto por pruebas. Impacto: todavía puede concederse crédito parcial sin evidencia localizada; normalizar texto no demuestra que el juicio sea verdadero. Recomendación: marcar ese criterio como no verificable, sin convertir fallo del tutor en déficit del estudiante. Validación: cita inventada nunca produce fortaleza ni error atribuido al alumno.
+
+\textbf{H07: secreto histórico y dependencia con aviso de seguridad.} Véase capítulo \ref{ch:tecnica}. Impacto: confianza, datos y disponibilidad del experimento. Recomendación: remediación previa al piloto en una fase posterior. Validación: evidencia de rotación, revisión de accesos y dependencias aprobadas, sin publicar valores.
+
+\textbf{H08: la fricción final es estructural.} No es solo un botón: fase, API, ejercicio, evaluación y estado terminal dependen de una entrega de código. Impacto: retrasar satisfacción después del primer vacío. Recomendación: cerrar primero, refuerzo opcional después. Validación: completar sesión sin solución adicional, y si se elige refuerzo, mantener el mismo objetivo conceptual.
+
+\chapter{Análisis pedagógico y calibración}
+\label{ch:pedagogia}
+\section{Qué permite afirmar una respuesta}
+La unidad de análisis debe ser una \textbf{afirmación acotada}, no una nota del estudiante. Una explicación puede mostrar relación entre entrada y salida, pero no demostrar que sabe adaptar el programa. Una predicción acertada sin razones es evidencia distinta de una explicación causal. Una respuesta incompleta no equivale a una afirmación falsa. Una omisión no permite inferir incapacidad. La confianza declarada es introspección, no un diagnóstico validado.
+
+El contrato recomendado distingue: evidencia correcta localizada; error factual localizado; explicación parcial que necesita precisión; información no observada; juicio no verificable del sistema. Cada observación debe referirse a pregunta, fragmento del código, afirmación concreta y método (regla estática o interpretación del modelo). Si el sistema no puede localizar evidencia, debe decirlo y retirar el juicio, no rebajar una nota ni inventar un acierto. Se conserva la separación entre cumplimiento de la consigna y afirmaciones adicionales relevantes que ya existe en \src{lib/afirmaciones.js}{16--60}.
+
+\textbf{Respuesta parcial:} «La función suma las notas». Si la pregunta pide explicar el promedio, se reconoce la suma y se señala que falta explicar el divisor. No se exige mencionar comentarios, complejidad o validaciones no solicitadas. Si añade «dividir por 2 siempre da el promedio», se corrige ese error específico con un caso de tres notas. No se concluye «no entiendes Python». Un ejemplo trabajado puede enseñar; repetirlo después indica exposición al feedback y no constituye confirmación independiente de comprensión.
+
+\section{Contrato mínimo de nivel y temas}
+\hip{} Para el Alpha, limitar reclutamiento y promesa a programación introductoria. Una sola selección al iniciar pregunta «¿Qué temas ya has trabajado en clase?»: (a) variables, operaciones y funciones; (b) también condicionales; (c) también ciclos y listas. Una opción «No estoy seguro» elige el conjunto básico y permite reducir la profundidad. Son conjuntos curriculares orientativos, no rangos de inteligencia. Deben contrastarse con el curso concreto antes de reclutar; no afirmar que todas las universidades siguen ese orden.
+
+El contrato congelado contiene \texttt{topic\_policy\_id}, temas declarados, versión de taxonomía, temas detectados y lista permitida. Los temas de una pregunta deben estar en la intersección entre presencia verificable en código y temas permitidos. Propósito, entradas y resultado se pueden explorar sin exigir una etiqueta técnica. Big O, complejidad espacial, invariantes formales, grafos, programación dinámica y reducciones quedan fuera de la prueba introductoria. Recursión solo se habilita en una cohorte futura o con una regla declarada y aprobada antes del experimento; no se activa por pegar código avanzado.
+
+Para código avanzado de IA, la aplicación puede preguntar qué recibe y devuelve, pero debe reconocer el límite: «Este programa incluye temas que esta práctica inicial todavía no cubre. Podemos revisar su propósito o usar un fragmento de los temas de tu curso». No se simplifica falsamente un grafo a una multiplicación ni se pretende cubrir todo el programa. Si no hay una pregunta específica admisible, cerrar honestamente con alcance limitado. Esa incompatibilidad se registra como problema de pertinencia, no como error del estudiante.
+
+«No he visto este tema» registra desajuste, retira la pregunta sin evidencia negativa y la reemplaza a lo sumo una vez por práctica con otra del conjunto permitido. No crea un cuestionario. El reemplazo mantiene el máximo de tres preguntas intentadas de contenido adecuado, con un máximo de cuatro exposiciones contando la descartada. Cada pregunta efectivamente nueva recibe confianza previa; una reformulación de la misma mantiene la confianza original. La política se congela antes del experimento.
+
+\section{Confianza previa y decisiones de ayuda}
+Antes de revelar el enunciado, mostrar el tema y un fragmento breve: «Sobre cómo este programa calcula el resultado: ¿qué tan capaz te sientes de explicarlo?». Una fila de cinco botones: 1 «Nada seguro», 2, 3 «Algo seguro», 4, 5 «Muy seguro». No preseleccionar ni preguntar después de responder. Pulsar registra y revela la pregunta en la misma tarjeta; añadir «Prefiero no responder» conserva autonomía y marca dato faltante, sin imputarlo a 3. Esta excepción se acuerda en el protocolo antes de comenzar; no altera la métrica primaria.
+
+La confianza no sube la dificultad automáticamente. Un 5 seguido de error puede señalar una brecha de calibración; un 1 con explicación acertada puede señalar inseguridad. Con cinco personas solo se describen casos. Mostrar «Tu explicación aquí coincide con el programa» sin etiquetar al estudiante como excesivamente confiado. La ayuda se elige por tipo de necesidad: reformulación si no entiende la consigna; ejemplo mínimo si falta una relación causal; repregunta breve si la respuesta es ambigua; transferencia opcional si ya comprendió una idea y quiere comprobar otra situación.
+
+\section{Ejemplos verificables y límites del analizador}
+Para el código exacto \texttt{def factorial(n): return 1 if n else factorial(n-1)}, con enteros no nulos la condición es verdadera y retorna 1 directamente. Con 0 llama a \texttt{factorial(-1)}, que retorna 1. Por tanto termina y devuelve 1 para todos los enteros bajo esa definición sin redefiniciones ni efectos externos. No calcula el factorial usual salvo coincidencias particulares. El cálculo local con entradas -3, -1, 0, 1 y 3 produjo 1 en todos los casos. La demostración general depende de las dos ramas; probar cinco entradas por sí solo no la demostraría. No se extrapola a objetos con operadores personalizados.
+
+La implementación ya reconoce ese patrón mediante AST y fallback exacto (\src{lib/python-static.py}{65--87}; \src{lib/python-fallback.js}{49--50}), y tiene pruebas contra recursión infinita inventada. No se informa como bug vigente que siempre falle ese ejemplo. En grafos, el reconocimiento exige una estructura concreta y contrato DAG; quitar memo conserva el conteo matemático de ese algoritmo bajo esa precondición, pero puede cambiar los recursos necesarios. No extrapolar a grafos con ciclos ni a cualquier variable llamada memo.
+
+Ante sintaxis inválida, conservar texto, localizar línea si el parser la conoce y ofrecer corrección; sin Python, decir «sintaxis no verificada». Las importaciones no se ejecutan, de modo que su mera ausencia en el entorno no bloquea el análisis sintáctico, pero el comportamiento de una librería desconocida queda condicionado o no verificado. Código incompleto requiere identificar datos faltantes y permitir fragmento más pequeño. Comentarios que ordenan al tutor ignorar reglas son datos no confiables; el prompt actual lo declara, pero una instrucción textual no garantiza inmunidad a inyección. Mantener esquemas, lista de conceptos, validación de citas, límites y controles por servidor.
+
+\begin{landscape}
+\small
+\begin{longtable}{P{3.6cm}P{6.4cm}P{6cm}P{7.2cm}}
+\caption{Cinco perfiles de prueba de pertinencia; ejemplos sintéticos, no resultados estudiantiles}\\
+\toprule Perfil y programa & Pregunta apropiada & Pregunta inapropiada & Justificación y comportamiento del Alpha \\\midrule\endhead
+Principiante, promedio de lista & «Para [2,4], ¿qué representan la suma 6 y la cantidad 2 en el resultado 3?» & «Demuestra la complejidad espacial auxiliar y expresa el tiempo en Big O». & Relación suma/cantidad presente; no requiere teoría asintótica. Si listas no cursadas, preguntar entradas y significado con alcance declarado.\\
+Principiante, DAG copiado de IA & «En esta llamada con origen 0 y destino 3, ¿qué debería representar el número que recibes?» & «Prueba por inducción sobre orden topológico la recurrencia y su complejidad». & El artefacto avanzado no prueba conocimiento. Solo propósito admisible; reconocer que el resto supera el Alpha, sin fallar al estudiante.\\
+Avanzado, función \texttt{doble(x)} & «Si el contrato permite listas además de números, ¿qué cambia en el significado de \texttt{x*2}?». & «Deriva una recurrencia de programación dinámica de esta función». & No inventar estructuras ausentes. En futura versión, comparar contrato y semántica es pertinente; hoy usuario fuera del ICP, sin prometer experiencia avanzada.\\
+Avanzado, conteo DAG con memo & «¿Qué subproblema guarda memo[u] y qué cambia en resultado y trabajo si retiras consulta y guardado bajo el contrato DAG?» & «Como hay memoización, demuestra que este programa funciona en cualquier grafo con ciclos». & La primera distingue conteo de visitas y corrección de eficiencia; la segunda extiende indebidamente la precondición. Fuera del Alpha introductorio.\\
+Avanzado, aproximación de cobertura de vértices & Para algoritmo que toma una arista, añade sus dos extremos y elimina aristas incidentes: «¿Por qué los extremos seleccionados cubren todas las aristas y cómo se relaciona el matching elegido con OPT?» & «Tu resultado es óptimo porque el problema es NP-difícil» o exigir demostración de P distinto de NP. & Las aristas elegidas forman matching; toda cobertura usa al menos un extremo por cada una, mientras se eligen dos: cota 2 bajo este algoritmo. No prueba optimalidad exacta ni resuelve intratabilidad. Solo escenario futuro, sujeto a competencias declaradas.\\\bottomrule
+\end{longtable}
+\end{landscape}
+
+\chapter{Decisiones comparadas}
+\label{ch:decisiones}
+\section{Marco y sensibilidad}
+Se asignan puntuaciones de 1 (peor) a 5 (mejor) con seis criterios: valor inmediato V 25\%, baja fricción F 20\%, validez pedagógica P 20\%, validez del experimento M 15\%, facilidad/esfuerzo E 10\% y bajo riesgo operativo R 10\%. \(S=\sum w_i s_i/100\). Los pesos priorizan utilidad y aprendizaje sin perder medición; no son evidencia científica ni estimaciones de efecto. El costo de modelo y la complejidad están en E y R; ninguna puntuación proviene de un ensayo comparativo.
+
+\begin{longtable}{P{7cm}rrrrrrr}
+\toprule Alternativa & V & F & P & M & E & R & S \\\midrule\endhead
+Preguntas: selector actual 1--5 & 3&2&3&3&5&4&3.10\\
+Preguntas: máximo tres de plataforma, cierre voluntario & 4&5&4&5&5&4&4.45\\
+Preguntas: dos más una adaptativa según evidencia & 5&5&4&4&3&3&4.25\\
+Preguntas: selección inicial de tiempo disponible & 4&3&3&4&3&3&3.40\\\midrule
+Revisión: apelación con nota &3&2&3&3&2&2&2.60\\
+Revisión: eliminar todo canal de corrección &2&5&2&4&5&2&3.20\\
+Revisión: reparación contextual sin nota &5&4&5&5&3&4&4.50\\
+Revisión: solo control interno, sin canal estudiantil &3&5&3&5&4&3&3.80\\\midrule
+Nota: A, eje principal 0--10 &3&2&2&2&5&2&2.55\\
+Nota: B, detalle opcional no certificador &3&3&2&3&4&2&2.80\\
+Nota: C, diagnóstico cualitativo con evidencia &5&4&5&5&3&4&4.50\\
+Nota: D, recompensa de práctica sin diagnóstico completo &4&5&3&5&4&3&4.05\\\bottomrule
+\end{longtable}
+
+Con pesos iguales, las ganadoras siguen siendo máximo tres (4.50), reparación (4.33) y diagnóstico (4.33). Sin embargo, la elección de preguntas es sensible: si V sube a 40 y E/R bajan a 5 cada uno, con F20/P20/M10, dos más una obtiene 4.50 frente a 4.35 del máximo tres. Por eso se recomienda máximo tres para una prueba fácil de reproducir y se reserva la adaptación de longitud para después de observar abandono. No se presenta una superioridad universal.
+
+\begin{landscape}
+\small
+\begin{longtable}{P{2.3cm}P{4cm}P{4.1cm}P{3.8cm}P{3.4cm}P{3cm}P{3cm}}
+\caption{B. Decisiones de producto y pérdida aceptada}\label{tab:decisiones}\\
+\toprule Dilema & Alternativas & Criterios y evaluación & Decisión recomendada & Por qué & Qué se pierde & Cómo validar \\\midrule\endhead
+Cantidad & Selector; tres con salida; dos más una; tiempo. & Tabla anterior: 3.10 / 4.45 / 4.25 / 3.40. & Máximo tres preguntas de plataforma; cierre tras cada feedback. & Reduce decisión inicial; duración acotada y política reproducible. & Control numérico y cobertura exhaustiva; no se pretende medir todo el dominio. & Sin selector ni override de API; máximo tres adecuadas; abandono y primer valor descritos, no umbral de nota.\\
+Revisión & Apelar; quitar todo; reparación; solo control interno. & 2.60 / 3.20 / 4.50 / 3.80. & Reparación breve más control interno; sin recalificación. & Mantiene agencia cuando tutor falla y centra la conversación en comprensión. & Comparación de notas y reiteración hasta conseguir puntos. & Error factual corregible, versión anterior conservada, reporte visible y sin ciclos ilimitados.\\
+Nota & Principal; opcional; diagnóstico; recompensa sola. & 2.55 / 2.80 / 4.50 / 4.05. & C como base; incorporar cierre honesto de D. & Evidencia orienta acción; la recompensa sola puede quedarse vacía. & Cifra fácil de compartir y familiaridad; se reconoce preferencia histórica mixta. & Usuario identifica evidencia y siguiente paso; sin porcentaje ni afirmación de certificación.\\
+Nivel & Código; una selección; híbrida amplia; foco introductorio. & Matriz específica: 3.28 / 3.77 / 3.36 / 4.18. & Foco introductorio con señal mínima de temas y selección contextual local. & Alineación ICP, pruebas manejables y menos promesas. & Cobertura avanzada; no se concluye que avanzados carezcan de necesidad. & Cinco perfiles, tema no cursado reparable, política congelada.\\\bottomrule
+\end{longtable}
+\end{landscape}
+
+\section{Cantidad: política concreta de parada}
+\hip{} Ofrecer hasta tres preguntas: propósito y estrategia; una decisión o transformación central; un caso o modificación pertinente. La selección puede responder a evidencia de la sesión dentro del mismo catálogo y política fija. No hay selector de máximo ni nivel ajustado por el estudiante para obtener una nota. Cerrar voluntariamente después de cualquier feedback es una terminación legítima, no un fracaso.
+
+Parar automáticamente al completar tres preguntas pertinentes, al agotar candidatos no repetidos o cuando no se puede formular otra pregunta válida dentro del alcance. No parar por alcanzar un puntaje. Si ya se identificó un vacío útil, ofrecer «Cerrar con lo que descubriste» junto a «Explorar otra parte»; no forzar repetir hasta demostrar dominio. Con todas omitidas se puede cerrar, pero la sesión no satisface el umbral experimental de práctica útil definido después. El código inválido se corrige antes de contenido; tras dos intentos fallidos se ofrece cierre con ayuda localizada sin hacer pasar un error técnico por aprendizaje.
+
+El presupuesto inicial esperado para la prueba es tres preguntas, con duración a observar y salida en una o dos. La opción de «profundizar» después de tres no genera una segunda sesión válida: se pospone durante el piloto para evitar ambigüedad. A largo plazo, dos preguntas y una tercera elegida por necesidad podría reducir duración; requiere evidencia de dónde aparece valor.
+
+\section{Revisión: reparar sin indefensión}
+Después del feedback, ofrecer «No entendí la explicación» (reformular) y «Esto no refleja lo que quise decir» (aclaración contextual de hasta 300 caracteres). Un reporte «Creo que hay un error en el análisis del código» es distinto: el sistema vuelve a contrastar la afirmación disputada con hechos disponibles. Una reparación como máximo por pregunta, sin nueva pregunta ni nota; si persiste incertidumbre, marcar el juicio como no verificado y permitir continuar/cerrar.
+
+No borrar silenciosamente el juicio anterior. Mostrar «Corregimos esta afirmación del tutor: ...», con motivo y versión del feedback. Mantener vínculo entre observación original, aclaración y rectificación. El reporte puede quedar para revisión interna tras las ventanas; no prometer contacto del equipo durante ellas. Si el fallo es sistemático y exige cambiar reglas, se interrumpe la validez experimental y se abre una nueva cohorte posteriormente. No mantener un error factual por preservar una cifra ni modificar el tratamiento a escondidas.
+
+\section{Nota: consecuencias de retirarla}
+La alternativa A es familiar, compacta y barata porque ya existe, pero invita a optimizar la cifra y confunde cobertura con dominio. B reduce protagonismo, pero conserva aritmética, mantenimiento y posibilidad de apelación. C puede ser más largo y exige un contrato de evidencia robusto; se controla mostrando un acierto, una duda y un paso, con detalles desplegables. D puede motivar mediante cierre sin juicio, pero «ya puedes explicar X» es excesivo si no existe evidencia. La combinación recomendada dice «En esta práctica explicaste X con este ejemplo» o «Identificaste que necesitas repasar Y».
+
+Retirar también promedio, porcentaje de dominio, límites por nota y mensajes «nota anterior/actual» en API, componentes y pruebas. Las reglas cualitativas conservan observaciones, no un score oculto para selección ni analytics. Las sesiones históricas se mantienen bajo su versión hasta expirar; el contrato nuevo no transforma notas viejas en progreso comparable. No hay tabla de posiciones, rachas, premios por volver ni notificaciones.
+
+\section{Calibración: matriz específica}
+Se puntúan precisión pedagógica PP (15), pertinencia PE (15), facilidad de implementación E (10), mantenimiento M (8), baja latencia L (7), bajo costo LLM C (7), baja fricción F (10), facilidad de prueba T (10), baja exclusión X (8) y coherencia experimental H (10). Todos los pesos suman 100. La exclusión es una pérdida real del foco introductorio; la coherencia con el ICP pesa más en esta fase.
+
+\begin{landscape}
+\small
+\begin{longtable}{P{7.5cm}rrrrrrrrrrr}
+\toprule Estrategia & PP&PE&E&M&L&C&F&T&X&H&S\\\midrule\endhead
+E1. Inferir solo desde código &2&2&5&4&5&5&5&3&2&2&3.28\\
+E2. Una selección de contexto para todos los niveles &3&3&4&4&5&4&4&4&4&4&3.77\\
+E3. Híbrida progresiva para principiantes y avanzados &4&5&2&2&3&2&4&2&5&3&3.36\\
+E4. Restringir Alpha a introductorios, señal mínima &4&4&4&4&5&5&4&5&2&5&4.18\\\bottomrule
+\end{longtable}
+\end{landscape}
+
+E1 es rápida, pero confunde artefacto y autor. E2 agrega una señal útil con un solo gesto; etiquetas «básico/avanzado» no garantizan competencias específicas y todavía exige mantener todos los niveles. E3 puede ser pedagógicamente rica, pero multiplica estados, validaciones, ejemplos y costos para cinco personas. E4 utiliza la señal ligera de E2 dentro de un alcance pequeño, no promete un tutor universal. Su exclusión debe comunicarse con honestidad y registrarse para investigación futura.
+
+Con pesos iguales E4 conserva ventaja (4.20 frente a 4.00 de E2). Si excluir usuarios avanzados fuera el costo decisivo, aumentar X a 30 y reducir PP10/PE10/E8/M6/L5/C5/F8/T8/H10 cambia la elección: E2 llega a 3.85 y E4 a 3.68. No hay evidencia actual para ese giro de público. Evolución: validar retorno introductorio; entrevistar avanzados por tarea; solo después ampliar contratos y pruebas de grafos, DP o aproximación.
+
+El catálogo existente necesita metadatos de prerrequisitos, temas permitidos, habilidad cognitiva, referencia verificable al código, contexto curricular y versión editorial. No requiere embeddings ni base vectorial. La recuperación debe filtrar antes de ordenar y no introducir criterios nuevos en el feedback. La corrección de clasificación es una acción simple sobre tema; no otra prueba de nivel.
+
+\chapter{Experiencia objetivo propuesta}
+\label{ch:experiencia}
+Todo este capítulo es \textbf{hipótesis de diseño por validar}. No describe cambios ya hechos. Se recomienda implementar P0 y el paquete P1 descrito aquí antes de abrir las cinco ventanas; una vez abiertas, congelarlo. Si no hay tiempo para validar P1, aplazar el piloto o registrar explícitamente otra versión previa; nunca mezclar tratamientos a mitad de la semana.
+
+\begin{longtable}{P{2.4cm}P{5.3cm}P{4.6cm}P{3.7cm}}
+\toprule Pantalla/estado & Comportamiento y entrada & Microcopia propuesta & Evento y salida \\\midrule\endhead
+Landing & Mensaje para programación inicial, muestra opcional y CTA. & «Descubre qué necesitas repasar para explicar tu código». «Practicar con mi código». & Llegada; CTA lleva a identificación. Ejemplo no cuenta como uso.\\
+Identificación & Clerk antes de la práctica; consentimiento separado. Sesión reconocida evita repetir login. & «Inicia sesión para recuperar tu práctica». «Esta prueba registra tus usos durante siete días». & Identidad validada; consentimiento versionado. No incentivos por volver.\\
+Entrada & Pegar código propio, confirmar tarea, una selección de temas. Sin selector de cantidad. & «Pega el código que necesitas explicar. Hasta tres preguntas; puedes cerrar después de cada explicación». & Inicio confirmado por servidor, código identificado. El ejemplo prefijado se excluye del estudio.\\
+Preparación & Validación de tamaño/sintaxis y alcance. Sin enviar a IA si falta identidad. & «Estamos preparando una pregunta sobre tu programa». Si falta parser: «No pudimos verificar la sintaxis». & Pregunta preparada con tema/referencia; error conserva borrador.\\
+Confianza & Tema y fragmento, antes del enunciado. Cinco botones sin valor predeterminado. & «¿Qué tan seguro te sientes para explicar esta parte?» & Confianza registrada; luego pregunta mostrada. Omisión explícita registrada.\\
+Pregunta & Respuesta libre; aclaración, no sé y tema no cursado. & «Cuéntalo con tus palabras». «No he visto este tema». & Respuesta/omisión/aclaración; controles de fase del servidor.\\
+Feedback & Una evidencia, un vacío o incertidumbre, un siguiente paso; detalle opcional. & «Explicaste cómo sumas las notas. Falta relacionar esa suma con cuántas notas hay». & Feedback visto; utilidad opcional. Continuar o cerrar. Reparación contextual limitada.\\
+Cierre & Resumen basado en lo observado; nada de promedio o porcentaje. & «En esta práctica identificaste por qué el divisor cambia el resultado. Te queda repasar...». & Sesión completada, motivo voluntario/límite/alcance. Refuerzo opcional.\\
+Transferencia & Un ejemplo pequeño del mismo concepto; no otra obligación. & «Si quieres, prueba esta variación». «Terminar por ahora». & Refuerzo separado, nunca nueva sesión de retorno por sí mismo.\\
+Nueva visita & Identidad existente, nueva tarea/código; preferencias recordadas sin perfil de dominio. & «¿Qué programa quieres practicar hoy?». «Continuar borrador» separado de «Nueva práctica». & Nuevo session\_id solo al aceptar nuevo uso; recuperación no cuenta.\\\bottomrule
+\end{longtable}
+
+\section{Estados, errores y accesibilidad}
+Estados conceptuales: llegada, identificación, consentimiento, entrada, validación, confianza, pregunta, evaluación pendiente, feedback, reparación, cierre y refuerzo opcional. Error recuperable vuelve al último estado confirmado por servidor. Error de autenticación permite reingreso sin repetir práctica; propiedad se verifica de nuevo. Sesión caducada conserva únicamente el borrador permitido y exige inicio nuevo, pero el conteo decide si código y tarea son nuevos.
+
+Timeout no borra el texto ni crea otra sesión; se consulta resultado por idempotencia antes de reenviar. En 429 se respeta el plazo común del servidor; en 413 se solicita acortar fragmento y no se induce una espera inútil. Error de persistencia impide confirmar una transición: «No pudimos guardar este paso. Tu texto sigue aquí». Un fallo del modelo no se convierte en nota cero. No hay reintento automático ilimitado ni migración automática de modelo.
+
+Se conserva textarea como alternativa a Monaco, navegación por teclado, foco al cambio de fase y anuncios accesibles. En móvil debe verse la pregunta sin atravesar siempre 480 px de editor; proponer código plegable durante respuesta, manteniendo fácil acceso. El editor sencillo no debe bloquear pegado. Validar voz de lector, foco de Clerk y regreso del modal, tamaño de botones y contraste. Estas son verificaciones futuras, no accesibilidad certificada.
+
+\section{Ejemplo de interacción, sin fabricar un estudiante}
+Programa sintético introductorio:
+\begin{verbatim}
+def promedio(notas):
+    if not notas:
+        return 0
+    return sum(notas) / len(notas)
+\end{verbatim}
+Contexto declarado: funciones, condicionales y listas. Tarjeta previa: «El cálculo del resultado de promedio». Se registra una confianza hipotética de 4; este número solo ilustra el contrato.
+
+Pregunta: «¿Qué recibe esta función y qué representa el resultado? Explica la idea sin recorrer línea por línea». Respuesta de ejemplo: «Suma las notas y devuelve el total». Feedback propuesto: «Identificaste la suma. El resultado final también divide por la cantidad de notas, por lo que devuelve su promedio; para [2,4], suma 6 y devuelve 3. Revisa qué diferencia hay entre total y promedio». La observación cita la parte de respuesta que sí existe, sin atribuir una explicación ausente.
+
+Después puede cerrar con «Identificaste la diferencia entre sumar y promediar; todavía no observamos que puedas aplicarla a otra lista». Si decide continuar, confianza previa para el segundo tema y pregunta «[2,4] y [1,2,3] suman 6. ¿Por qué no tienen el mismo promedio?». Responder 3 y 2 con el papel del divisor aporta otra evidencia, pero no justifica decir que domina programación. Como refuerzo opcional se puede predecir el resultado de [3,6,9]; no hace falta implementar promedio ponderado para obtener cierre.
+
+En una segunda visita se pega, por ejemplo, un programa de conteo de tareas pendientes de otro ejercicio; la sesión se verifica por identidad, ventana y novedad. Volver a pegar este promedio con comentarios distintos se registra como práctica repetida y nunca como éxito primario.
+
+\chapter{Experimento del profesor: protocolo sin ejecución}
+\label{ch:experimento}
+\section{Hipótesis y población}
+Se adopta literalmente el contenido sustantivo de P: generar preguntas de sustentación sobre código propio para estudiantes introductorios que usan IA logrará que al menos tres de cinco vuelvan con código nuevo en siete días sin recordatorio, medido por retorno espontáneo. Es una regla exploratoria de producto; \(n=5\) no demuestra retención de mercado, efecto causal ni aprendizaje. No se calcularán p-valores ni se estimará una mejora causal desde las notas históricas.
+
+Reclutar cinco personas distintas del ICP, cada una con laboratorio o entrega de programación pendiente dentro de los siete días siguientes. Comprobar consentimiento, cuenta Clerk y tarea real antes de la primera sesión. El código debe pertenecer a su tarea, aunque haya sido producido con apoyo de IA; un ejemplo prellenado no satisface elegibilidad. Registrar únicamente cumplimiento del ICP, fecha de entrega y código de tarea, no matrícula, notas universitarias ni documento de identidad. Mantener registro de candidatos y fallas de incorporación para no ocultar que se seleccionó a quienes pudieron terminar.
+
+\section{Definiciones operacionales preespecificadas}
+\begin{longtable}{P{3.1cm}P{12.9cm}}
+\toprule Término & Regla propuesta, a fijar antes del primer participante \\\midrule\endhead
+usuario\_elegible & Persona única autenticada, consentida y reclutada para el ICP, con entrega próxima, código propio y primera sesión válida. Un responsable verifica que dos cuentas no correspondan a la misma persona; mapeo de contacto separado del registro analítico. Los cinco se fijan al completar incorporación; no se reemplazan después según retorno.\\
+sesion\_valida & Inicio explícito confirmado por servidor con código aceptado; al menos una pregunta mostrada, una explicación sustantiva enviada por el usuario y un feedback visto. No requiere aprobar ni terminar tres preguntas. Explicación sustantiva: al menos tres tokens separados por espacios, con al menos un token de dos letras, excluyendo respuestas que solo expresan «no sé», «paso» o solicitud de ayuda según lista versionada. Es un umbral observable de actividad, no de comprensión; su costo es excluir algunas respuestas breves válidas.\\
+t0 & Timestamp UTC del servidor al completar la sesión inicial válida mediante «Cerrar» o cierre por límite, después de ver feedback; el refuerzo opcional no retrasa t0. Usar finalización separa primera exposición y ventana de retorno. Si la sesión inicial nunca alcanza ese estado, es falla de incorporación, no participante elegible silenciosamente perdido.\\
+ventana & Intervalo \((t0,t0+168\ \mathrm{horas}]\). Tanto el inicio del retorno como el umbral de sesión válida deben ocurrir dentro. Eventos de servidor, resolución de milisegundos; no reloj del cliente ni siete fechas de calendario. UTC para cómputo, America/Bogota (UTC-5) para informe. Un evento exactamente en t0 no es retorno; en el límite superior sí.\\
+retorno\_espontaneo & Nueva práctica iniciada por el mismo usuario, fuera de la visita guiada, con intención explícita de iniciar y sin contacto recordatorio previo. Se separa una visita nueva por al menos 30 minutos sin actividad de práctica confirmada por servidor. Esta regla conservadora excluye continuación inmediata durante la demostración; no exige esperar 24 horas. Se debe acordar con el profesor antes del piloto y se reportan usos más tempranos por separado.\\
+codigo\_nuevo & Tarea/programa de propósito realmente distinto del inicial, con identidad de tarea diferente y evidencia técnica no cosmética conforme a la política de novedad. Cambios de espacios, comentarios, nombres o constantes aisladas no bastan. Una solución muy distinta de la misma tarea es práctica repetida para este estudio. Véase regla siguiente.\\
+retorno\_valido & Intersección de espontáneo, código nuevo, sesión válida y ventana, sin contaminación conocida. Una persona cuenta como máximo una vez; varias prácticas no aumentan numerador. El denominador de análisis es la cohorte fija de cinco.\\
+segunda sesión & Toda sesión nueva posterior a la inicial se registra; no se denomina automáticamente retorno válido. Recuperar, recargar, abrir pestaña, aclarar, refuerzo o repetir código no generan éxito primario.\\\bottomrule
+\end{longtable}
+
+El umbral de actividad deliberadamente no depende del dictamen del LLM: un estudiante puede dar una explicación errónea y recibir valor. Tampoco exige declarar útil el feedback para contar, porque eso introduciría otro resultado subjetivo en la métrica principal. Una respuesta mínima mecánica podría superar el umbral; se documenta esa limitación y no se cambian reglas al ver resultados. «Feedback visto» significa confirmación del cliente autenticado de que el bloque se presentó en pestaña visible, no prueba de lectura o comprensión.
+
+\section{Novedad del código: privacidad y reproducibilidad}
+Un hash exacto resuelve identidad de bytes, no identidad de una tarea. Se proponen tres señales complementarias, persistidas sin conservar código en el registro analítico:
+\begin{enumerate}
+\item \textbf{Identidad de tarea.} En reclutamiento, asignar identificadores opacos a entrega y ejercicio. Al iniciar se elige la tarea o «otra» con propósito y entradas/salida en dos campos breves (máximo 160 caracteres cada uno, sin nombres personales). El identificador lo emite el servidor; no aceptar que el cliente cree una tarea idéntica con otro UUID para inflar novedad.
+\item \textbf{Huella técnica versionada.} Generar HMAC-SHA256 por usuario y experimento sobre una representación AST sin comentarios, posiciones ni docstrings; conservar nombres y constantes en esa huella primaria. Otra huella estructural normaliza nombres locales y clases de literales para detectar cambios triviales. Guardar versión de parser y algoritmo. La clave HMAC es del servidor y distinta de la de sesión; no se publica. No afirmar que normalizar AST demuestra equivalencia semántica.
+\item \textbf{Regla de adjudicación acotada.} Mismo task\_id o huella primaria igual: repetido. Tarea distinta y huella diferente: candidato; si la huella estructural coincide, queda posible variación trivial. Dos revisores aplican la misma lista: objetivo observable distinto, contrato de entrada/salida distinto en sustancia y transformación o lógica distinta más allá de formato, nombres o constantes. Revisan descriptores y un resumen estructural mínimo generado al recibir código, sin notas ni resultado de retorno agregado. Solo acuerdo afirmativo cuenta; desacuerdo o evidencia insuficiente queda «no verificable» y se informa aparte.
+\end{enumerate}
+El resumen estructural guarda categorías de operaciones y cambios de control, sin identificadores ni literales. No reconstruye el programa y puede ser insuficiente: se acepta el subconteo conservador como límite, con sensibilidad descriptiva. No se solicita al estudiante que recuerde después qué hizo ni se decide novedad por simpatía con su caso. La adjudicación es un evento interno con versión de política, razones codificadas y dos IDs de revisión; puede realizarse al cierre de la ventana sin contacto con participantes.
+
+Si el parser no está disponible, la normalización textual no se presenta como equivalente a AST. Para el piloto se requiere disponibilidad comprobada del algoritmo elegido en el despliegue; un fallo aislado marca novedad pendiente y bloquea solo su clasificación, no inventa éxito. No se recomienda un servicio externo que ejecute o clasifique código estudiantil para producir huellas. La política es más conservadora que «archivo distinto» y debe ser una pregunta de aprobación metodológica al profesor antes de iniciar, sin cambiarla tras observar 0--5.
+
+\section{Pasos de ejecución futura y congelación}
+\begin{enumerate}
+\item Cerrar P0 y paquete P1; validar con cuentas del equipo marcadas como prueba, excluidas de la cohorte. Ensayar todo el cómputo con eventos sintéticos y reloj controlado en staging. No usar a los cinco participantes del experimento como depuradores durante sus ventanas.
+\item Fijar manifiesto de experimento: commit, esquema de datos, políticas de temas/novedad/actividad, prompts completos y hashes, catálogo, reglas de parada/selección, proveedor/modelo efectivos, parámetros, versión de parser, dependencias, ámbito del despliegue y consentimiento.
+\item Hacer la primera sesión con código propio y la misma instrucción neutral. Facilitar acceso sin resolver las respuestas. Registrar ayuda técnica y cierre inicial. El participante conoce seguimiento y privacidad; no se le pide «vuelve para ayudarnos a llegar a tres» ni se premia regresar.
+\item Tras t0, no enviar mensajes por WhatsApp, correos, llamadas, enlaces, notificaciones o invitaciones de miembros del equipo. Desactivar campañas y automatismos de reactivación antes del inicio; comprobar herramientas externas utilizadas por el equipo. Los mensajes de autenticación solicitados por el propio usuario pueden permitirse como transaccionales y quedan registrados, sin marketing.
+\item No cambiar prompts, política de preguntas, banco, modelo, reglas de evaluación o UI de tratamiento durante las ventanas. Fijo significa misma \textbf{función de selección y evaluación}, no el mismo enunciado para todos los códigos. La personalización se reproduce a partir de versión, temas y estado; guardar ID y hash del enunciado/criterios para auditoría.
+\item Al concluir cada ventana, cerrar su observación sin contactar todavía a participantes cuyas ventanas sigan abiertas. El reporte definitivo sale después de \(\max_i(t0_i+168h)\); no truncar al quinto participante porque otro comenzó antes. Exportar el recuento y sus exclusiones antes de las entrevistas posteriores.
+\end{enumerate}
+
+Las variaciones de salida del modelo con el mismo identificador pueden impedir reproducción exacta. Registrar el identificador de modelo devuelto y revisión disponible, parámetros y manifiesto; no prometer determinismo porque temperatura sea baja. Si el proveedor cambia o retira el modelo y no puede preservarse el tratamiento, no hacer fallback silencioso: detener la prueba como inválida y diseñar nueva cohorte. Una corrección de seguridad urgente tiene prioridad, pero también requiere declarar la discontinuidad experimental.
+
+\section{Contingencias, retiros y regla de decisión}
+Una persona elegible que no regresa cuenta como no retorno; quien regresa con el mismo programa también. No eliminar del denominador a quien encontró poco valor. Una falla inicial antes de elegibilidad puede repararse y repetirse antes de fijar su t0; registrar intentos y no ocultar sesgo de incorporación. Si un candidato se retira antes de entrar a la cohorte, se puede reclutar otro con los mismos criterios sin consultar resultados de retorno.
+
+Después de fijar los cinco, no hay reemplazos. Si alguien retira consentimiento, cumplir el borrado acordado; conservar como máximo un conteo agregado de retirada si el consentimiento lo permite. Se mantiene cinco como cohorte originalmente definida, y se informa una observación censurada, no un fracaso de utilidad. Falla técnica que impide observar una ventana, cambio de tratamiento o contacto recordatorio produce censura/contaminación con inicio y motivo. Una solicitud de ayuda iniciada por el estudiante no demuestra recordatorio: responder solo soporte necesario y registrar intervención; la sesión ayudada se informa como asistida, fuera del retorno espontáneo principal si hubo orientación para iniciar/terminar.
+
+Sea \(k\) el número de retornos certificados y \(u\) el de participantes cuyo resultado no puede observarse con integridad. Se publica \(k/5\), \(u\) y el rango descriptivo \([k,k+u]\), sin estimar que todos regresaron. Con \(u=0\) y protocolo íntegro:
+\begin{center}
+\begin{tabular}{cl}
+\toprule Retornos certificados & Decisión predefinida\\\midrule
+0 o 1 de 5 & Pivotar la propuesta, segmento o momento de uso.\\
+2 de 5 & Ajustar fricción/valor y hacer una nueva prueba.\\
+3, 4 o 5 de 5 & Continuar con la propuesta; todavía no escalar ni declarar PMF.\\\bottomrule
+\end{tabular}
+\end{center}
+Si \(u>0\), se conserva la tabla como referencia pero \textbf{no se declara validada una decisión de producto con una cohorte incompleta}. Se informa prueba inconclusa y se repite tras resolver la causa; incluso un rango dentro de una categoría no demuestra ausencia de sesgo. Esta política se fija antes de ver resultados. Ni una nota alta ni mejora de confianza rescata un 0--1 íntegro. Una nota baja tampoco invalida un retorno real.
+
+Después de las cinco ventanas, preguntar qué necesidad motivó la vuelta, cuál fue el vacío útil, qué paso sobró, qué alternativa utilizó quien no volvió y si existió una nueva oportunidad real de practicar. Las respuestas explican mecanismos y futuras hipótesis; no reemplazan los eventos ni cambian retrospectivamente el numerador. Si no hubo oportunidad de código nuevo pese al reclutamiento, reportarlo como limitación del contexto y revisar el diseño siguiente.
+
+\chapter{Métricas y arquitectura de instrumentación}
+\label{ch:medicion}
+\section{Fuente de verdad y esquema conceptual}
+La infraestructura actual no permite este análisis: sesiones sin usuario, archivos locales o token portátil, ausencia de eventos de uso, sin timestamps de actividad persistidos para retención. La expiración de dos horas se fija al inicio y no se renueva (\src{lib/sustentacion.js}{116--117}). En disco, la eliminación al caducar ocurre al intentar leer; no hay limpieza programada que garantice borrado a las dos horas (\src{lib/session-store.js}{27--39}). Esto requiere un diseño explícito de retención, además de base de datos.
+
+Se recomienda un \textbf{único almacén relacional gestionado compartido}, con transacciones, índices únicos y acceso solo desde servidor. PostgreSQL es una opción coherente para ese contrato, no una migración realizada ni una elección de proveedor aprobada. Si el equipo ya dispone de otro almacén con las mismas garantías, usarlo reduce costo. Archivos locales no sirven al despliegue portátil; una hoja manual no registra uso de forma fiable; un almacén eventual sin condición única añade dificultad innecesaria de deduplicación. No hace falta plataforma analítica ni cola distribuida para cinco personas.
+
+\begin{longtable}{P{3cm}P{8.6cm}P{4.1cm}}
+\toprule Entidad conceptual & Campos mínimos & Restricciones \\\midrule\endhead
+Experiment & id, manifest\_hash, versión, inicio, política, estado, versiones de parser/modelo/prompts. & Manifiesto inmutable al abrir cohorte.\\
+Participant & id interno, Clerk user\_id estable, experiment\_id, consent\_version, ICP verificado, tarea/fecha, eligibility\_at, t0, window\_end, test\_flag, censura. & Único por experimento y user\_id; cohortes del equipo separadas.\\
+CodeArtifact & id, propietario, task\_id, HMAC primaria/estructural, parser\_version, novelty\_policy, estado y referencia comparada, descriptores mínimos. & No raw code analítico; no deduplicación cruzada entre personas.\\
+PracticeSession & session\_id UUID del servidor, participant\_id, artifact\_id, started\_at, completed\_at, valid\_at, estado, revisión, versión y visit\_id. & Propiedad y transición atómicas; inicio idempotente por usuario y request\_key.\\
+SessionPayload & session\_id, código/respuestas/feedback cifrados necesarios para recuperación, expires\_at. & Separado de analytics; TTL corto y borrado verificable.\\
+PracticeEvent & event\_id, session\_id, tipo, server\_at, seq, question\_id, question\_instance, dedup\_key, payload permitido. & Único por clave semántica; eventos del servidor o acuses autenticados validados.\\
+Operation & user\_id, idempotency\_key, payload\_digest, estado, revisión esperada, resultado\_ref, lease\_until. & Mismo reintento devuelve mismo resultado; mismo key con datos distintos se rechaza.\\
+ProtocolIncident & participante/intervalo, tipo, contacto o caída, origen, decisión predefinida, revisor. & No contiene conversaciones privadas ni código.\\
+NoveltyReview & artifact\_id, versión, códigos de razón, dos revisores, timestamp y dictamen. & Auditable, ciego a notas; no modifica hechos crudos.\\\bottomrule
+\end{longtable}
+
+Una operación que llama al LLM reserva primero una transición con una clave idempotente y estado pendiente; no mantiene una transacción de base de datos abierta durante 45 segundos. Al terminar, confirma revisión, resultado y eventos atómicamente. Si el proceso muere después de recibir la salida y antes de persistirla, puede haber costo duplicado al recuperar: \textbf{exactamente una transición persistida no garantiza una sola llamada al proveedor}. Acotar reintentos y reconciliar pendientes; no vender semántica de ejecución exactamente una vez que el proveedor no ofrezca.
+
+\section{Contrato conceptual de eventos}
+Campos base B en toda actividad autenticada: \texttt{event\_id}, \texttt{experiment\_id}, \texttt{participant\_id} vinculado a Clerk, \texttt{session\_id}, \texttt{server\_at} UTC, \texttt{product\_version}, \texttt{manifest\_hash}, \texttt{schema\_version}, \texttt{dedup\_key}. La sesión referencia artefacto y huella; no duplicar esos datos en cada fila. El servidor deriva usuario, fecha y secuencia; rechaza IDs de propietario aportados por el cliente. No se guardan email, nombre, IP íntegra, código o respuestas dentro de eventos.
+
+\begin{landscape}
+\small
+\begin{longtable}{P{3.4cm}P{4.2cm}P{4.3cm}P{3.7cm}P{4.6cm}P{3.2cm}}
+\caption{D. Contrato de medición propuesto; especificación, no implementación}\label{tab:eventos}\\
+\toprule Evento & Cuándo se genera & Campos mínimos además de B & Fuente de verdad & Deduplicación & Propósito \\\midrule\endfirsthead
+\toprule Evento & Cuándo se genera & Campos mínimos además de B & Fuente de verdad & Deduplicación & Propósito \\\midrule\endhead
+visit\_arrived & Carga voluntaria de landing/simulador. & visit\_id, ruta, contexto equipo/participante, instante de llegada. & Acuse recibido por servidor; antes de consentimiento, solo marca efímera local. & Una llegada por visit\_id; recarga no reinicia ventana. & Tiempo a valor. La marca local previa es aproximada y se declara separada.\\
+session\_started & Servidor acepta iniciar tras identidad, consentimiento y código. & artifact\_id, task\_id, request\_key, origin, topics. & Transacción de sesión. & Único user/experimento/request\_key; UUID nuevo del servidor. & Inicio real; no mera navegación.\\
+question\_prepared & Se fija pregunta y criterios antes de confianza. & question\_instance, template\_id, texto/criterios hash, tema, políticas. & Selector de servidor y payload efímero. & Sesión + instancia de pregunta. & Auditar selección congelada.\\
+confidence\_recorded & Usuario toca 1--5 o declina antes de revelar pregunta. & Instancia, valor entero o null, missing\_reason. & Recepción validada y ligada a estado. & Una valoración inicial por instancia; cambios antes de revelar versionados. & Medida secundaria; nunca umbral de éxito.\\
+question\_shown & Pregunta se presenta en pestaña visible después de confianza. & Instancia, preconfidence\_event, display\_nonce. & Acuse del cliente validado por estado del servidor. & Sesión + instancia + primera presentación. & Orden temporal; recarga no añade pregunta nueva.\\
+answer\_submitted & Servidor acepta una respuesta de la pregunta activa. & Instancia, token\_count, substantive\_flag, operation\_id; sin texto. & Servidor; texto solo en payload temporal. & Sesión/instancia/submission\_id; misma revisión no acepta respuestas divergentes. & Actividad de práctica, sin depender del acierto.\\
+clarification\_requested & Reformulación de consigna o reparación contextual. & Instancia, tipo, contador y operation\_id. & Acción validada; respuesta versionada aparte. & Idempotencia por acción; límite congelado. & Separar ayuda de nueva pregunta y de apelación.\\
+question\_skipped & Omite o declara tema no cursado. & Instancia, razón: no\_se, prefiero\_pasar, tema\_no\_cursado. & Servidor. & Una omisión por instancia, compatible con estado. & No atribuir error; registrar desajuste.\\
+feedback\_ready / viewed & Resultado validado guardado; luego presentado visible. & Instancia, feedback\_version, latency\_ms, método, display\_nonce. & Ready: servidor. Viewed: acuse autenticado y comprobación de versión. & Ready único por versión/operación; primera vista única por versión. & Primer feedback disponible/visto; umbral de sesión válida.\\
+feedback\_usefulness & Opcional tras ver feedback: útil/no útil. & Instancia, elección y razón codificada opcional. & Acuse del participante. & Una respuesta por feedback; cambios versionados. & Aproximar valor percibido, separado de retorno.\\
+session\_qualified & Se cumple inicio + pregunta + explicación sustantiva + feedback visto. & valid\_at, evidence\_event\_ids, policy\_id. & Derivación transaccional del servidor. & Una vez por sesión. & Umbral independiente de nota.\\
+session\_completed & Cierre voluntario o límite; refuerzo no obligatorio. & Motivo, qualified, completed\_at. & Estado persistido. & Una terminación por sesión. & Fijar t0 inicial; distinguir cierre y abandono.\\
+second\_session / valid\_return & Nueva sesión posterior; posteriormente cumple todos los criterios. & Referencia inicial, novelty\_review, dentro de ventana, actividad, espontaneidad. & Derivación de eventos y protocolo; nunca cliente. & Segunda: por session\_id. Retorno: único experiment/participant. & Numerador auditable 0--5.\\
+recovered / retry & Recuperación de sesión o repetición de operación tras error. & target\_operation, causa, revision. & Servidor y auditoría de operación. & Retry\_id; no repetir transición objetivo. & Medir fricción sin inflar sesiones.\\
+llm\_request\_finished & Finaliza intento de proveedor, bueno o fallido. & request\_id, modelo efectivo, prompt\_version, ms, tokens cuando disponibles, código de estado. & Adaptador servidor; sin prompt/respuesta en logs. & Una terminación por request\_id. & Latencia, costo, fallos; tokens ausentes no se inventan.\\
+critical\_error & Error que impide avanzar o registrar. & Código permitido, referencia, fase, dependencia, retryable. & Servidor; si falla DB, log mínimo de incidente para reconciliar. & error\_id/attempt; agrupar sin perder intentos. & Censura técnica y soporte.\\
+abandonment\_inferred & Sesión sin completar y sin actividad durante 30 minutos. & last\_server\_at, inferred\_at, recovered\_later. & Consulta derivada, no evento de cerrar pestaña. & Sesión/intervalo; se revoca estado de abandono si retoma. & Diagnóstico de fricción; no falso «no retorno».\\
+novelty\_decided / protocol\_incident & Revisión ciega de novedad o contacto/caída/cambio. & Regla, razón, revisores; intervalo afectado. & Registro interno con acceso restringido. & Artefacto/política/revisión; incidente único. & Auditar exclusión y calidad del experimento.\\\bottomrule
+\end{longtable}
+\end{landscape}
+
+\section{Métricas, volumen mínimo y consulta de día 7}
+\textbf{Primaria:} número de usuarios con retorno válido entre los cinco, mostrado como \(k/5\), con exclusiones. \textbf{Secundarias:} confianza previa por tema y casos de discrepancia con evidencia; utilidad declarada del feedback; si se quiere explorar transferencia, su evidencia cualitativa, sin índice de aprendizaje. \textbf{Diagnósticas:} tiempo llegada--feedback disponible/visto/útil, latencia LLM, preguntas intentadas, omisiones, desajuste curricular, login fallido, abandono inferido, recuperación, reintentos, fallas críticas y costo por práctica.
+
+El tiempo a primer valor no se calcula solo entre quienes terminan: reportar también participantes sin valor declarado y sesiones interrumpidas. El tiempo de llegada anónima usa una marca efímera con reloj local y debe etiquetarse como estimación; a partir de autenticación hay timestamps del servidor comparables. No usar latencia LLM como sustituto del tiempo total del estudiante. Evitar tasas engañosamente precisas con cinco casos: presentar números individuales anonimizados, mediana/rango si aporta, y faltantes.
+
+No recolectar cada tecla, movimientos del ratón, grabaciones, historial externo ni respuestas completas en analytics. Un recorrido mínimo válido de una pregunta necesita aproximadamente nueve hechos: inicio, preparación, confianza, exposición, envío, feedback disponible, visto, calificación de actividad y cierre; la llegada y la operación LLM agregan dos. Tres preguntas producen alrededor de 25 hechos, según acuses y eventos técnicos. Diez sesiones (cinco iniciales y cinco retornos hipotéticos) serían del orden de 250--350 eventos, no un objetivo de negocio. En volumen real, registrar todo uso necesario con retención acordada; no cortar observaciones al alcanzar una cuota artificial.
+
+Pseudoconsulta documental, deliberadamente no ejecutable como migración:
+\begin{verbatim}
+COHORTE := los cinco participant_id fijados antes de analizar retorno
+PARA cada participante de COHORTE:
+  limite := t0 + 168 horas
+  candidatas := sesiones distintas de la inicial, del mismo propietario
+    con started_at > t0 y qualified_at <= limite
+    y started_at <= limite
+    y visita nueva conforme a politica de 30 minutos
+    y origen voluntario, fuera de sesion guiada
+  validas := candidatas con codigo nuevo adjudicado segun politica
+    y sin contacto recordatorio previo ni intervencion descalificante
+    y manifiesto del experimento conservado
+  resultado := existe(validas)   # una persona, como maximo un exito
+  excluir o censurar solo conforme a reglas previas, nunca por nota
+K := contar participantes con resultado verdadero certificado
+U := contar participantes no observables por censura/contaminacion
+EXPORTAR cinco filas, K de 5, U y razones de inclusion/exclusion
+\end{verbatim}
+El reporte futuro debe incluir IDs seudónimos, t0 y límite, primera sesión candidata/válida, huellas referenciadas, dictamen de novedad, evento de feedback visto, contacto, versión y motivo final. Una segunda persona reproduce el conteo con la misma consulta y manifiesto; conservar hash de exportación y fecha de corte. Si hay una sexta identidad, no entra a la cohorte. Si faltan datos, no reconstruirlos desde recuerdos. El archivo de exportación es un entregable futuro del experimento, no un archivo producido aquí.
+
+\section{Minimización, consentimiento y borrado}
+Para medir retorno no se necesita código bruto. Para ofrecer recuperación entre dispositivos sí puede ser necesario guardar temporalmente código, respuesta y feedback; se propone cifrado de aplicación, acceso por propietario, exclusión de logs y borrado a las 24 horas desde cierre o, si quedó incompleta, 24 horas desde última actividad. Es una hipótesis operacional para el piloto, no política vigente. Al caducar el payload queda solo la metadata mínima de medición, sin posibilidad de leer el programa. El borrador local debe tener opción de borrado, separación por usuario y eliminación al cerrar sesión o vencer el plazo; no dejar tokens de otra persona en un equipo compartido.
+
+Propuesta de conservación de eventos identificables: hasta 30 días después de la última ventana para auditar y producir la entrega; después borrar vinculación Clerk, fingerprints, descriptores y eventos individuales, conservando agregados anónimos. El responsable fija una fecha de borrado y verifica también backups según la capacidad del proveedor. Si las copias no permiten borrado inmediato, declararlo antes del consentimiento y limitar su retención; no prometer eliminación instantánea de backups.
+
+El consentimiento explica finalidad académica, proveedor de IA efectivo, datos que se transmiten para feedback, duración, ausencia de efecto en calificaciones, posibilidad de retiro y contacto del responsable. No guardar nombre ni correo en analytics; los cinco contactos de reclutamiento permanecen separados con acceso restringido. Estas son decisiones de minimización propuestas, no certificación de cumplimiento jurídico. El equipo debe confirmar su política institucional y que tiene derecho a procesar los programas que se aportan. No se enviaron programas al proveedor en esta auditoría.
+
+\chapter{Factibilidad técnica, costos y calidad}
+\label{ch:tecnica}
+\section{Persistencia, autenticación y superficies heredadas}
+En local, \texttt{session-store} escribe JSON atómico con permisos 0600 y directorio 0700, bloqueos y recuperación de locks de más de 120 s. Sobrevive un reinicio en el mismo disco y con la misma clave; no garantiza otro host ni volumen persistente. En Vercel, el token contiene código/historia cifrados y puede sobrevivir un arranque frío dentro de dos horas si se conserva la clave y versión. Otro dispositivo no dispone del localStorage ni del token por autenticarse en Clerk. Ninguna modalidad ofrece una consulta de usuarios retornantes. No se debe sustituir esa distinción por «todo está en memoria».
+
+La sesión no incorpora user\_id y se acepta su token como credencial portadora (\src{lib/sustentacion.js}{22--34,116--128}). Separar token de sesión pedagógica de identidad Clerk; comprobar ambos y su propiedad en cada acción. Los IDs iniciales actualmente pueden venir del cliente; el contrato nuevo separa idempotency\_key del cliente y session\_id emitido por servidor. Verificar el recurso en servidor evita depender solo del middleware. La guía de Clerk Core 2 confirma que \texttt{clerkMiddleware()} no protege rutas por defecto; la referencia actual también recomienda controles próximos al recurso \cite{clerk5,clerkresource}. La sintaxis exacta se implementará para la versión SDK elegida, sin copiar APIs de otra versión a ciegas.
+
+Las rutas \texttt{/api/generar-preguntas} y \texttt{/api/evaluar-respuestas} no tienen caller en la UI inspeccionada: el único fetch de aplicación va a \texttt{/api/sustentacion}. Siguen accesibles como rutas y tienen pruebas dedicadas. Clasificación: \textbf{heredadas en el recorrido local, consumo externo no verificado}. Antes de eliminarlas, revisar consumidores/documentación del equipo y logs sin contenido sensible. Si no hay contrato externo, retirar rutas, scoring legado y pruebas de endpoints; conservar pruebas de recuperación de competencias que también usa el evaluador secuencial. Si deben mantenerse temporalmente, aplicar identidad, límites y aislamiento de eventos; no permitir una segunda vía anónima para el experimento.
+
+\section{Seguridad: hallazgos y remediación posterior}
+\textbf{Secreto histórico, criticidad alta hasta aclarar exposición.} La inspección redactada del historial encontró \texttt{CLERK\_SECRET\_KEY} con formato de credencial en \nolinkurl{.env.local}, línea 2, revisión \nolinkurl{03335bd1ad79a418b4a2c3d807c597529eab53c5}. El HEAD actual solo versiona \nolinkurl{.env.example}; en historia aparecen también \nolinkurl{app/.env.local} y \nolinkurl{.env.local}. No se muestran valores ni se probó actividad. La presencia en Git constituye exposición potencial y requiere tratamiento crítico; no prueba abuso ni acceso a producción. La detección fue acotada a archivos de entorno y patrones de credencial, no una certificación exhaustiva de ausencia de otros secretos.
+
+Recomendación P0 para ejecución posterior: identificar el entorno afectado, rotar/revocar la credencial, actualizar el secreto autorizado, revisar registros de acceso y notificar internamente al responsable. Limpiar historia exige coordinación y autorización específica porque puede reescribir refs; no sustituye la rotación. Esta auditoría no rotó ni borró nada. La clave de sesión debe ser independiente del API key: actualmente se permite usar \texttt{LLM\_API\_KEY} como fallback (\src{lib/sustentacion.js}{9--12}); cambiarlo durante las ventanas invalidaría tokens, por lo que resolver antes de iniciarlas.
+
+\textbf{Dependencia afectada.} \src{package.json}{19--25} fija Next.js 14.1.4. El aviso oficial del 11 de diciembre de 2025 incluye Next.js 14.x con App Router en un riesgo de DoS y señala 14.2.35 como corrección de ese aviso \cite{nextsecurity}. No se probó explotación ni se afirma que la exposición de fuente descrita para otras ramas aplique a esta versión. Un aviso posterior de septiembre de 2026 revisado afecta específicamente 16.2--16.3.5; no corresponde atribuirlo a 14.1.4 \cite{next2026}. La tarea futura es adoptar una versión actualmente mantenida y corregida, compatible con Clerk/React, y ejecutar regresiones; 14.2.35 es referencia histórica de parche, no garantía de estar al día en octubre de 2026.
+
+Otros controles: autorización por propietario, cuota persistente por usuario/experimento y presupuesto global, tamaño de cuerpo previo al parseo en todas las rutas, protección frente a tokens reutilizados, separación de entornos y redacción de logs. La ruta principal ya limita el stream y registra códigos permitidos sin código ni respuestas (\src{app/api/sustentacion/route.js}{28--56}); mantenerlo. Las rutas heredadas usan \texttt{req.json()} antes de limitar campos y carecen de esa protección de stream. No ejecutar código para comprobar retorno ni incorporar un sandbox de ejecución como requisito del Alpha.
+
+\section{Proveedor, latencia y costos}
+La integración activa es un cliente compatible con chat completions configurado mediante variables; no hay CrewAI ni orquestación de agentes en dependencias o llamadas. E2R propuso Ollama y Qwen; E3 declara Gemini en «2 · Landing y Reflexión», C28; el documento interno de estabilidad reporta pruebas previas de Groq con \texttt{openai/gpt-oss-120b}. Estas fuentes no establecen qué corre hoy en producción. Se mantiene el proveedor/modelo que el equipo confirme, con manifiesto y sin migración en esta auditoría.
+
+Para \(q\) respuestas evaluables y \(r\) revisiones, el flujo actual consume aproximadamente \(q+r+p\) llamadas, donde \(p\) puede ser 1 por práctica final; algunas comprobaciones estáticas y «no sé» no llaman al LLM. Con cinco preguntas y hasta dos revisiones por pregunta podrían alcanzarse 16 llamadas en una sesión nominal completa. La propuesta de tres preguntas y una reparación como máximo por pregunta reduce el máximo nominal a seis, más un refuerzo opcional si efectivamente requiere IA. No se necesitan llamadas para confianza, seleccionar una plantilla, recuperar ni contar retorno.
+
+El cliente actual devuelve contenido y no registra usage (\src{lib/llm.js}{66--74}). Capturar tokens cuando el proveedor los entregue permite calcular:
+\[
+C_{\mathrm{LLM}}=\sum_j\left(\frac{T^{\mathrm{in}}_j p_{\mathrm{in}}+T^{\mathrm{out}}_j p_{\mathrm{out}}}{10^6}\right).
+\]
+Como escenario ilustrativo, no presupuesto comprometido: diez sesiones, tres llamadas cada una, 6.000 tokens de entrada y 1.500 de salida por llamada suman 180.000/45.000 tokens. Si el proveedor confirmado fuera Groq GPT-OSS 120B con las tarifas consultadas de USD 0.15/0.60 por millón de entrada/salida \cite{groq}, resultaría USD 0.054 antes de impuestos, reparaciones y reintentos. Ese cálculo no implica que se use ese modelo ni que el token real coincida con el supuesto. Duplicar llamadas duplica ese costo; un contexto mayor o múltiples fallos cambia el resultado. Las cuotas gratuitas pueden bloquear una solicitud aunque su costo monetario sea bajo.
+
+Para cinco usuarios, la carga de almacenamiento y autenticación es pequeña; el costo depende de planes existentes, mínimos facturados y conservación, no solo del volumen. No se cotizan planes no verificados ni se promete gratuidad. Aprobar antes del piloto un techo interno ilustrativo de USD 10 para llamadas y hasta USD 25 de infraestructura incremental durante la prueba, solo si hace falta; son límites de decisión del equipo, no precios de servicios. Priorizar recursos ya contratados. El costo humano probablemente domina: prever 2--4 horas totales para incorporar a cinco, 1--2 para supervisión técnica sin contactos y 1--2 para adjudicar/exportar; estimaciones de trabajo, sin tarifa inventada.
+
+Reducir latencia conservando selección local, reutilizando análisis de código por versión dentro de la sesión, evitando repetir el código en prompts y acotando la respuesta del modelo. La eliminación de duplicados del código ya aparece en \src{lib/evaluacion.js}{60--68}; no proponerla como pendiente. Una salida más corta necesita probar que conserva evidencia. Mantener 429 con Retry-After y separar cuota global de memoria del proceso. No añadir agentes, RAG vectorial, streaming complejo o cambio de modelo para resolver una medición de cinco usuarios.
+
+\section{Qué cubren las pruebas existentes y qué no}
+\begin{longtable}{P{3.3cm}P{6.3cm}P{6.3cm}}
+\toprule Suite y resultado actual & Cobertura inspeccionada & Límite / acción posterior \\\midrule\endhead
+RAG: 5/5 & 92 competencias, negativos estructurales, endpoints de lote, pesos y dimensiones aplicables (\src{tests/rag.test.cjs}{14--155}). & Dobles semánticos; actualizar solo endpoints retirados, conservar catálogo y pertinencia.\\
+Adaptativo: 25/25 & AST, sintaxis, crédito parcial, contradicciones, cierre, ejercicio, idempotencia en disco, expiración y errores (\src{tests/adaptativo.test.cjs}{35--432}). & No identidad Clerk ni DB distribuida; migrar tests que asumen nota o entrega obligatoria.\\
+Pedagogía v3: 15/15 & DAG, promedio, omisión/aclaración, fallback Vercel, transferencia, recuperación en instancia fría (\src{tests/pedagogia-v3.test.cjs}{20--224}). & Recuperar último token en otra instancia no verifica exclusión de replay con token antiguo. No valida nivel humano.\\
+Estabilidad: 22/22 & Esquemas, IDs, citas, 429, errores, locks, revisión y recorrido simulado (\src{tests/estabilidad.test.cjs}{18--289}). & Fixture de Groq no es llamada ni evidencia de producción actual.\\
+Interfaz: 5/5 al cierre & Cinco pruebas de render/contrato textual (\src{tests/interfaz.test.cjs}{8--56}). & Primer intento sin React no arrancó. Segundo intento con dependencias ya presentes pasa; no es prueba de navegador.\\
+Recorrido: no ejecutado & Next + Chromium y doble local; escritorio/móvil y recuperación (\src{tests/recorrido.cjs}{1--94}). & Requiere build y dependencias; hereda entorno para Clerk y carga editor. No era adecuado ejecutarlo aquí.\\
+Proveedor: no ejecutado & Opt-in live de una solicitud (\src{scripts/comprobar-proveedor.cjs}{1--39}). & Consume API y contraviene prueba externa del encargo. Se conserva como capacidad, no ejecución.\\\bottomrule
+\end{longtable}
+El documento histórico \nolinkurl{docs/AUDITORIA_ESTABILIDAD.md} reporta 72/72, build y navegador aprobados. En esta auditoría se reprodujeron las 72 pruebas: 67 primero y cinco de interfaz después de aparecer dependencias. Build y navegador históricos no se reprodujeron. Los tests no reemplazan observación real del principiante ni acuerdo experto sobre feedback.
+
+\chapter{Backlog priorizado para una implementación posterior}
+\label{ch:backlog}
+Las prioridades distinguen condiciones de medición de mejoras de tratamiento. P0 es indispensable para realizar el experimento con integridad; P1 decide qué experiencia se probará y se recomienda completarlo antes de reclutar. Si se aplaza P1, debe ser hasta después de las cinco ventanas, no hasta el tercer día. P2 depende de resultados. Las estimaciones son de esfuerzo relativo: S = cambio localizado; M = varias capas con regresiones; L = persistencia/seguridad/operación transversal. Para planificación interna se pueden traducir tentativamente S a 0.5--1.5, M a 2--4 y L a 4--8 jornadas-persona, sujetas a disponibilidad y familiaridad; no son fechas ni un presupuesto cerrado.
+
+\begin{landscape}
+\small
+\begin{longtable}{P{0.8cm}P{4cm}P{2cm}P{4.1cm}P{3.4cm}P{3.5cm}P{3.4cm}P{1.7cm}}
+\caption{C. Matriz de recomendaciones priorizadas}\label{tab:recomendaciones}\\
+\toprule ID & Cambio específico & Tipo & Evidencia & Valor esperado & Costo/riesgo & Dependencias & Prioridad \\\midrule\endfirsthead
+\toprule ID & Cambio específico & Tipo & Evidencia & Valor esperado & Costo/riesgo & Dependencias & Prioridad \\\midrule\endhead
+R01 & Exigir Clerk en recursos y autorizar propietario; texto de acceso claro. & Agregar / simplificar & H01; P §3.6; middleware 1--7 y API 28--45. & Identidad recuperable; retorno atribuible. & M; fricción de login y cambios SDK. & Configuración efectiva de Clerk, R05. & P0\\
+R02 & Persistir sesiones, operaciones y eventos con revisión y claves únicas. & Agregar / sustituir & H02; session-store 16--39,56--69. & No perder uso al cambiar instancia/dispositivo. & L; atomicidad, TTL, doble costo de llamadas. & R01, almacén aprobado, política de datos. & P0\\
+R03 & Huellas, identidad de tarea y dictamen de novedad reproducible. & Agregar & P §3.1; no existe huella de código en contrato actual. & Contar uso nuevo, no recargas/cambios cosméticos. & M--L; falsos negativos, parser y revisión. & R02, acuerdo de regla y consentimiento. & P0\\
+R04 & Manifiesto congelado, cohorte cinco, ventanas y exportación auditable. & Agregar & P §3.7--8; pedagogia 3, contratos-ia 3 no fijan modelo. & Regla 0--5 reproducible y no contaminada. & M; operación humana y modelo externo mutable. & R01--R03, versión del tratamiento elegida. & P0\\
+R05 & Rotación del secreto expuesto, revisión de accesos y dependencias corregidas. & Modificar & H07; Git histórico; package.json 23; aviso oficial. & Disponibilidad y protección de datos. & M--L; coordinación y regresiones; no reescribir historia sin autorización. & Responsables de Clerk/hosting y futura autorización operativa. & P0\\
+R06 & Conservar recuperación/errores; cuotas compartidas; limitar o retirar API heredadas. & Mantener / eliminar & C07,C20,C21; llm 10--12,24--63. & Segunda práctica viable; menor abuso y fallo. & M; consumidores externos desconocidos. & R01--R02, revisión de consumidores. & P0 mínimo\\
+R07 & Tres preguntas máximo de servidor; cierre después de feedback; quitar selector. & Simplificar / eliminar & C06,C11; E1 B27; matrices del capítulo 7. & Menos decisiones y duración acotada. & M; selección y fases dependen del máximo. & R04, R09, pruebas de parada. & P1 antes\\
+R08 & Cambiar apelación por reparación contextual/rectificación sin nota. & Eliminar / agregar & H05; sustentacion 161--177; UI 243--248. & Confianza y comprensión sin litigar puntaje. & M; rectificar sin perder historia; límite de llamadas. & R09, contrato de feedback nuevo. & P1 antes\\
+R09 & Diagnóstico cualitativo con evidencia; retirar notas y dominio porcentual de UI/API. & Simplificar / eliminar & H04,H06; E3 C18--C21; componentes 16--43. & Cierre interpretable y honestidad. & M--L; cálculos, selección y tests dependen de nivel/nota. & Contrato versionado; conservar datos antiguos aislados. & P1 antes\\
+R10 & Restringir a introductorios; una señal curricular; confianza antes de cada pregunta. & Agregar / acotar & H03; E3 reflexión C18,C29; P §3.3. & Preguntas pertinentes y confianza secundaria válida. & M; categorías locales y contenido fuera de alcance. & R04, catálogo filtrado, acuerdo curricular. & P0 confianza / P1 nivel\\
+R11 & Cierre antes de refuerzo opcional; landing fiel; temas del editor secundarios. & Simplificar / reubicar & H08; C01,C05,C16; UI 198,219,250--263. & Valor inmediato sin otra obligación. & M; no eliminar transferencia útil; riesgo de menor práctica. & R07,R09,R10. & P1 antes\\
+R12 & Perfil entre sesiones, adaptación avanzada, experimentos comerciales/visual. & Investigar & E3 reflexión C18,C21; Tarpit frecuencia/pago sin validar. & Potencial de uso repetido, aún no demostrado. & L variable; expansión y recolección excesiva. & Retorno observado y entrevistas posteriores. & P2\\\bottomrule
+\end{longtable}
+\end{landscape}
+
+\section{Hoja de ruta con entradas y salidas}
+\textbf{Fase P0, experimento medible.} Entrada: commit y responsables identificados, política de consentimiento y stack de almacenamiento acordados. Orden sugerido: remediación de secretos/dependencias; identidad y propiedad; persistencia/idempotencia; eventos y novedad; manifiesto, exportación, confianza y pruebas en staging. Alcance mínimo incluye las API que realmente sigan expuestas, sin reescribir landing entera. Entregables futuros: migración de esquema versionada, controles de acceso, procedimiento de borrado, manifiesto y consulta reproducible. Esfuerzo conjunto L--XL, aproximadamente 10--20 jornadas-persona si un desarrollador conoce el stack; rango no aditivo de filas con tareas compartidas. Riesgo principal: confundir entrega técnica con experimento listo. Salida: los casos de identidad, concurrencia, ventana y conteo pasan y dos revisores reproducen 0--5 en datos sintéticos.
+
+\textbf{Fase P1, tratamiento breve y pertinente.} Entrada: contratos de eventos e identidad estables; acuerdo sobre las cuatro decisiones de producto. Orden: contrato cualitativo y selección por temas; máximo tres y cierre; reparación sin nota; refuerzo opcional y copia coherente. Entregables futuros: UI/API versionadas, catálogo permitido, escenarios pedagógicos y regresiones actualizadas. Esfuerzo M--L conjunto, aproximadamente 6--12 jornadas-persona con dependencias resueltas. Riesgo: eliminar puntuación solo visualmente y conservarla como lógica oculta. Salida: un principiante puede cerrar con evidencia útil, sin Big O ni obligación de escribir otro programa, y el flujo no altera medición. Realizarlo antes de t0, o aplazar el paquete completo hasta después del último día 7.
+
+\textbf{Fase de observación, siete días por participante.} Entrada: cinco incorporaciones válidas y versión congelada. Alcance: operación, disponibilidad y observación interna, sin mensajes recordatorios ni cambios de tratamiento. Salida: cinco ventanas completas, exportación auditada y estado de integridad. No usar esta fase para probar nuevas políticas de prompts ni experimentar con el proveedor.
+
+\textbf{Fase P2, decidir con evidencia.} Con 0--1 íntegro, investigar si falta necesidad frecuente, si el momento de uso es equivocado o si el valor no compensa el esfuerzo; un pivote debe cambiar una hipótesis, no solo bajar dificultad. Con 2, priorizar la fricción o vacío señalado por evidencia. Con 3--5, repetir con otra cohorte y explorar progreso guardado si aparece como trabajo recurrente. Entrada: reporte y entrevistas cerrados; salida: una nueva hipótesis y alcance aprobado. No estimar esfuerzo de RAG avanzado/pagos sin demanda y diseño concreto; S para descubrimiento, L o más para capacidades amplias.
+
+\begin{landscape}
+\small
+\begin{longtable}{P{0.9cm}P{4.6cm}P{6.2cm}P{4.4cm}P{3.2cm}P{3.8cm}}
+\caption{E. Historias implementables en un encargo posterior}\label{tab:historias}\\
+\toprule ID & Como... quiero... para... & Criterios de aceptación observables & Archivos / sistemas afectados & Riesgos & Pruebas previstas \\\midrule\endfirsthead
+\toprule ID & Como... quiero... para... & Criterios de aceptación observables & Archivos / sistemas afectados & Riesgos & Pruebas previstas \\\midrule\endhead
+US01 & Como participante quiero identificarme una vez para recuperar mi práctica. & Anónimo recibe 401 en API antes de costo; ruta de práctica exige identidad; B no lee/modifica A; login devuelve al punto adecuado. & middleware.js; app/layout.jsx; frontera servidor de simulador; API sustentacion y legacy. & SDK/redirects, pérdida de borrador. & Sesión válida, caducada, falsificación de user\_id y token de otro usuario.\\
+US02 & Como estudiante quiero reintentar sin perder respuesta ni duplicar pasos. & Mismo request key y payload devuelve misma sesión/resultado; payload distinto se rechaza; estado y evento atómicos entre dos instancias. & lib/session-store.js; lib/sustentacion.js; adaptador DB y entidad Operation futuros. & Resultado remoto recibido sin commit; costo extra. & Concurrente, caída antes/después de persistir, lease caducado y recuperación.\\
+US03 & Como investigador quiero contar prácticas nuevas para medir retorno. & Cinco filas con evidencia; mismo código/espacios/comentarios/nombres no cuentan; una persona nunca suma dos; límites de 168 h exactos. & Modelo Artifact/Participant/Event futuro; consulta; API inicio. & Novedad ambigua y subconteo. & Casos sintéticos repetido/trivial/nueva tarea/huella fallida y doble revisión.\\
+US04 & Como participante quiero conocer y controlar el uso de mis datos. & Consentimiento previo, retiro registrado, borrado de payload y datos identificables conforme a plazo; localStorage separado y limpiado al logout. & Entrada, app/simulador/page.jsx; repositorio de payload; tareas de borrado futuras; Clerk. & Backups o logs conservan más de lo prometido. & Borrado y acceso posterior denegado; equipo compartido; logs sin contenido.\\
+US05 & Como responsable quiero fijar el tratamiento para interpretar la semana. & Toda sesión lleva manifiesto; no arranca si modelo/política difiere; prueba del equipo excluida; reporte marca intervención/contacto. & Configuración versionada futura; lib/llm.js; lib/pedagogia.js; exports. & Cambio silencioso del proveedor. & Cambio de versión en medio, versión ausente, cuenta test y ventanas escalonadas.\\
+US06 & Como principiante quiero preguntas de temas cursados para practicar algo pertinente. & Una selección breve; reglas solo usan intersección; ciclo no habilita Big O; tema no cursado se reemplaza una vez sin error personal. & lib/perfil.js; lib/pedagogia.js; lib/knowledge.js; knowledge/schema.json; UI. & Conjuntos curriculares imperfectos. & Cinco perfiles contrastantes; avanzado fuera de alcance sin promesa falsa.\\
+US07 & Como participante quiero indicar confianza sin otro formulario pesado. & 1--5 sin predeterminado; valoración previa al enunciado; null explícito si declina; recarga no duplica ni reasigna confianza. & UI; API sustentacion; evento de confianza futuro. & Medir después de exposición; faltantes. & Orden servidor, pregunta reemplazada, aclaración misma pregunta y teclado.\\
+US08 & Como estudiante quiero terminar cuando ya tengo algo útil para repasar. & Sin selector 1--5; servidor máximo tres pertinentes; cierre después de feedback; tres omitidas no generan sesión calificada; refuerzo no obligatorio. & app/simulador/page.jsx; lib/sustentacion.js; pruebas de flujo. & Confundir cierre temprano con fracaso; estado perdido. & Cerrar en 1/2/3, agotamiento candidatos, todas omitidas, corrección sintáctica.\\
+US09 & Como estudiante quiero saber qué expliqué y qué falta para prepararme. & Resumen cita evidencia real; no nota/porcentaje ni juicio de dominio; cita no localizada queda no verificable; no concede crédito oculto. & lib/evaluacion.js; lib/afirmaciones.js; lib/contratos-ia.js; componentes y diagnóstico. & Cualitativo demasiado largo o igual de categórico. & Citas inventadas, negaciones, paráfrasis, parcialidad y contradicciones.\\
+US10 & Como estudiante quiero corregir un malentendido para confiar en el feedback. & Una reparación por pregunta; rectificación en contexto y versionada; no recalificación; fallo no obliga a discutir ni bloquea cierre. & UI revisión; lib/sustentacion.js; lib/evaluacion.js; contrato de feedback. & Inducción del modelo por petición de acuerdo. & Error factual comprobado, solicitud infundada, timeout y límite alcanzado.\\
+US11 & Como estudiante quiero profundizar voluntariamente en un vacío concreto. & Resumen disponible antes del reto; reto del mismo concepto permitido; no reemplaza propósito con otro tema; volver a practicar no suma retorno. & lib/pedagogia.js; lib/evaluacion.js; app/simulador/components.jsx y página. & Refuerzo desalineado o con requisitos extra. & Variantes equivalentes, programa incompleto, sin Python y decisión de omitir.\\
+US12 & Como equipo quiero una versión segura y operable para observar sin intervenir. & Secreto histórico tratado y rotación comprobada; dependencia corregida; cuotas comunes; rutas legacy retiradas o protegidas; alertas internas sin contactar alumnos. & package.json/lock en futuro; hosting/Clerk; lib/llm.js; API legacy. & Incompatibilidad o interrupción de credenciales. & Build, regresiones, permisos, límite compartido y ausencia de secretos en logs.\\\bottomrule
+\end{longtable}
+\end{landscape}
+
+\chapter{Plan de pruebas de la siguiente iteración}
+\label{ch:pruebas}
+El plan amplía cobertura donde cambia el comportamiento; no propone reescribir por completo las 72 pruebas existentes. Los tests de aritmética y etiquetas numéricas deben retirarse o reemplazarse cuando su contrato desaparezca. Los tests de formato, citas, omisiones, sintaxis, errores y recuperación siguen siendo valiosos. Una prueba que espera 10/10 no debe forzar conservar el producto puntuador.
+
+\begin{longtable}{P{2.4cm}P{8cm}P{5.5cm}}
+\toprule Grupo & Escenarios y resultado esperado & Criterio de salida \\\midrule\endhead
+Identidad & Anónimo, sesión Clerk caducada, login modal, dos dispositivos y dos usuarios con token intercambiado; ningún acceso ajeno ni llamada costosa sin identidad. & Pruebas de API reales en staging, no solo componentes SignedIn.\\
+Persistencia & Doble clic, dos pestañas, dos instancias, proceso muerto, commit perdido, token antiguo, lease vencido, restart y despliegue nuevo. & Un estado final autoritativo; eventos únicos; costo duplicado eventual reconocido y acotado.\\
+Ventanas & Evento en t0, t0+1 ms, exactamente 168 h y 1 ms posterior; distintos t0 por persona; visita a 29/30 min. & Recuento coincide con reglas; timestamps de cliente no alteran clasificación.\\
+Novedad & Mismo código, espacios, comentarios, rename, literal, misma tarea con algoritmo distinto, nueva tarea sustantiva, parseo ausente y revisión en desacuerdo. & Casos triviales excluidos; incertidumbre registrada; no adjudicación posterior improvisada.\\
+Eventos & Recarga, recuperación, refuerzo, confianza duplicada, feedback no mostrado, respuesta no sé, pruebas del equipo y usuario no reclutado. & Ninguno infla numerador; orden pregunta/confianza y llaves únicas validados.\\
+Retiro/incidente & Retiro antes/después de t0, contacto del equipo, correo automático, falla DB y cambio de modelo. & Cohorte original declarada; censura y tratamiento inválido sin reemplazos oportunistas.\\
+Pedagogía & Cinco perfiles del capítulo 6; factorial exacto; DAG con precondiciones; promedio; respuestas parcialmente correctas y falsas al final. & Cero conceptos no permitidos; no confundir omisión, error y no verificado. Evaluación humana del feedback sintético.\\
+Integridad LLM & JSON truncado, IDs ausentes/duplicados, citas inexistentes, negaciones, instrucciones en comentarios, proveedor 400/413/429/5xx, timeout. & No avanzar sin salida válida; no nota fabricada; reintento explícito y acotado; sin exposición de datos.\\
+Flujo y cierre & Inicio con código propio, tres preguntas, cierre en primera/segunda, reparación, tema no cursado, reto opcional y nueva visita. & Resumen accesible sin programar otra solución; no selector ni apelación de nota en API o UI.\\
+UX/accesibilidad & Pegar código desde editor y PDF; tabs/indentación; móvil 390 px; teclado; lector; cierre de modal; editor lento y textarea; almacenamiento denegado. & No pérdida de código, foco comprensible y alternativa funcional. No asumir que CSS prueba usabilidad.\\
+Privacidad & Logs, exportación, backups y borrado; equipo compartido; otro usuario en mismo navegador. & Sin datos brutos en eventos; acceso por propietario; TTL/borrado demostrado con datos sintéticos.\\
+Operación & Cuotas y alertas internas; ruta retirada; modelo/versión efectivos; parser en despliegue; retorno tras redeploy de staging. & Gate P0 completo antes de reclutar. Manifiesto idéntico al que se usará.\\\bottomrule
+\end{longtable}
+
+\textbf{Ensayo de conteo.} Crear escenarios sintéticos de 0, 1, 2, 3 y 5 retornantes, cada uno con varios eventos duplicados y visitas repetidas. Dos personas deben obtener el mismo k con la consulta documental y el esquema implementado. Añadir un retirado y un incidente para comprobar que se informa inconclusión sin cambiar denominador. La prueba se realiza con identidades del equipo explícitamente excluidas del experimento real.
+
+\textbf{Ensayo UX previo.} Con personas fuera de la cohorte definitiva, observar si entienden la pregunta, el propósito del login y el cierre, y si pueden señalar qué les sirvió. No inferir eficacia educativa de que pulsen «útil». Registrar duración completa e interrupciones; el objetivo de primer valor en pocos minutos es orientativo hasta medirlo. Los cinco participantes definitivos reciben una versión ya congelada.
+
+\textbf{Staging.} Instalar en la fase futura las dependencias del lockfile bajo política del equipo, ejecutar suites, build y recorrido con dobles; luego probar autenticación y persistencia reales en entorno aislado, con cuentas/datos sintéticos y autorización para servicios. Verificar que cualquier prueba con LLM real use solo datos sintéticos autorizados. Esta auditoría no realiza esas llamadas. No abrir la cohorte hasta tener evidencia de límites, borrado y exportación, además de experiencia funcional.
+
+\chapter{Registro de decisiones y preguntas abiertas}
+\label{ch:adr}
+Todos los ADR son \textbf{recomendados, no implementados ni aprobados para despliegue}.
+\begin{longtable}{P{1.7cm}P{5.1cm}P{5.2cm}P{4cm}}
+\toprule ADR & Decisión y motivo & Opción descartada y consecuencia & Condición de revisión \\\midrule\endhead
+ADR01 & Retorno 3/5 en siete días es la decisión; evita circularidad de nota. & Porcentaje con 7/10; se pierde continuidad de la métrica vieja, se conserva historia. & Nuevo protocolo explícito del profesor, nunca cambio al ver resultados.\\
+ADR02 & Máximo tres, cierre tras feedback. & Selector 1--5 y duración adaptativa amplia; menos control numérico/cobertura, mayor reproducibilidad. & Evidencia de duración y momento de valor después del piloto.\\
+ADR03 & Diagnóstico cualitativo y cierre honesto. & Nota opcional o porcentaje de dominio; pierde cifra familiar, requiere evidencia breve. & Solicitud consistente de usuarios y validación de un instrumento externo, no preferencia del equipo.\\
+ADR04 & Reparación contextual, control interno y reporte factual. & Apelación de puntos o quitar toda defensa; limita costo sin silenciar error del tutor. & Errores recurrentes que excedan una reparación; revisar diseño en otra versión.\\
+ADR05 & ICP introductorio, temas declarados y código contextual. & Inferir autor por código o cubrir niveles 1--8; se excluye experiencia avanzada por ahora. & Demanda avanzada observada y capacidad de pruebas por competencia.\\
+ADR06 & DB compartida, Clerk por recurso y eventos mínimos. & Token como registro de investigación, archivos o hoja manual. Agrega infraestructura operable. & Almacén alternativo con mismas garantías verificadas.\\
+ADR07 & Identidad de tarea + huellas + revisión ciega de novedad. & Hash exacto único o autoinforme posterior; aumenta esfuerzo y puede subcontar. & Acuerdo metodológico previo; mejora en nuevo experimento, nunca retroactiva.\\
+ADR08 & Mantener proveedor/modelo confirmado y catálogo local. & Migrar LLM, agentes o RAG vectorial por moda; acota cambios y costo. & Evidencia de errores/latencia incompatible con valor en prueba posterior.\\
+ADR09 & Payload efímero separado de medición. & Guardar todos los programas indefinidamente; limita auditoría semántica retrospectiva. & Necesidad justificada con nuevo consentimiento y plazo.\\
+ADR10 & Refuerzo opcional, vinculado al vacío. & Solución Python obligatoria para cerrar; puede disminuir práctica adicional, debe observarse. & Usuarios demandan transferencia como valor central, sin forzar para contar retorno.\\\bottomrule
+\end{longtable}
+
+\section{Preguntas críticas antes de implementar o ejecutar}
+\begin{enumerate}
+\item \textbf{Equipo/infraestructura:} ¿qué despliegue corresponde al piloto, qué commit sirve, qué entorno Clerk utiliza y cuál es el proveedor/modelo/plan efectivo? Verificar sin copiar claves al informe. ¿El secreto histórico ya fue revocado y auditado? Son bloqueos operativos del piloto, no motivos para detener esta documentación.
+\item \textbf{Profesor:} ¿acepta que «preguntas fijas» signifique reglas, plantillas, políticas y parámetros congelados, con personalización contextual? ¿Acepta máximo tres y cierre voluntario sin exigir tres respuestas para contar práctica válida? El informe recomienda sí por pertinencia y fricción, pero no atribuye esa precisión a un correo no disponible.
+\item \textbf{Profesor:} ¿acepta t0 al cierre inicial, ventana exacta de 168 horas, separación de visita de 30 minutos, umbral de actividad sin acierto y adjudicación conservadora de tarea nueva? ¿Acepta informar cohorte censurada como inconclusa? Resolver antes de registrar participantes.
+\item \textbf{Equipo docente:} ¿qué temas han cursado los cinco y qué oportunidad real de otro programa tendrán? Un laboratorio pendiente puede consistir en corregir el mismo archivo; eso no satisface automáticamente código nuevo. Verificar oportunidad sin pedir que produzcan código solo para regresar.
+\item \textbf{Responsable de datos:} ¿quién custodia consentimiento, contactos y exportación; qué proveedor/ubicación/backup se usará; quién ejecuta borrado y revisa novedad? ¿Se aprueban 24 horas de payload y 30 días de eventos tras la última ventana?
+\item \textbf{Equipo de producto:} ¿hay consumidores externos de las API heredadas? ¿Se acepta el paquete completo de simplificación antes del experimento y la pérdida de nota/porcentaje? Si no, registrar otra versión de tratamiento y no combinar resultados.
+\end{enumerate}
+Otras incertidumbres no bloqueantes de esta auditoría: puntaje faltante de Gabriel, portapapeles/móvil hoy, relación entre utilidad y nota, frecuencia ordinaria de nuevas tareas, disposición a pagar y demanda avanzada. No hace falta inventarlas ni resolver mercado entero antes de una prueba pequeña; sí conservarlas como límites de interpretación.
+
+\chapter{Conclusión}
+PyDefense merece una prueba de uso repetido con un recorrido que permita reconocer un vacío concreto y salir con un siguiente paso. El código ya ofrece una base de conversación secuencial y controles útiles. La siguiente iteración debe corregir identidad y persistencia, proteger datos y disponibilidad, y simplificar cantidad, revisión, calificación y refuerzo sin perder evidencia pedagógica.
+
+No conviene seguir bajando dificultad para elevar notas, agregar pagos, expandir a todas las competencias o construir otra arquitectura de agentes antes de comprobar retorno. Una experiencia agradable no prueba aprendizaje; un puntaje alto tampoco prueba valor. Con cinco ventanas íntegras, 0--1 obliga a pivotar, 2 a ajustar y 3--5 a continuar investigando la propuesta. Con medición incompleta, la decisión honesta es reparar el experimento. Este documento termina en especificación y no inicia desarrollo.
+
+\appendix
+\chapter{Trazabilidad y registro de evidencia}
+\label{ap:traza}
+Los nombres E1/E2/E2R/E3 resuelven a los libros completos de la bibliografía. Toda referencia de código se refiere al commit de la ficha, salvo la evidencia del secreto que identifica su revisión histórica. «Alta» califica fidelidad de observación documental, no representatividad del mercado.
+
+\begin{landscape}
+\small
+\begin{longtable}{P{6cm}P{6cm}P{3cm}P{4cm}P{4.4cm}}
+\caption{F. Fuente exacta, hallazgo, decisión y criterio de aceptación}\label{tab:traza}\\
+\toprule Fuente exacta & Afirmación y estado & Confianza & Recomendación & Criterio de éxito \\\midrule\endfirsthead
+\toprule Fuente exacta & Afirmación y estado & Confianza & Recomendación & Criterio de éxito \\\midrule\endhead
+E1, «1 · Decisión de área», D6--D8,E6--E8; «4 · Cambios y Reflexión», C5--D9. & Cambio de área y ampliación inicial; documentado, no validación general. & Alta documental, limitada mercado. & R10, mantener ICP acotado. & Muestra intro explícita, sin atribuir entrevistas amplias al segmento específico.\\
+E1, «2 · ICP + JTBD», B19--B28. & Ansiedad de tiempo y sentirse examinado; histórico. & Alta documental. & R07--R11. & Cierre disponible con evidencia sin otra obligación ni nota.\\
+E1, «3 · Tarpit», E6--E12,C14--C16. & Cinco riesgos y pago/frecuencia inciertos. & Alta documental. & R04,R12. & No tratar supuestos como mercado demostrado.\\
+E2, «2 · Hipótesis MVP», C4--C8,C19,C21--C22. & Terminal, tres preguntas y tasa de aciertos. & Alta documental. & ADR01 y transición de métrica. & Informe separa métrica antigua y protocolo vigente.\\
+E2, «3 · Market Product Fit», C12,C17; «4 · Cambios y Reflexión», C23. & 3--5 minutos estimados sin prueba; frecuencia desconocida. & Alta sobre incertidumbre. & R04,R07. & Medición llegada--feedback útil con faltantes, sin promesa temporal probada.\\
+E2R, «2 · Hipótesis MVP», C19; «4 · Cambios y Reflexión», C12--D13. & Web y agentes/modelos como propuesta. & Alta documental. & ADR08. & No afirmar CrewAI/Ollama activos ni cambiar proveedor.\\
+E3, «1 · Entrega 3», C8--C13,C19--C22. & ICP, job, hook y detonante de nuevo programa. & Alta documental; valor por validar. & R03,R07,R10. & Nueva práctica vinculada a necesidad y tarea distinta.\\
+E3, «1 · Entrega 3», C35--C39. & Cinco nombres, cuatro notas y 0/4; decisión de ajustar pese a umbral. & Alta documental; resultados autoinformados. & ADR01. & No se inventa quinta nota ni se infiere retorno desde 7/10.\\
+E3, «2 · Landing y Reflexión», C18--C21,C29. & Feedback útil, dificultad, pegado y deseo de guardar progreso reportados. & Media: resumen del equipo. & R07,R09--R12. & Verificar hoy portapapeles; pertinencia y siguiente paso, no extrapolar mercado.\\
+E3, «1 · Entrega 3», C44,C53; «2 · Landing y Reflexión», C6. & Clerk mencionado y acceso sin sesión; protección Vercel retirada. & Alta documental. & R01. & Identidad efectiva del recurso y prueba 401/propiedad.\\
+E3, «1 · Entrega 3», C60,C63--D70. & B2C y mercado/ARPU supuestos. & Alta documental, baja validación comercial. & R12. & No pagos ni expansión necesarios para este piloto.\\
+P, encargo §3 y §3.1--3.2. & Retorno 3/5, siete días, sin recordatorio, confianza y eventos persistidos. & Alta como instrucción; correo original no verificado. & R01--R04,R10. & Recuento reproducible y políticas acordadas previamente.\\
+\src{middleware.js}{1--7}; \src{app/api/sustentacion/route.js}{28--45}; guía Clerk v5. & Autenticación no exigida por el código inspeccionado. & Alta código; producción no verificada. & R01 / US01. & Anónimo y usuario ajeno rechazados en servidor.\\
+\src{lib/session-store.js}{16--39,56--69}; \src{lib/sustentacion.js}{14--34,75--98}. & Disco local o estado cifrado portátil; sin registro central de retorno. & Alta código y pruebas. & R02 / US02. & Reinicio/dispositivo no pierden eventos; duplicados no cuentan.\\
+\src{app/simulador/page.jsx}{79,217}; \src{lib/sustentacion.js}{70--73,103--104}. & Máximo elegido 1--5, default cinco y reglas de cierre. & Alta código. & R07 / US08. & Máximo fijo servidor y salida voluntaria; no cliente cambia dosis.\\
+\src{lib/sustentacion.js}{161--177}; \src{app/simulador/page.jsx}{243--248}. & Revisión reemplaza nota, hasta dos por pregunta, recalcula cierre. & Alta código y tests. & R08 / US10. & Corrección factual visible sin nota ni ciclos de apelación.\\
+\src{lib/pedagogia.js}{23--46}; \src{app/simulador/components.jsx}{16--24}. & Porcentaje ponderado limitado por evidencia, no validado como dominio. & Alta código; inferencia de riesgo. & R09 / US09. & Sin promedio/porcentaje; observaciones localizadas y limitadas.\\
+\src{lib/perfil.js}{20--28}; \src{lib/knowledge.js}{71--145}. & Código determina perfil y recuperación; no contexto curricular humano. & Alta código. & R10 / US06--07. & No Big O a principiante; confianza previa registrada.\\
+\src{lib/evaluacion.js}{23--35,121--175}; \src{lib/afirmaciones.js}{16--60}. & Citas y verificadores acotados; cita ausente puede conservar nivel parcial. & Alta código y dobles. & R09 / US09. & Cita no localizada queda no verificable, sin juicio personal inventado.\\
+\src{app/simulador/page.jsx}{219,250--263}; \src{lib/sustentacion.js}{178--187}. & Fase final requiere enviar código; no cierre ligero del resumen. & Alta código. & R11 / US08,US11. & Resumen previo y refuerzo opcional del mismo objetivo.\\
+\src{lib/pedagogia.js}{16--21,52--109}; \src{lib/evaluacion.js}{57--68}. & Preguntas locales y LLM evaluador en recorrido secuencial. & Alta código. & ADR08 / R06. & No gasto de LLM para seleccionar plantilla; versión auditable.\\
+\src{app/simulador/page.jsx}{157}; API generar 20--55, evaluar 27--63. & Solo sustentacion tiene caller de UI; rutas legacy permanecen. & Alta código; consumo externo no verificado. & R06 / US12. & Eliminadas con revisión de consumidores o protegidas transitoriamente.\\
+\src{lib/python-static.py}{65--87}; \src{tests/adaptativo.test.cjs}{35--59,95--104}. & Factorial exacto termina y devuelve 1 para enteros. & Alta razonamiento y pruebas sintéticas. & Mantener guardarraíl, US09. & No inventar recursión infinita ni resultados de ejecución estudiantil.\\
+Git: revisión \nolinkurl{03335bd1ad79a418b4a2c3d807c597529eab53c5}, .env.local:2; variable redactada. & Credencial con formato secreto en historia; actividad desconocida. & Alta detección, vigencia no verificada. & R05 / US12. & Rotación/revocación confirmada sin publicar valores.\\
+\src{package.json}{23}; aviso Next.js 2025-12-11. & Versión dentro del rango de DoS declarado por proveedor. & Alta versión/rango; explotación no probada. & R05 / US12. & Dependencia mantenida y parcheada; build y regresiones pasan.\\
+Comandos del apéndice \ref{ap:comandos}; pruebas 5+25+15+22+5. & 72 aprobadas; interfaz pasó al segundo intento, tras aparecer React. & Alta ejecución local. & Plan de pruebas futuro. & Distinguir pruebas actuales de build/navegador solo históricos.\\\bottomrule
+\end{longtable}
+\end{landscape}
+
+\chapter{Respuestas explícitas a las 28 preguntas de investigación}
+\label{ap:preguntas}
+\begin{enumerate}
+\item \textbf{Problema más valioso y frecuente.} Detectar un vacío antes de sustentar código propio es el mejor candidato respaldado por E3 C18--C21 de reflexión. La frecuencia sigue sin demostrarse (E1 Tarpit C8; E2 reflexión C23). No se afirma que sea el mayor problema de todo estudiante.
+\item \textbf{Diferencia frente a ChatGPT.} Recorrido preparado, selección local contextual y comprobaciones acotadas; no ventaja exclusiva ni superioridad empírica. Véase capítulo \ref{ch:negocio}.
+\item \textbf{Momento de valor.} Feedback que conecta una afirmación con un fragmento y un siguiente paso para una duda real; se mide después de llegada, no al cargar página.
+\item \textbf{Capacidades que lo crean.} Preguntas contextualizadas, omisión/aclaración, feedback y ejemplos pertinentes. Temas visuales, nota y apelación no tienen aporte demostrado al retorno; tabla A traza cada capacidad.
+\item \textbf{Landing y experiencia.} Promesa prudente de práctica, pero terminal ilustrativa y «rápida» no reflejan toda la programación final. No se encontró garantía explícita de aprobación objetiva.
+\item \textbf{Juicio y sobrecarga.} Cinco preguntas predeterminadas, selección de máximo, dos indicadores numéricos, litigio y ejercicio obligatorio para final; señales de diseño, no emociones medidas hoy.
+\item \textbf{Automatizar con control.} Cantidad máxima, selección de temas presentes, guardado, idempotencia y resumen. Preservar cerrar, omitir, corregir tema y reportar error.
+\item \textbf{Confianza/omisión/aclaración.} Una fila 1--5 antes del enunciado, sin default, salida explícita si declina; aclarar no consume pregunta; omisión no es error, tema no cursado activa reemplazo acotado.
+\item \textbf{Respuesta incompleta.} Reconocer lo localizado, distinguir falta de explicación de falsedad y pedir una precisión o dar un ejemplo; no fabricar dominio ni castigar requisitos no pedidos.
+\item \textbf{Recompensa sin nota.} Observación concreta lograda o vacío descubierto, con paso siguiente y cierre accesible. No «dominas X» por contestar una vez.
+\item \textbf{Nueva sesión con menos pasos.} Sesión Clerk vigente y temas recordados; nuevo código/tarea y comenzar. Recuperación es acción distinta. No repetir consentimiento salvo cambio material de política.
+\item \textbf{Login frente a fricción.} Landing y ejemplo públicos; identificación única antes de práctica experimental, copia del beneficio y retorno al punto de entrada. API verifica identidad aun si UI falla.
+\item \textbf{Preguntas pertinentes y nivel.} Código determina contenido; temas cursados determinan profundidad. Enfocar Alpha introductorio, sin Big O por defecto; no inferir autor por sofisticación del programa. Matriz E1--E4 y cinco perfiles.
+\item \textbf{Comprensión observable.} Explicación causal, predicción justificada o transferencia localizada; conservar método e incertidumbre, sin porcentaje de dominio.
+\item \textbf{Guardarraíles.} Esquema, IDs, citas, temas permitidos, AST bajo precondiciones y rechazo/abstención frente a contradicción. Sus límites impiden certificar conducta general o ausencia de inyección.
+\item \textbf{Explicación, repregunta o ejercicio.} Reformular consigna si confusa; repreguntar si ambigua; ejemplo mínimo si falta relación; transferencia opcional cuando el vacío está claro, siempre del mismo concepto.
+\item \textbf{Feedback sin disputa.} Un acierto, una duda y un paso; reparación de intención/error factual en contexto, sin nota y con máximo de una reparación por pregunta.
+\item \textbf{Código problemático.} Corregir sintaxis si comprobable, declarar límites ante dependencias/contexto, no ejecutar/importar programas, ignorar instrucciones incrustadas y validar salida; permitir fragmento o cierre sin falsa certeza.
+\item \textbf{Imprescindibles para 3/5.} Identidad/propiedad, persistencia, novedad, umbral/ventana, congelación, consentimiento, confianza y ausencia de recordatorios; corregir fallas que impidan observar. P0 no incluye todos los deseos de producto.
+\item \textbf{Jerarquía de métricas.} Primaria retorno válido; secundarias confianza/utilidad; diagnósticas latencia/abandono/errores. Notas, rachas y número bruto de visitas pueden incentivar optimización indebida.
+\item \textbf{Eventos mínimos.} Nueve hechos de práctica válida mínima más llegada/operación; no keystrokes ni contenido bruto analítico. Tabla D y deduplicación por claves semánticas.
+\item \textbf{Costos razonables.} Pocas decenas de llamadas en escenario nominal, cientos de eventos; validar plan efectivo, no comprar un stack amplio. Fórmula y ejemplo tarifario condicionado, costos humanos y topes propuestos en capítulo \ref{ch:tecnica}.
+\item \textbf{Resultado que obliga a pivotar.} 0--1 de 5 con protocolo íntegro; 2 ajustar; 3--5 seguir investigando. Entrevistas después de ventanas explican por qué, sin reemplazar eventos ni rescatar la hipótesis con notas.
+\item \textbf{Dónde vive el estado.} React/localStorage más disco local o token cifrado en Vercel. Recarga puede recuperar; otro dispositivo no por login; despliegue depende de claves/versión y no crea registro central. Capítulos \ref{ch:actual} y \ref{ch:tecnica}.
+\item \textbf{Clerk y usuario persistido.} Derivar user\_id en servidor, vincular participante/sesión y autorizar cada acceso; excluir anónimos y cuentas de prueba. No aceptar identidad del body.
+\item \textbf{Latencia y costo sin complejidad.} Selección local, análisis reutilizado, contexto acotado, salida breve validada, idempotencia persistente y cuota común. Mantener proveedor; no reintento infinito ni multiagentes.
+\item \textbf{Retirar en todas las capas.} Selector/max cliente; apelación numérica; promedio, porcentaje y aritmética vinculada; obligatoriedad del reto; endpoints legacy si no hay consumidores. Actualizar contratos/tests/métricas, no dejar estados muertos.
+\item \textbf{Dependencias y regresiones.} Identidad antes de persistencia; esquema/eventos antes de consulta; contrato cualitativo antes de UI; freeze después de staging. Matrices C/E y capítulo \ref{ch:pruebas} fijan casos y aceptación.
+\end{enumerate}
+
+\chapter{Inspecciones, comandos y reproducibilidad}
+\label{ap:comandos}
+Directorio de trabajo: \nolinkurl{/home/melisamo2305/Escritorio/Landing_Grupo4}. Node v24.13.0 y Python 3.12.3. Las inspecciones empezaron con contexto de fecha 29 de octubre y el cierre usa la actualización del cliente a 30 de octubre de 2026, America/Bogota; no se usa la fecha de modificación del host como fecha del estudio.
+
+\begin{longtable}{P{7cm}P{9cm}}
+\toprule Comando/inspección & Resultado y límite \\\midrule\endhead
+\texttt{pwd}; \texttt{ls -la}; \texttt{git status --short --branch}; \texttt{git rev-parse HEAD}; \texttt{git branch --all}; \texttt{git remote -v}. & main limpia, hash de portada; origin del repositorio solicitado y upstream distinto. No se hicieron fetch/pull/checkout ni escrituras Git.\\
+\texttt{rg --files --hidden} con exclusiones de Git, entornos y dependencias; \texttt{git ls-files}. & Inventario de app/lib/knowledge/tests/scripts/docs/configuración; sin AGENTS.md aplicable detectado. Una primera búsqueda incluyó solo AGENTS.md y no listó archivos; se corrigió al inventario general.\\
+\texttt{nl -ba} y \texttt{sed -n} sobre archivos del inventario; \texttt{rg -n} de rutas/auth/persistencia/modelos. & Lectura de pantallas, componentes, tres API, lógica, analizador, tests y documentación. Rutas/líneas citadas; único fetch UI a sustentacion. Sin impresión de .env*.\\
+Python estándar: \texttt{zipfile.ZipFile}, \texttt{ElementTree}, relaciones workbook/sheets y sharedStrings; celdas por atributo r. & Cuatro libros presentes, 18 hojas inspeccionadas; alias y SHA-256 abajo. No dependió de openpyxl ni creó otra versión del informe.\\
+GitHub conector: GET \nolinkurl{https://api.github.com/repos/Melisa2805/Landing_Grupo4/branches/main}. & SHA remoto coincide: 284e13c52a08fd1100fb6e2cdf4833fecc0f6f90. Consulta de solo lectura.\\
+GitHub conector: GET colección deployments con per\_page=10. & Rechazo INVALID\_ARGUMENT por endpoint no admitido. No se accedió a configuración Vercel; no se infiere pydefense-dev activo.\\
+\texttt{git log --all --format= --name-only -- '*.env*' '.env*'}; script Python con \texttt{git rev-list} y \texttt{git show} capturado. & Nombres de archivos y detección redactada de clave histórica. El script imprimió ruta/línea/nombre de variable/revisión y bandera de formato; jamás el valor. Revisión acotada, no escaneo exhaustivo.\\
+\texttt{node --experimental-vm-modules tests/rag.test.cjs}. & Exit 0; 5/5; duración reportada 279 ms aproximadamente.\\
+\texttt{node --experimental-vm-modules tests/adaptativo.test.cjs}. & Exit 0; 25/25; aproximadamente 2.03 s.\\
+\texttt{node --experimental-vm-modules tests/pedagogia-v3.test.cjs}. & Exit 0; 15/15; aproximadamente 783 ms.\\
+\texttt{node --experimental-vm-modules tests/estabilidad.test.cjs}. & Exit 0; 22/22; aproximadamente 1.63 s.\\
+\texttt{node --experimental-vm-modules tests/interfaz.test.cjs}, dos intentos. & Primero: exit 1 antes de tests, MODULE\_NOT\_FOUND por React ausente. Después de aparecer dependencias sin instalación del auditor: exit 0, 5/5, aproximadamente 70 ms.\\
+Lectura de \texttt{tests/entorno.cjs}, líneas 1--79, antes de ejecutar suites. & VM con transporte falso, variables ficticias y directorios temporales eliminados al final. Los tests mutan solo fixtures temporales, no datos de estudiantes.\\
+Cálculo Python local del factorial literal y de matrices ponderadas. & Cinco entradas sintéticas retornan 1; aritmética de alternativas reproducida. No se añadió una prueba ni archivo de código al proyecto.\\
+\texttt{command -v} y \texttt{shutil.which} para compiladores y chktex. & Ninguno de los compiladores indicados disponible; no PDF ni compilación simulada. No se instalaron dependencias.\\
+Inspección final de Git y estructura de LaTeX. & Único artefacto del auditor: este .tex nuevo. Hay un cambio concurrente preservado en package-lock.json: metadatos peer, sin versiones nuevas; ningún diff en app/lib/tests/knowledge/middleware/package.json. Revisión de delimitadores, referencias, tablas, citas y rangos. No sustituye compilación visual.\\\bottomrule
+\end{longtable}
+
+No se ejecutaron \texttt{npm run build}, \texttt{npm run test:recorrido}, \texttt{test:proveedor -- --live}, migraciones, commit, push, PR, despliegue, ni cambios de Clerk/Vercel. No se generó build porque el encargo restringe escrituras de producto/configuración; la ausencia inicial de dependencias también impidió una demostración inmediata. La auditoría no se presenta como demostración visual del flujo. Los cambios concurrentes del lockfile se preservaron; no se restauraron archivos ajenos para aparentar un árbol limpio.
+
+\section{Inventario complementario de archivos}
+Además de los módulos detallados en la tabla A, se revisaron \nolinkurl{package-lock.json}, \nolinkurl{.gitignore}, \nolinkurl{postcss.config.js}, \nolinkurl{tailwind.config.js}, \nolinkurl{app/globals.css}, los dos módulos CSS de landing, \nolinkurl{tests/fixtures/dag.cjs} y el fixture JSON de Groq usado por las suites. Configuración de estilos y favicon no contienen lógica de retorno. El catálogo \nolinkurl{knowledge/python/nivel_1.json} a \nolinkurl{nivel_8.json} tiene respectivamente 12, 10, 12, 13, 11, 11, 12 y 11 registros: 92. Sus metadatos distinguen nivel observable del código y dificultad, pero no constituyen evaluación del autor (\src{knowledge/schema.json}{2--7}).
+
+\section{Huellas de los libros consultados}
+\begin{description}
+\item[E1] \nolinkurl{20c88e472ba58cc92f1c31256d54ceff504195177ceb16d8471e7acc955b870f}.
+\item[E2] \nolinkurl{82e0fac3221f168ac100ca2bf74bfdefc86359ff6ae59a3301c074f84e4cc141}.
+\item[E2R] \nolinkurl{c0ed3d153bc1023db40f8ff829767ef4d60e6029c3e1f5b13d88ea3d9c01cf15}.
+\item[E3] \nolinkurl{d7d4c8e5a34a3ec801fcaa334775d5fcfc5a0ef2c2177a14955027290d2b095b}.
+\end{description}
+SHA-256 identifica los archivos leídos, no su autenticidad académica. No se recabaron entrevistas originales ni se corrigieron celdas. E3 rúbrica A7 exige justificar decisión contra resultado y umbral; A9 pide coherencia de hipótesis, job y mercado. Estas exigencias explican la trazabilidad del informe, no autorizan alterar resultados históricos.
+
+\chapter{Glosario y notas de interpretación}
+\begin{description}
+\item[ICP] Perfil del cliente ideal para esta prueba: estudiante introductorio que usa IA y debe explicar Python.
+\item[JTBD] Trabajo que el estudiante quiere resolver: comprender y defender su programa con seguridad.
+\item[Primer valor] Feedback visto y percibido útil para una duda real; distinto de carga o respuesta de servidor.
+\item[Retorno] Nuevo uso voluntario, válido y con tarea nueva dentro de la ventana; no es login, visita ni recarga.
+\item[AST] Árbol de sintaxis abstracta; permite reconocer estructura, no prueba ejecución general.
+\item[RAG local] Aquí, selección heurística de registros JSON para contexto. No implica embeddings, vector DB ni agentes.
+\item[Idempotencia] Repetir la misma operación no duplica transición persistida; no garantiza costo externo exactamente una vez.
+\item[Manifiesto] Conjunto inmutable de versiones y políticas que define el tratamiento experimental.
+\item[Evidencia insuficiente] No hay observación que respalde una conclusión. No significa error del estudiante.
+\item[No verificado] El sistema/auditor no comprobó el comportamiento. Debe conservarse esa incertidumbre.
+\item[Censura] Resultado individual no observable de manera íntegra por retiro, falla o contaminación definida previamente.
+\item[Hipótesis de diseño] Beneficio esperado de una decisión todavía no medido; todas las mejoras de retorno propuestas pertenecen a esta categoría.
+\end{description}
+
+La auditoría no usa los nombres históricos como identidades de la cohorte futura. No atribuye resultados de pruebas automatizadas a personas. Las propuestas de reglas, esfuerzo, costos de escenario y microcopias son especificaciones discutibles con criterios de aceptación, no hechos observados ni compromisos del profesor.
+
+\begin{thebibliography}{99}
+\addcontentsline{toc}{chapter}{Bibliografía y fuentes}
+\bibitem{repo} Grupo 4. Repositorio PyDefense, \texttt{main}, commit \nolinkurl{284e13c52a08fd1100fb6e2cdf4833fecc0f6f90}. \url{https://github.com/Melisa2805/Landing_Grupo4/tree/284e13c52a08fd1100fb6e2cdf4833fecc0f6f90}. Archivos y líneas citados dentro del informe.
+\bibitem{E1} Grupo 4. \textit{Entregable 1- Grupo 4.xlsx}. Archivo local suministrado, cinco hojas; coordenadas y SHA-256 en este informe.
+\bibitem{E2} Grupo 4. \textit{Entregable 2- Grupo 4.xlsx}. Versión original local; cinco hojas. No confundir con revisión ni con nombre alterno «(1)» del encargo.
+\bibitem{E2R} Grupo 4. \textit{Revisión\_Entregable\_2\_Grupo\_4.xlsx}. Cinco hojas; propuesta web y arquitectura histórica, no evidencia de implementación.
+\bibitem{E3} Grupo 4. \textit{Entregable 3- Grupo 4.xlsx}. Tres hojas; resultados, reflexión y rúbrica. Puntajes en «1 · Entrega 3», C36--C37.
+\bibitem{P} Encargo adjunto, \textit{Auditoría estratégica y funcional de PyDefense}. \nolinkurl{/home/melisamo2305/.codex/attachments/b7cd211f-47dd-46d0-87f1-ba68720ad2d2/Pasted text.txt}. Apartado 3: protocolo atribuido al profesor Santiago Jaramillo Campo; correo original y fecha exacta no disponibles.
+\bibitem{estabilidad} Grupo 4. \textit{Auditoría de estabilidad: evaluaciones rechazadas y límites del proveedor}. \nolinkurl{docs/AUDITORIA_ESTABILIDAD.md} en el commit auditado. Evidencia histórica de pruebas, no certificación del entorno actual.
+\bibitem{clerk5} Clerk. \textit{Upgrading @clerk/nextjs to Core 2}, sección New Middleware architecture. Consultado durante la auditoría. \url{https://clerk.com/docs/guides/development/upgrading/upgrade-guides/core-2/nextjs}.
+\bibitem{clerkresource} Clerk. \textit{clerkMiddleware(): SDK Reference, Next.js}. Consulta de documentación vigente; distinguirla de la versión 5 instalada en lockfile. \url{https://clerk.com/docs/reference/nextjs/clerk-middleware}.
+\bibitem{nextsecurity} Next.js. \textit{Security Update: December 11, 2025}. Rango afectado por DoS y corrección de esa publicación. \url{https://nextjs.org/blog/security-update-2025-12-11}.
+\bibitem{next2026} Next.js. \textit{Security Update for a Critical Upstream Issue}, 22 de septiembre de 2026. Aviso contrastado, rango 16.2--16.3.5, no atribuido a 14.1.4. \url{https://nextjs.org/blog/nextjs-security-update-september-22-2026}.
+\bibitem{groq} Groq. \textit{GPT OSS 120B}, precio público por millón de tokens: entrada USD 0.15 y salida USD 0.60, consultado durante la auditoría. Escenario condicionado, no proveedor de producción confirmado. \url{https://console.groq.com/docs/model/openai/gpt-oss-120b}.
+\end{thebibliography}
+\end{document}
