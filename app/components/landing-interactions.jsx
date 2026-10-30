@@ -130,8 +130,8 @@ export function MiniQuiz() {
   return (
     <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6 max-w-3xl mx-auto">
       <div className="space-y-2">
-        <h2 className="text-3xl font-bold">Muestra opcional</h2>
-        <p className="text-sm text-slate-400">Un ejemplo de selección múltiple para calentar. No es una práctica con tu código: allí respondes con tus propias palabras.</p>
+        <h2 className="text-3xl font-bold">Mini reto: ¿qué hace este código?</h2>
+        <p className="text-sm text-slate-400">Calienta en 10 segundos. En la práctica con tu código respondes con tus propias palabras.</p>
       </div>
       <pre className="overflow-x-auto rounded-xl bg-slate-950 border border-slate-800 p-4 text-sm text-blue-300"><code>{'for nota in notas:\n    if nota >= 3:\n        aprobados.append(nota)'}</code></pre>
       <fieldset className="space-y-3">
