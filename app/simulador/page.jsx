@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from 'react'
 import Editor from '@monaco-editor/react'
 import { useAuth, SignInButton } from '@clerk/nextjs'
 import { Retroalimentacion, Resumen, EvaluacionRefuerzo } from './components'
+import { Progreso, CodigoResaltado, Procesando, GuardarResumen } from './ux'
 import { PUNTOS_CONSENTIMIENTO, VERSION_CONSENTIMIENTO } from '../../lib/consentimiento'
 import { CODIGO_EJEMPLO, esEjemplo } from '../../lib/ejemplo'
-import { Code2, HelpCircle } from 'lucide-react'
+import { Code2, HelpCircle, RotateCcw, CheckCircle2, MessageSquare, Lightbulb, Lock } from 'lucide-react'
 
 // Definición nativa del tema Dracula
 const draculaTheme = {
@@ -57,7 +58,7 @@ function EnunciadoEjercicio({ texto }) {
 }
 
 const TEMAS = [['basico', 'Variables, operaciones y funciones'], ['condicionales', 'También condicionales'], ['ciclos_listas', 'También ciclos y listas'], ['no_seguro', 'No estoy seguro']]
-const CONFIANZA = [[1, 'Nada seguro'], [2, ''], [3, 'Algo seguro'], [4, ''], [5, 'Muy seguro']]
+const CONFIANZA = [[1, 'Nada seguro'], [2, 'Poco'], [3, 'Algo seguro'], [4, 'Bastante'], [5, 'Muy seguro']]
 const DIA_MS = 24 * 3600_000
 const boton = 'w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-white'
 const secundario = 'border border-slate-500 px-4 py-2 rounded-lg disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white'
@@ -86,6 +87,9 @@ export default function SimuladorPage() {
   const [ahora, setAhora] = useState(Date.now())
   const [aviso, setAviso] = useState('')
   const [utilidad, setUtilidad] = useState({})
+  const [accionEnCurso, setAccionEnCurso] = useState(null)
+  const [codigoVisible, setCodigoVisible] = useState(true)
+  const ultima = useRef(null)
   const solicitud = useRef(null)
   const foco = useRef(null)
   const inicio = useRef(null)
@@ -136,6 +140,18 @@ export default function SimuladorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listo])
   useEffect(() => { foco.current?.focus() }, [sesion?.fase, sesion?.numero])
+  useEffect(() => { try { setCodigoVisible(window.matchMedia('(min-width: 1024px)').matches) } catch {} }, [])
+  // Keys 1-5 answer the confidence card when no text field has the focus.
+  useEffect(() => {
+    if (sesion?.fase !== 'confianza') return
+    const tecla = (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName) || e.target?.isContentEditable) return
+      if (/^[1-5]$/.test(e.key)) { e.preventDefault(); enviar('confianza', { valor: Number(e.key) }) }
+    }
+    window.addEventListener('keydown', tecla)
+    return () => window.removeEventListener('keydown', tecla)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sesion?.fase, sesion?.revision])
   useEffect(() => {
     if (esperaHasta <= Date.now()) return
     const timer = setInterval(() => {
@@ -165,7 +181,7 @@ export default function SimuladorPage() {
   function nuevaPractica() {
     solicitud.current?.abort()
     solicitud.current = null
-    setOcupado(false); setSesion(null); setRespuesta(''); setCodigoRefuerzo(''); setError(''); setSintaxis(null); setReparacion({ tipo: '', texto: '' })
+    setOcupado(false); setAccionEnCurso(null); setSesion(null); setRespuesta(''); setCodigoRefuerzo(''); setError(''); setSintaxis(null); setReparacion({ tipo: '', texto: '' })
     guardada.current = null
     inicio.current = null
   }
@@ -174,7 +190,8 @@ export default function SimuladorPage() {
     if (['responder', 'reparar', 'entregar'].includes(accion) && esperaHasta > Date.now()) return
     const controller = new AbortController()
     solicitud.current = controller
-    setOcupado(true); setError('')
+    ultima.current = { accion, extra }
+    setOcupado(true); setError(''); setAccionEnCurso(accion)
     const timeout = setTimeout(() => controller.abort(), 55000)
     try {
       let body
@@ -198,7 +215,7 @@ export default function SimuladorPage() {
       if (solicitud.current === controller) setError(e.name === 'AbortError' ? 'Se agotó el tiempo. Tu texto se conserva; vuelve a intentar o recupera el estado guardado.' : e.message === 'inconsistente' ? 'El servidor devolvió un progreso inconsistente. Recupera el estado guardado.' : 'No se pudo conectar. Tu texto se conserva; reintenta.')
     } finally {
       clearTimeout(timeout)
-      if (solicitud.current === controller) { solicitud.current = null; setOcupado(false) }
+      if (solicitud.current === controller) { solicitud.current = null; setOcupado(false); setAccionEnCurso(null) }
     }
   }
   function manejarError(res, data, accion) {
@@ -229,22 +246,36 @@ export default function SimuladorPage() {
     nuevaPractica(); setCodigo(''); setTemas('')
     setEstado(null); setListo(false); setAviso('Tus prácticas y eventos se borraron. Puedes cerrar esta página.')
   }
+  // A new program starts from an empty editor; the sample stays one click away.
+  function otroPrograma() {
+    nuevaPractica()
+    setCodigo('')
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  function reintentar() {
+    if (ultima.current) enviar(ultima.current.accion, ultima.current.extra)
+  }
   function utilidadFeedback(h, valor) {
     setUtilidad((u) => ({ ...u, [`${h.instancia}:${h.version}`]: valor }))
     publicar('/api/sustentacion', { accion: 'acuse', tipo: 'utilidad', sesion: sesion.sesion, instancia: h.instancia, version: h.version, valor }).catch(() => {})
   }
 
   if (!isLoaded) return <main className="max-w-2xl mx-auto px-4 py-12"><p role="status">Cargando…</p></main>
-  if (!isSignedIn) return <main className="max-w-2xl mx-auto px-4 py-12 space-y-5">
-    <h1 className="text-2xl font-bold flex items-center gap-2"><Code2 className="text-blue-400" /> Practica la explicación de tu código</h1>
-    <p className="text-slate-300">Inicia sesión para practicar. Tu práctica queda asociada a tu cuenta para que puedas recuperarla si se interrumpe.</p>
+  if (!isSignedIn) return <main className="max-w-2xl mx-auto px-4 py-12 space-y-6">
+    <h1 className="text-3xl font-bold flex items-center gap-2"><Code2 className="text-blue-400" /> Practica la explicación de tu código</h1>
+    <p className="text-slate-300">Ensaya tu sustentación antes de la entrega: respondes hasta tres preguntas sobre tu propio programa y descubres qué te conviene repasar.</p>
+    <ol className="grid sm:grid-cols-3 gap-3 text-sm">
+      {[[Code2, 'Pega tu código', 'O usa el ejemplo para conocer la práctica.'], [MessageSquare, 'Explica con tus palabras', 'Hasta tres preguntas; puedes cerrar cuando quieras.'], [Lightbulb, 'Descubre qué repasar', 'Lo que explicaste, lo que falta y un siguiente paso.']].map(([Icono, titulo, detalle]) =>
+        <li key={titulo} className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 space-y-2"><Icono aria-hidden="true" className="h-6 w-6 text-blue-400" /><p className="font-semibold">{titulo}</p><p className="text-slate-400">{detalle}</p></li>)}
+    </ol>
     <SignInButton mode="modal"><button className={boton}>Iniciar sesión para practicar</button></SignInButton>
+    <p className="text-xs text-slate-400 flex items-center gap-2"><Lock aria-hidden="true" className="h-4 w-4" />Tu práctica queda en tu cuenta para que puedas recuperarla si se interrumpe. No hay nota.</p>
   </main>
   if (!estado) return <main className="max-w-2xl mx-auto px-4 py-12 space-y-3">{error ? <p role="alert" className="text-red-200">{error}</p> : aviso ? <p role="status">{aviso}</p> : <p role="status">Preparando tu práctica…</p>}</main>
   if (!estado.consentimiento.vigente) return <main className="max-w-2xl mx-auto px-4 py-12 space-y-5">
     <h1 className="text-2xl font-bold">Antes de practicar</h1>
-    <p className="text-slate-300">Esta prueba registra tus usos durante siete días. Lee cómo se usan tus datos:</p>
-    <ul className="list-disc pl-5 space-y-2 text-slate-200">{PUNTOS_CONSENTIMIENTO.map((p) => <li key={p}>{p}</li>)}</ul>
+    <p className="text-slate-300">Solo se pide una vez. Esta prueba registra tus usos durante siete días; así se usan tus datos:</p>
+    <ul className="space-y-3 rounded-xl border border-slate-700 bg-slate-900/60 p-5 text-slate-200">{PUNTOS_CONSENTIMIENTO.map((p) => <li key={p} className="flex gap-3"><CheckCircle2 aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" /><span>{p}</span></li>)}</ul>
     <p className="text-sm text-slate-300">Proveedor de IA configurado: {estado.proveedor || 'no informado por el servidor'}. Responsable: {estado.contacto || 'el equipo del Grupo 4'}.</p>
     {error && <p role="alert" className="text-red-200">{error}</p>}
     <button className={boton} disabled={ocupado} onClick={consentir}>Acepto y quiero practicar</button>
@@ -261,6 +292,7 @@ export default function SimuladorPage() {
   const valorEditor = enRefuerzo ? codigoRefuerzo : codigo
   const cambiarCodigo = enRefuerzo ? setCodigoRefuerzo : setCodigo
   const etiquetaEditor = enRefuerzo ? 'Tu solución del refuerzo' : 'Código Python para explicar'
+  const fragmentoActivo = ['confianza', 'pregunta'].includes(fase) ? sesion.tema?.fragmento : fase === 'feedback' ? ultimo?.referencia : null
   return <main className="simulador mx-auto w-full max-w-[1680px] px-4 lg:px-8 py-6 space-y-6">
     <header className="border-b border-slate-800 pb-4">
       <h1 className="text-2xl font-bold flex items-center gap-2"><Code2 className="text-blue-400" /> Practica tu sustentación</h1>
@@ -286,7 +318,7 @@ export default function SimuladorPage() {
               <label>Tema <select value={tema} onChange={(e) => setTema(e.target.value)} className="bg-slate-900 border border-slate-600 rounded p-1"><option value="vs-dark">Oscuro</option><option value="vs">Claro</option><option value="hc-black">Alto contraste</option><option value="dracula">Dracula</option><option value="monokai">Monokai</option></select></label>
             </div>
           </details>
-        </> : <details open className="rounded-xl border border-slate-700"><summary className="cursor-pointer p-3 text-sm">Código de esta práctica</summary><pre className="max-h-[320px] lg:max-h-[560px] overflow-auto whitespace-pre-wrap bg-slate-950 p-4 text-sm"><code>{sesion.codigo}</code></pre></details>}
+        </> : <details open={codigoVisible} onToggle={(e) => setCodigoVisible(e.currentTarget.open)} className="rounded-xl border border-slate-700 overflow-hidden"><summary className="cursor-pointer p-3 text-sm">Código de esta práctica{fragmentoActivo ? ' · la parte de la pregunta está resaltada' : ''}</summary><CodigoResaltado codigo={sesion.codigo} fragmento={fragmentoActivo} /></details>}
         {enRefuerzo && <details><summary className="cursor-pointer text-sm">Consultar el código original</summary><pre className="mt-2 overflow-auto whitespace-pre-wrap rounded bg-slate-950 p-3 text-sm"><code>{sesion.codigo}</code></pre></details>}
         <p className="text-xs text-slate-400">No se ejecuta tu código. Tu código, tus respuestas y la retroalimentación se guardan cifrados y se borran 24 horas después de cerrar o de tu última actividad.</p>
         {aviso && <p role="status" className="text-amber-200 text-sm">{aviso}</p>}
@@ -309,10 +341,22 @@ export default function SimuladorPage() {
         </div>}
       </div>
       <section aria-label="Práctica" aria-busy={ocupado} className={`min-w-0 space-y-5 bg-slate-900/60 border border-slate-700 p-5 xl:p-7 rounded-xl break-words ${sesion ? 'order-first lg:order-none' : ''}`}>
-        <h2 className="text-lg font-bold flex items-center gap-2"><HelpCircle className="text-blue-400" /> Práctica guiada</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-bold flex items-center gap-2"><HelpCircle className="text-blue-400" /> Práctica guiada</h2>
+          {sesion && <Progreso sesion={sesion} />}
+        </div>
         {espera > 0 && <p className="text-amber-200">Podrás enviar de nuevo en {espera} s. Puedes seguir editando tu texto.</p>}
-        {error && <div role="alert" className="rounded-lg border border-red-700 p-3 text-red-200"><p>{error}</p>{sesion && <button disabled={ocupado} className="underline mt-2" onClick={() => enviar('recuperar')}>Recuperar el estado guardado</button>}</div>}
-        <p role="status" className="text-sm text-slate-400">{ocupado ? 'Procesando el paso…' : !sesion ? 'Pega tu código y pulsa «Comenzar práctica».' : ['cierre', 'refuerzo', 'refuerzo_revisado'].includes(fase) ? `Práctica cerrada con ${sesion.completadas} ${sesion.completadas === 1 ? 'pregunta' : 'preguntas'}.` : `Pregunta ${sesion.numero || sesion.completadas} de hasta ${sesion.limite}.`}</p>
+        {error && <div role="alert" className="rounded-lg border border-red-700 p-3 text-red-200 space-y-2"><p>{error}</p>
+          <div className="flex flex-wrap gap-3">{ultima.current && espera === 0 && <button disabled={ocupado} className="inline-flex items-center gap-2 rounded-lg border border-red-500 px-3 py-1.5 text-sm" onClick={reintentar}><RotateCcw aria-hidden="true" className="h-4 w-4" />Reintentar</button>}
+            {sesion && <button disabled={ocupado} className="underline text-sm" onClick={() => enviar('recuperar')}>Recuperar el estado guardado</button>}</div></div>}
+        {ocupado ? <Procesando accion={accionEnCurso} /> : !sesion && <div className="space-y-3 text-slate-300">
+          <p>Pega tu código a la izquierda y pulsa «Comenzar práctica».</p>
+          <ul className="space-y-2 text-sm text-slate-400">
+            <li className="flex gap-2"><CheckCircle2 aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-400" />Hasta tres preguntas sobre tu propio programa.</li>
+            <li className="flex gap-2"><CheckCircle2 aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-400" />Después de cada respuesta ves lo que explicaste, lo que falta y un siguiente paso.</li>
+            <li className="flex gap-2"><CheckCircle2 aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-400" />Puedes cerrar cuando quieras; no hay nota.</li>
+          </ul>
+        </div>}
         {caducada && <p className="rounded-lg border border-amber-600 p-3 text-amber-100">Esta práctica caducó (2 horas). Puedes revisar lo que hiciste o iniciar una nueva.</p>}
         {fase === 'confianza' && !caducada && <div className="space-y-4">
           <h3 ref={foco} tabIndex={-1} className="font-semibold text-lg">Pregunta {sesion.numero} · {sesion.tema.nombre}</h3>
@@ -320,8 +364,9 @@ export default function SimuladorPage() {
           {sesion.tema.fragmento && <pre className="overflow-x-auto rounded-lg bg-slate-950 p-3 text-sm"><code>{sesion.tema.fragmento}</code></pre>}
           <p id="confianza">Antes de ver la pregunta: sobre esta parte del programa, ¿qué tan seguro te sientes para explicarla?</p>
           <div role="group" aria-labelledby="confianza" className="grid grid-cols-5 gap-2">
-            {CONFIANZA.map(([valor, etiqueta]) => <button key={valor} disabled={bloqueado} onClick={() => enviar('confianza', { valor })} aria-label={`${valor}${etiqueta ? `, ${etiqueta}` : ''}`} className="rounded-lg border border-slate-500 py-3 hover:border-blue-400 disabled:opacity-50"><span className="block text-lg font-bold">{valor}</span><span className="block text-xs text-slate-300 min-h-4">{etiqueta}</span></button>)}
+            {CONFIANZA.map(([valor, etiqueta]) => <button key={valor} disabled={bloqueado} onClick={() => enviar('confianza', { valor })} aria-label={`${valor}, ${etiqueta}`} className="rounded-xl border border-slate-600 bg-slate-950/60 py-3 transition hover:-translate-y-0.5 hover:border-blue-400 hover:bg-blue-950/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400 disabled:opacity-50"><span className="block text-xl font-bold">{valor}</span><span className="block text-[11px] leading-tight text-slate-300 min-h-4 px-1">{etiqueta}</span></button>)}
           </div>
+          <p className="text-xs text-slate-500">Atajo: pulsa una tecla del 1 al 5. No hay respuesta correcta; solo nos ayuda a entender cómo te sientes.</p>
           <div className="flex flex-wrap gap-3">
             <button className={secundario} disabled={bloqueado} onClick={() => enviar('confianza', { valor: null })}>Prefiero no responder</button>
             <button className={secundario} disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'tema_no_cursado' })}>No he visto este tema</button>
@@ -329,13 +374,15 @@ export default function SimuladorPage() {
           </div>
         </div>}
         {fase === 'pregunta' && !caducada && <div className="space-y-4">
-          <h3 ref={foco} tabIndex={-1} className="font-semibold text-lg">Pregunta {sesion.numero}</h3>
-          <p className="whitespace-pre-wrap">{sesion.pregunta}</p>
+          <h3 className="font-semibold text-lg">Pregunta {sesion.numero} · {sesion.tema.nombre}</h3>
+          <p className="whitespace-pre-wrap text-lg leading-relaxed">{sesion.pregunta}</p>
           <details><summary className="cursor-pointer text-sm">Qué se observará</summary><ul className="list-disc pl-5 text-sm mt-2">{sesion.objetivos.map((o) => <li key={o}>{o}</li>)}</ul></details>
           {sesion.aclaracion && <p role="status" className="rounded-lg border border-blue-600 p-3">{sesion.aclaracion}</p>}
           <label htmlFor="respuesta" className="block text-sm">Cuéntalo con tus palabras</label>
-          <textarea id="respuesta" rows={7} maxLength={4000} value={respuesta} disabled={bloqueado} onChange={(e) => setRespuesta(e.target.value)} className="w-full bg-slate-950 border border-slate-600 rounded-lg p-3" />
-          <p className="text-xs text-slate-400">{respuesta.length}/4000 caracteres</p>
+          <textarea ref={foco} id="respuesta" rows={7} maxLength={4000} value={respuesta} disabled={bloqueado} onChange={(e) => setRespuesta(e.target.value)}
+            onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && respuesta.trim() && !evaluacionBloqueada) { e.preventDefault(); enviar('responder', { respuesta }) } }}
+            placeholder="Por ejemplo: «Recibe…, hace…, y devuelve…». Un ejemplo pequeño ayuda." className="w-full bg-slate-950 border border-slate-600 rounded-lg p-3 focus:border-blue-400" />
+          <p className="text-xs text-slate-400">{respuesta.length}/4000 caracteres · Ctrl + Enter para enviar · tu borrador se guarda en este navegador</p>
           <button className={boton} disabled={evaluacionBloqueada || !respuesta.trim()} onClick={() => enviar('responder', { respuesta })}>Enviar respuesta</button>
           <div className="flex flex-wrap gap-3">
             <button className={secundario} disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'no_se' })}>No sé / prefiero pasar</button>
@@ -371,13 +418,17 @@ export default function SimuladorPage() {
           </div> : <button className={boton} disabled={bloqueado} onClick={() => enviar('continuar')}>Ver el cierre</button>)}
         </div>}
         {fase === 'cierre' && sesion.resumen && <div className="space-y-5">
-          <h3 ref={foco} tabIndex={-1} className="text-xl font-bold">Cierre de la práctica</h3>
+          <h3 ref={foco} tabIndex={-1} className="text-xl font-bold flex items-center gap-2"><CheckCircle2 aria-hidden="true" className="h-6 w-6 text-emerald-400" />Práctica completada</h3>
           <Resumen resumen={sesion.resumen} />
+          <GuardarResumen resumen={sesion.resumen} historial={sesion.historial} />
           {sesion.resumen.refuerzoDisponible && <div className="rounded-xl border border-blue-700 p-4 space-y-3">
             <p>Si quieres, practica la misma idea con un ejercicio pequeño. Es opcional y no cambia tu cierre.</p>
             <button className={secundario} disabled={bloqueado} onClick={() => enviar('refuerzo')}>Probar un ejercicio opcional</button>
           </div>}
-          <button className={boton} disabled={ocupado} onClick={nuevaPractica}>Nueva práctica</button>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <button className={boton} disabled={ocupado} onClick={otroPrograma}>Practicar con otro programa</button>
+            <button className={`${secundario} py-3`} disabled={ocupado} onClick={nuevaPractica}>Repetir con este código</button>
+          </div>
         </div>}
         {enRefuerzo && sesion.refuerzo && <div className="space-y-4">
           <h3 ref={foco} tabIndex={-1} className="text-xl font-bold">Refuerzo opcional</h3>
@@ -391,7 +442,7 @@ export default function SimuladorPage() {
             <button className={boton} disabled={evaluacionBloqueada || !codigoRefuerzo.trim() || codigoRefuerzo.length > 12000} onClick={() => enviar('entregar', { codigo: codigoRefuerzo })}>Enviar mi solución</button>
           </div> : <EvaluacionRefuerzo evaluacion={sesion.evaluacionRefuerzo} />}
           <details><summary className="cursor-pointer">Volver a ver el cierre</summary><div className="mt-3"><Resumen resumen={sesion.resumen} /></div></details>
-          <button className={secundario} disabled={ocupado} onClick={nuevaPractica}>{fase === 'refuerzo' ? 'Terminar por ahora' : 'Nueva práctica'}</button>
+          <button className={secundario} disabled={ocupado} onClick={otroPrograma}>{fase === 'refuerzo' ? 'Terminar por ahora' : 'Practicar con otro programa'}</button>
         </div>}
         {!!sesion?.historial.length && <details className="border-t border-slate-700 pt-3"><summary className="cursor-pointer">Tus respuestas en esta práctica</summary><ol className="space-y-5 mt-3">{sesion.historial.map((h, i) => <li key={h.instancia || i} className="text-sm space-y-2"><p className="font-semibold">{i + 1}. {h.pregunta}</p>{h.respuesta && <p className="whitespace-pre-wrap text-slate-300">{h.respuesta}</p>}<p>{h.feedback.estado}</p><Retroalimentacion registro={h} /></li>)}</ol></details>}
       </section>

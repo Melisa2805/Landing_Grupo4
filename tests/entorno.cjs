@@ -71,7 +71,7 @@ async function entorno({ env, transport, pythonDisponible = true, reloj, db, usu
   }
   async function crearModulo(nombre) {
     let modulo
-    if (nombre.startsWith('node:') || ['react', 'react/jsx-runtime'].includes(nombre)) {
+    if (nombre.startsWith('node:') || ['react', 'react/jsx-runtime', 'lucide-react'].includes(nombre)) {
       let nativo = require(nombre)
       if (nombre === 'node:child_process' && !pythonDisponible) nativo = { ...nativo, execFile: (bin, args, options, callback) => {
         const { PassThrough } = require('node:stream')
@@ -106,7 +106,7 @@ async function entorno({ env, transport, pythonDisponible = true, reloj, db, usu
       modulo = new vm.SourceTextModule(source, { context: contexto, identifier: nombre, importModuleDynamically: (specifier) => import(specifier) })
     }
     await modulo.link(async (specifier, padre) => {
-      if (['next/server', '@clerk/nextjs/server'].includes(specifier) || specifier.startsWith('node:') || specifier.startsWith('react')) return cargar(specifier)
+      if (['next/server', '@clerk/nextjs/server', 'lucide-react'].includes(specifier) || specifier.startsWith('node:') || specifier.startsWith('react')) return cargar(specifier)
       const destino = path.resolve(path.dirname(padre.identifier), specifier)
       return cargar(path.extname(destino) ? destino : `${destino}.js`)
     })

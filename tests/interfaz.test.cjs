@@ -69,3 +69,17 @@ test('contrato de interfaz: identidad, confianza previa, cierre, reparación y b
   const landing = await fs.readFile('app/components/landing-showcase.jsx', 'utf8')
   assert.ok(!landing.includes('pydefense codigo.py'))
 })
+
+test('render: progreso sin juicio, código resaltado y resumen exportable sin cifras', async () => {
+  const e = await entorno()
+  const { Progreso, CodigoResaltado, textoResumen } = await e.importar('app/simulador/ux.jsx')
+  const sesion = { fase: 'confianza', limite: 3, historial: [{ omitida: false }, { omitida: true }] }
+  const progreso = renderToStaticMarkup(React.createElement(Progreso, { sesion }))
+  for (const texto of ['Pregunta 1: respondida', 'Pregunta 2: omitida', 'Pregunta 3: en curso', 'Cierre: pendiente']) assert.ok(progreso.includes(texto), texto)
+  assert.ok(!/incorrect|error|fall/i.test(progreso))
+  const codigo = renderToStaticMarkup(React.createElement(CodigoResaltado, { codigo: 'def f(x):\n    return x * 2', fragmento: 'return x * 2' }))
+  assert.equal((codigo.match(/border-blue-400/g) || []).length, 1)
+  const texto = textoResumen({ evidencia: { texto: 'Explicaste la suma.' }, duda: null, siguientePaso: 'Prueba otro ejemplo.', limites: ['No certifica dominio.'] }, [{ pregunta: '¿Qué hace?', respuesta: 'Suma.', feedback: { estado: 'Explicación parcial' } }])
+  for (const t of ['Lo que explicaste: Explicaste la suma.', 'Siguiente paso: Prueba otro ejemplo.', 'Tu respuesta: Suma.']) assert.ok(texto.includes(t), t)
+  assert.ok(sinCifras(texto))
+})
