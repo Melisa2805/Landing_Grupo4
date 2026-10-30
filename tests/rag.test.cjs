@@ -9,7 +9,7 @@ const preguntas = [
   { pregunta: '¿Qué devuelve doble(3)?', contexto: 'x * 2' },
   { pregunta: '¿Qué cambia si x es una cadena?', contexto: 'x' },
 ]
-const peticion = (data) => ({ json: async () => data })
+const peticion = (data) => new Request('http://localhost/api/legado', { method: 'POST', body: typeof data === 'string' ? data : JSON.stringify(data) })
 
 test('valida 92 originales, pesos, recuperación y negativos estructurales', async () => {
   const e = await entorno()
@@ -45,6 +45,31 @@ test('valida 92 originales, pesos, recuperación y negativos estructurales', asy
     assert.ok(k.recuperarCompetencias(c).every((r) => r.nivel_conocimiento < 4))
   }
   assert.equal(e.llamadas.length, 0)
+  // The introductory filter is applied before ranking.
+  for (const [c] of casos) assert.ok(k.recuperarCompetencias(c, 2).every((r) => r.nivel_conocimiento <= 2))
+})
+
+test('rutas heredadas exigen identidad y acotan el cuerpo antes de leerlo; sin llamadas al proveedor', async () => {
+  const e = await entorno()
+  const generar = await e.importar('app/api/generar-preguntas/route.js')
+  const evaluar = await e.importar('app/api/evaluar-respuestas/route.js')
+  e.comoUsuario(null)
+  for (const ruta of [generar, evaluar]) assert.equal((await ruta.POST(peticion({ codigo, preguntas }))).status, 401)
+  e.comoUsuario('user_prueba_a')
+  for (const ruta of [generar, evaluar]) {
+    assert.equal((await ruta.POST(peticion('x'.repeat(60001)))).status, 413)
+    assert.equal((await ruta.POST(peticion('{'))).status, 400)
+  }
+  assert.equal(e.llamadas.length, 0)
+})
+
+test('rutas heredadas consumen la cuota diaria compartida', async () => {
+  const e = await entorno({ env: { LLM_BASE_URL: 'https://llm.test/v1', LLM_MODEL: 'modelo-simulado', LLM_API_KEY: 'clave-ficticia-tests', PYDEFENSE_CUOTA_USUARIO_DIA: '1' } })
+  const generar = await e.importar('app/api/generar-preguntas/route.js')
+  e.responder({ preguntas })
+  assert.equal((await generar.POST(peticion({ codigo }))).status, 200)
+  assert.equal((await generar.POST(peticion({ codigo }))).status, 500)
+  assert.equal(e.llamadas.length, 1)
 })
 
 test('rutas conservan JSON, contexto acotado y una llamada por endpoint', async () => {

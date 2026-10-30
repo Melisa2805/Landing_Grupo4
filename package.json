@@ -3,30 +3,38 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "npm run test:rag && npm run test:adaptativo && npm run test:pedagogia && npm run test:interfaz && npm run test:estabilidad",
-    "test:pedagogia": "node --experimental-vm-modules tests/pedagogia-v3.test.cjs",
+    "test": "npm run test:rag && npm run test:adaptativo && npm run test:pedagogia && npm run test:interfaz && npm run test:estabilidad && npm run test:persistencia && npm run test:medicion",
+    "test:pedagogia": "node --experimental-vm-modules tests/pedagogia.test.cjs",
     "test:interfaz": "node --experimental-vm-modules tests/interfaz.test.cjs",
     "test:rag": "node --experimental-vm-modules tests/rag.test.cjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "test:adaptativo": "node --experimental-vm-modules tests/adaptativo.test.cjs",
     "test:estabilidad": "node --experimental-vm-modules tests/estabilidad.test.cjs",
     "test:proveedor": "node --experimental-vm-modules scripts/comprobar-proveedor.cjs",
-    "test:recorrido": "node tests/recorrido.cjs"
+    "test:recorrido": "node tests/recorrido.cjs",
+    "test:persistencia": "node --experimental-vm-modules tests/persistencia.test.cjs",
+    "test:medicion": "node --experimental-vm-modules tests/medicion.test.cjs",
+    "experimento": "node --experimental-vm-modules scripts/experimento.cjs",
+    "test:postgres": "node --experimental-vm-modules tests/postgres.test.cjs"
   },
   "dependencies": {
-    "@clerk/nextjs": "^5.0.0",
+    "@clerk/nextjs": "^7.9.22",
+    "@electric-sql/pglite": "^0.5.13",
     "@monaco-editor/react": "^4.7.0",
-    "lucide-react": "^0.359.0",
-    "next": "14.1.4",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "lucide-react": "^1.64.0",
+    "next": "16.4.3",
+    "pg": "^8.23.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.1"
+    "autoprefixer": "^10.6.2",
+    "postcss": "^8.5.32",
+    "tailwindcss": "^3.4.19"
+  },
+  "overrides": {
+    "dompurify": "3.4.17"
   }
 }

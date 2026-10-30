@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Editor from '@monaco-editor/react'
-import { Retroalimentacion, Diagnostico, EvaluacionFinal } from './components'
+import { useAuth, SignInButton } from '@clerk/nextjs'
+import { Retroalimentacion, Resumen, EvaluacionRefuerzo } from './components'
+import { PUNTOS_CONSENTIMIENTO, VERSION_CONSENTIMIENTO } from '../../lib/consentimiento'
+import { CODIGO_EJEMPLO, esEjemplo } from '../../lib/ejemplo'
 import { Code2, HelpCircle } from 'lucide-react'
 
 // Definición nativa del tema Dracula
@@ -53,69 +56,86 @@ function EnunciadoEjercicio({ texto }) {
   )
 }
 
-function esperadoBreve(valor) {
-  return typeof valor === 'string' && /^-?\d+\.\d{6,}$/.test(valor)
-    ? `≈ ${Number(valor).toLocaleString('es-CO', { maximumFractionDigits: 3 })}`
-    : valor
+const TEMAS = [['basico', 'Variables, operaciones y funciones'], ['condicionales', 'También condicionales'], ['ciclos_listas', 'También ciclos y listas'], ['no_seguro', 'No estoy seguro']]
+const CONFIANZA = [[1, 'Nada seguro'], [2, ''], [3, 'Algo seguro'], [4, ''], [5, 'Muy seguro']]
+const DIA_MS = 24 * 3600_000
+const boton = 'w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-white'
+const secundario = 'border border-slate-500 px-4 py-2 rounded-lg disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white'
+
+async function publicar(ruta, body, signal) {
+  const res = await fetch(ruta, { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal, body: JSON.stringify(body) })
+  return { res, data: await res.json().catch(() => ({})) }
 }
 
-// Omitted or "no sé" answers have no graded criteria; two reviews is the limit.
-const revisable = (h) => !!h && !h.omitida && !!h.criterios?.length && (h.revisiones?.length || 0) < 2
-
-const CLAVE_BORRADOR = 'pydefense-v3'
-const boton = 'w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-white'
-
 export default function SimuladorPage() {
-  const [codigo, setCodigo] = useState(`def calcular_promedio(notas):
-    total = sum(notas)
-    return total / len(notas) if notas else 0`)
-  const [tema, setTema] = useState('dracula')
-  const [sencillo, setSencillo] = useState(false)
+  const { isLoaded, isSignedIn, userId } = useAuth()
+  const [estado, setEstado] = useState(null)
+  const [codigo, setCodigo] = useState(CODIGO_EJEMPLO)
+  const [temas, setTemas] = useState('')
   const [sesion, setSesion] = useState(null)
   const [respuesta, setRespuesta] = useState('')
-  const [codigoPractica, setCodigoPractica] = useState('')
-  const [motivoRevision, setMotivoRevision] = useState('')
-  const [numeroRevision, setNumeroRevision] = useState('')
-  const [maxPreguntas, setMaxPreguntas] = useState(5)
+  const [codigoRefuerzo, setCodigoRefuerzo] = useState('')
+  const [reparacion, setReparacion] = useState({ tipo: '', texto: '' })
+  const [tema, setTema] = useState('dracula')
+  const [sencillo, setSencillo] = useState(false)
   const [ocupado, setOcupado] = useState(false)
   const [listo, setListo] = useState(false)
-  const [tokenRecuperar, setTokenRecuperar] = useState(null)
   const [error, setError] = useState('')
+  const [sintaxis, setSintaxis] = useState(null)
   const [esperaHasta, setEsperaHasta] = useState(0)
   const [ahora, setAhora] = useState(Date.now())
-  const [avisoGuardado, setAvisoGuardado] = useState('')
+  const [aviso, setAviso] = useState('')
+  const [utilidad, setUtilidad] = useState({})
   const solicitud = useRef(null)
   const foco = useRef(null)
-  const borrador = useRef(null)
   const inicio = useRef(null)
+  const guardada = useRef(null)
+  const visita = useRef(null)
+  const acuses = useRef(new Set())
+  const clave = userId ? `pydefense-v4:${userId}` : null
 
+  // Draft and the open practice are restored per signed-in user; an old draft
+  // (more than 24 hours) is discarded.
   useEffect(() => {
+    if (!clave) return
     try {
-      const guardado = JSON.parse(localStorage.getItem(CLAVE_BORRADOR) || 'null')
-      if (guardado) {
-        if (Number.isFinite(guardado.esperaHasta)) setEsperaHasta(guardado.esperaHasta)
-        if (typeof guardado.codigo === 'string') setCodigo(guardado.codigo)
-        if (typeof guardado.respuesta === 'string') setRespuesta(guardado.respuesta)
-        if (typeof guardado.codigoPractica === 'string') setCodigoPractica(guardado.codigoPractica)
-        if (['vs-dark', 'vs', 'hc-black', 'dracula', 'monokai'].includes(guardado.tema)) setTema(guardado.tema)
-        if (Number.isInteger(guardado.maxPreguntas)) setMaxPreguntas(Math.max(1, Math.min(5, guardado.maxPreguntas)))
-        if (guardado.token) setTokenRecuperar(guardado.token)
-        if (guardado.inicio?.idSolicitud) {
-          const { codigo, maxPreguntas, idSolicitud } = guardado.inicio
-          inicio.current = { codigo, maxPreguntas, idSolicitud }
-        }
-      }
-    } catch { setAvisoGuardado('No fue posible leer el borrador local. Puedes comenzar una nueva práctica.') }
+      const d = JSON.parse(localStorage.getItem(clave) || 'null')
+      if (d && Date.now() - d.guardadoEn < DIA_MS) {
+        for (const [campo, fijar] of [['codigo', setCodigo], ['respuesta', setRespuesta], ['codigoRefuerzo', setCodigoRefuerzo], ['temas', setTemas], ['tema', setTema]]) if (typeof d[campo] === 'string' && (campo !== 'codigo' || d[campo].trim())) fijar(d[campo])
+        guardada.current = typeof d.sesion === 'string' ? d.sesion : null
+        inicio.current = d.inicio?.idSolicitud ? d.inicio : null
+      } else localStorage.removeItem(clave)
+    } catch { setAviso('No fue posible leer el borrador local. Puedes comenzar una nueva práctica.') }
+    try {
+      visita.current = sessionStorage.getItem('pydefense-visita') || crypto.randomUUID()
+      sessionStorage.setItem('pydefense-visita', visita.current)
+    } catch { visita.current = crypto.randomUUID() }
     setListo(true)
     return () => { solicitud.current?.abort(); solicitud.current = null }
-  }, [])
-  useEffect(() => { foco.current?.focus() }, [sesion?.fase, sesion?.numero])
+  }, [clave])
   useEffect(() => {
-    if (!listo) return
-    borrador.current = { codigo, respuesta, codigoPractica, tema, maxPreguntas, token: sesion?.token || tokenRecuperar, inicio: inicio.current, esperaHasta }
-    try { localStorage.setItem(CLAVE_BORRADOR, JSON.stringify(borrador.current)) }
-    catch { setAvisoGuardado('El navegador no permite guardar el borrador. Mantén esta pestaña abierta para conservar el progreso.') }
-  }, [listo, codigo, respuesta, codigoPractica, tema, maxPreguntas, sesion, tokenRecuperar, esperaHasta])
+    if (!listo || !clave) return
+    try { localStorage.setItem(clave, JSON.stringify({ codigo, respuesta, codigoRefuerzo, temas, tema, sesion: sesion?.sesion || guardada.current, inicio: inicio.current, guardadoEn: Date.now() })) }
+    catch { setAviso('El navegador no permite guardar el borrador. Mantén esta pestaña abierta para conservar el progreso.') }
+  }, [listo, clave, codigo, respuesta, codigoRefuerzo, temas, tema, sesion])
+  useEffect(() => {
+    if (!listo || estado) return
+    let llegadaLocal = null
+    try {
+      llegadaLocal = Number(sessionStorage.getItem('pydefense-llegada')) || null
+      sessionStorage.removeItem('pydefense-llegada')
+    } catch {}
+    publicar('/api/participacion', { accion: 'estado', visita: visita.current, llegadaLocal }).then(({ res, data }) => {
+      if (!res.ok) return setError(data.error || 'No se pudo cargar tu participación. Recarga la página.')
+      setEstado(data)
+      if (!data.consentimiento.vigente) return
+      const recuperable = guardada.current || data.practicaAbierta
+      if (recuperable) enviar('recuperar', { sesion: recuperable })
+    }).catch(() => setError('No se pudo conectar. Recarga la página para continuar.'))
+    // The status is loaded once per visit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listo])
+  useEffect(() => { foco.current?.focus() }, [sesion?.fase, sesion?.numero])
   useEffect(() => {
     if (esperaHasta <= Date.now()) return
     const timer = setInterval(() => {
@@ -125,144 +145,260 @@ export default function SimuladorPage() {
     }, 1000)
     return () => clearInterval(timer)
   }, [esperaHasta])
+  // Acknowledgements are sent only while the tab is visible: a question or a
+  // feedback block counts as shown once it is on screen.
   useEffect(() => {
-    if (listo && tokenRecuperar) enviar('recuperar', tokenRecuperar)
-    // Recovery runs once per saved token, not on every draft edit.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listo, tokenRecuperar])
+    if (!sesion || !['pregunta', 'feedback'].includes(sesion.fase)) return
+    const h = sesion.historial.at(-1)
+    const acuse = sesion.fase === 'pregunta' ? { tipo: 'pregunta_mostrada', instancia: sesion.instancia } : { tipo: 'feedback_visto', instancia: h.instancia, version: h.version }
+    const id = `${sesion.sesion}:${acuse.tipo}:${acuse.instancia}:${acuse.version || ''}`
+    const intentar = () => {
+      if (acuses.current.has(id) || document.visibilityState !== 'visible') return
+      acuses.current.add(id)
+      publicar('/api/sustentacion', { accion: 'acuse', sesion: sesion.sesion, ...acuse }).catch(() => acuses.current.delete(id))
+    }
+    intentar()
+    document.addEventListener('visibilitychange', intentar)
+    return () => document.removeEventListener('visibilitychange', intentar)
+  }, [sesion])
 
-  function reiniciar() {
+  function nuevaPractica() {
     solicitud.current?.abort()
     solicitud.current = null
-    setOcupado(false); setSesion(null); setTokenRecuperar(null)
-    setRespuesta(''); setCodigoPractica(''); setError('')
+    setOcupado(false); setSesion(null); setRespuesta(''); setCodigoRefuerzo(''); setError(''); setSintaxis(null); setReparacion({ tipo: '', texto: '' })
+    guardada.current = null
     inicio.current = null
-    setMotivoRevision(''); setNumeroRevision('')
   }
-  async function enviar(accion, token = sesion?.token) {
+  async function enviar(accion, extra = {}) {
     if (solicitud.current) return
-    if (['responder', 'revisar', 'entregar'].includes(accion) && esperaHasta > Date.now()) return
+    if (['responder', 'reparar', 'entregar'].includes(accion) && esperaHasta > Date.now()) return
     const controller = new AbortController()
     solicitud.current = controller
     setOcupado(true); setError('')
     const timeout = setTimeout(() => controller.abort(), 55000)
     try {
-      if (accion === 'iniciar' && (inicio.current?.codigo !== codigo || inicio.current?.maxPreguntas !== maxPreguntas)) {
-        inicio.current = { codigo, maxPreguntas, idSolicitud: crypto.randomUUID() }
-        try { localStorage.setItem(CLAVE_BORRADOR, JSON.stringify({ ...borrador.current, inicio: inicio.current })) }
-        catch { setAvisoGuardado('No fue posible guardar el inicio para reintentos tras una recarga.') }
-      }
-      const body = accion === 'iniciar' ? { accion, ...inicio.current } : { accion, token,
-        ...(accion === 'responder' ? { respuesta } : accion === 'corregir' ? { codigo } : accion === 'entregar' ? { codigo: codigoPractica } : accion === 'revisar' ? { motivo: motivoRevision, numero: Number(numeroRevision || sesion.numero) } : {}) }
-      const res = await fetch('/api/sustentacion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify(body) })
-      const data = await res.json()
+      let body
+      if (accion === 'iniciar') {
+        // The level is optional; the task is derived from the code on the server.
+        const firma = JSON.stringify([codigo, temas])
+        if (inicio.current?.firma !== firma) inicio.current = { firma, idSolicitud: crypto.randomUUID() }
+        body = { accion, codigo, temas: temas || undefined, idSolicitud: inicio.current.idSolicitud, visita: visita.current }
+      } else body = { accion, sesion: extra.sesion || sesion?.sesion, ...(accion === 'recuperar' ? {} : { revision: sesion.revision, ...extra }) }
+      const { res, data } = await publicar('/api/sustentacion', body, controller.signal)
       if (solicitud.current !== controller) return
-      if (!res.ok) {
-        if (data.codigo === 'LLM_LIMITE' && Number.isFinite(data.retryAfter)) {
-          setAhora(Date.now()); setEsperaHasta(Date.now() + Math.max(1, data.retryAfter) * 1000)
-        }
-        throw new Error(`${data.error || 'No se pudo completar el paso.'}${data.referencia ? ` Referencia: ${data.referencia}` : ''}`)
-      }
-      if (!data.token || !['pregunta', 'feedback', 'practica', 'final'].includes(data.fase) || !Array.isArray(data.historial) || (data.fase === 'pregunta' && typeof data.pregunta !== 'string') || (['practica', 'final'].includes(data.fase) && !data.resultado)) throw new Error('Respuesta incompleta del servidor. Reintenta.')
-      if (solicitud.current !== controller) return
-      if (!['iniciar', 'recuperar'].includes(accion)) {
-        const esperadas = sesion.historial.length + (accion === 'saltar' || accion === 'responder' && data.fase === 'feedback' ? 1 : 0)
-        if (data.historial.length !== esperadas || (accion === 'responder' && !['pregunta', 'feedback'].includes(data.fase)) || (accion === 'entregar' && data.fase !== 'final') || sesion.historial.some((h, i) => h.pregunta !== data.historial[i]?.pregunta || h.respuesta !== data.historial[i]?.respuesta)) throw new Error('El servidor devolvió un progreso inconsistente. Recupera el estado guardado.')
-      }
-      setSesion(data); setCodigo(data.codigo); setTokenRecuperar(null)
-      if (data.codigoPractica) setCodigoPractica(data.codigoPractica)
-      if (['continuar', 'iniciar', 'saltar'].includes(accion)) setRespuesta('')
-      if (accion === 'revisar') setMotivoRevision('')
+      if (!res.ok) return manejarError(res, data, accion)
+      if (!data.sesion || !Array.isArray(data.historial) || (sesion && accion !== 'recuperar' && accion !== 'iniciar' && (data.sesion !== sesion.sesion || data.revision < sesion.revision))) throw new Error('inconsistente')
+      setSesion(data); setSintaxis(null)
+      guardada.current = data.sesion
+      if (accion === 'iniciar') inicio.current = null
+      if (data.codigoRefuerzo) setCodigoRefuerzo(data.codigoRefuerzo)
+      if (['continuar', 'saltar', 'cerrar'].includes(accion) || (accion === 'responder' && data.fase === 'feedback')) setRespuesta('')
+      if (accion === 'reparar') setReparacion({ tipo: '', texto: '' })
     } catch (e) {
-      if (solicitud.current === controller) setError(e.name === 'AbortError' ? 'Se agotó el tiempo. Tu borrador se conserva; vuelve a intentar o recupera el estado guardado.' : e.message)
+      if (solicitud.current === controller) setError(e.name === 'AbortError' ? 'Se agotó el tiempo. Tu texto se conserva; vuelve a intentar o recupera el estado guardado.' : e.message === 'inconsistente' ? 'El servidor devolvió un progreso inconsistente. Recupera el estado guardado.' : 'No se pudo conectar. Tu texto se conserva; reintenta.')
     } finally {
       clearTimeout(timeout)
       if (solicitud.current === controller) { solicitud.current = null; setOcupado(false) }
     }
   }
+  function manejarError(res, data, accion) {
+    if (data.codigo === 'SINTAXIS_PENDIENTE') return setSintaxis((s) => ({ linea: data.linea, detalle: data.detalleSintaxis, intentos: (s?.intentos || 0) + 1 }))
+    if (data.codigo === 'CONSENTIMIENTO_PENDIENTE') return setEstado((e) => e && { ...e, consentimiento: { ...e.consentimiento, vigente: false } })
+    if (accion === 'recuperar' && ['SESION_INVALIDA', 'SESION_CADUCADA'].includes(data.codigo)) {
+      guardada.current = null
+      setSesion(null)
+      return setAviso('La práctica guardada ya no está disponible. Tu código sigue en el editor.')
+    }
+    if (data.codigo === 'LLM_LIMITE' && Number.isFinite(data.retryAfter)) { setAhora(Date.now()); setEsperaHasta(Date.now() + Math.max(1, data.retryAfter) * 1000) }
+    setError(res.status === 401 ? 'Tu sesión de usuario terminó. Vuelve a iniciar sesión; tu texto se conserva.' : `${data.error || 'No se pudo completar el paso.'}${data.referencia ? ` Referencia: ${data.referencia}` : ''}`)
+  }
+  async function consentir() {
+    setOcupado(true)
+    const { res, data } = await publicar('/api/participacion', { accion: 'consentir', version: VERSION_CONSENTIMIENTO }).catch(() => ({ res: { ok: false }, data: {} }))
+    setOcupado(false)
+    if (!res.ok) return setError(data.error || 'No se pudo registrar tu aceptación. Reintenta.')
+    setEstado(data)
+  }
+  async function retirar() {
+    if (!window.confirm('Se borrarán tus prácticas, tareas y eventos. ¿Quieres retirarte?')) return
+    setOcupado(true)
+    const { res } = await publicar('/api/participacion', { accion: 'retirar' }).catch(() => ({ res: { ok: false } }))
+    setOcupado(false)
+    if (!res.ok) return setError('No se pudo completar el retiro. Reintenta.')
+    try { localStorage.removeItem(clave) } catch {}
+    nuevaPractica(); setCodigo(''); setTemas('')
+    setEstado(null); setListo(false); setAviso('Tus prácticas y eventos se borraron. Puedes cerrar esta página.')
+  }
+  function utilidadFeedback(h, valor) {
+    setUtilidad((u) => ({ ...u, [`${h.instancia}:${h.version}`]: valor }))
+    publicar('/api/sustentacion', { accion: 'acuse', tipo: 'utilidad', sesion: sesion.sesion, instancia: h.instancia, version: h.version, valor }).catch(() => {})
+  }
+
+  if (!isLoaded) return <main className="max-w-2xl mx-auto px-4 py-12"><p role="status">Cargando…</p></main>
+  if (!isSignedIn) return <main className="max-w-2xl mx-auto px-4 py-12 space-y-5">
+    <h1 className="text-2xl font-bold flex items-center gap-2"><Code2 className="text-blue-400" /> Practica la explicación de tu código</h1>
+    <p className="text-slate-300">Inicia sesión para practicar. Tu práctica queda asociada a tu cuenta para que puedas recuperarla si se interrumpe.</p>
+    <SignInButton mode="modal"><button className={boton}>Iniciar sesión para practicar</button></SignInButton>
+  </main>
+  if (!estado) return <main className="max-w-2xl mx-auto px-4 py-12 space-y-3">{error ? <p role="alert" className="text-red-200">{error}</p> : aviso ? <p role="status">{aviso}</p> : <p role="status">Preparando tu práctica…</p>}</main>
+  if (!estado.consentimiento.vigente) return <main className="max-w-2xl mx-auto px-4 py-12 space-y-5">
+    <h1 className="text-2xl font-bold">Antes de practicar</h1>
+    <p className="text-slate-300">Esta prueba registra tus usos durante siete días. Lee cómo se usan tus datos:</p>
+    <ul className="list-disc pl-5 space-y-2 text-slate-200">{PUNTOS_CONSENTIMIENTO.map((p) => <li key={p}>{p}</li>)}</ul>
+    <p className="text-sm text-slate-300">Proveedor de IA configurado: {estado.proveedor || 'no informado por el servidor'}. Responsable: {estado.contacto || 'el equipo del Grupo 4'}.</p>
+    {error && <p role="alert" className="text-red-200">{error}</p>}
+    <button className={boton} disabled={ocupado} onClick={consentir}>Acepto y quiero practicar</button>
+  </main>
+
   const ultimo = sesion?.historial.at(-1)
-  const resultado = sesion?.resultado
-  const practica = sesion?.fase === 'practica'
-  const mostrandoSolucion = practica || sesion?.fase === 'final'
-  const bloqueado = ocupado || !listo || !!tokenRecuperar
+  const fase = sesion?.fase
+  const editable = !sesion || fase === 'refuerzo'
+  const enRefuerzo = ['refuerzo', 'refuerzo_revisado'].includes(fase)
+  const bloqueado = ocupado || !listo
   const espera = Math.max(0, Math.ceil((esperaHasta - ahora) / 1000))
   const evaluacionBloqueada = bloqueado || espera > 0
-  const valorEditor = mostrandoSolucion ? codigoPractica : codigo
-  const cambiarCodigo = mostrandoSolucion ? setCodigoPractica : setCodigo
-  const corregible = sesion?.fase === 'pregunta' && sesion?.analisis.estado === 'invalida'
-  const editorBloqueado = bloqueado || (!!sesion && !practica && !corregible)
+  const caducada = sesion && !sesion.vigente && ['confianza', 'pregunta', 'feedback'].includes(fase)
+  const valorEditor = enRefuerzo ? codigoRefuerzo : codigo
+  const cambiarCodigo = enRefuerzo ? setCodigoRefuerzo : setCodigo
+  const etiquetaEditor = enRefuerzo ? 'Tu solución del refuerzo' : 'Código Python para explicar'
   return <main className="simulador mx-auto w-full max-w-[1680px] px-4 lg:px-8 py-6 space-y-6">
     <header className="border-b border-slate-800 pb-4">
-      <h1 className="text-2xl font-bold flex items-center gap-2"><Code2 className="text-blue-400" /> Simulador de Sustentación</h1>
-      <p className="text-slate-300 mt-2">Explica, revisa tu progreso y escribe una solución propia. Una pregunta a la vez, hasta {sesion?.maxPreguntas || maxPreguntas} preguntas.</p>
-      <ol aria-label="Etapas" className="flex flex-wrap gap-3 text-sm mt-3 text-slate-300"><li className={!resultado ? 'text-blue-300 font-bold' : ''}>1. Sustentación</li><li className={practica ? 'text-blue-300 font-bold' : ''}>2. Diagnóstico y programación</li><li className={sesion?.fase === 'final' ? 'text-emerald-300 font-bold' : ''}>3. Evaluación final</li></ol>
+      <h1 className="text-2xl font-bold flex items-center gap-2"><Code2 className="text-blue-400" /> Practica tu sustentación</h1>
+      <p className="text-slate-300 mt-2">Pega el código que necesitas explicar. Hasta tres preguntas; puedes cerrar después de cada explicación. No hay nota: recibes lo que explicaste, lo que falta y un siguiente paso.</p>
     </header>
     <div className="grid lg:grid-cols-2 gap-5 xl:gap-8 items-start">
       <div className="min-w-0 space-y-4 lg:sticky lg:top-24">
-        <div className="flex flex-wrap justify-between items-center gap-3">
-          <h2 className="font-semibold">{mostrandoSolucion ? 'Tu solución Python' : 'Código Python para sustentar'}</h2>
-          <label className="text-sm">Tema <select value={tema} onChange={(e) => setTema(e.target.value)} className="bg-slate-900 border border-slate-600 rounded p-1"><option value="vs-dark">Oscuro</option><option value="vs">Claro</option><option value="hc-black">Alto contraste</option><option value="dracula">Dracula</option><option value="monokai">Monokai</option></select></label>
-        </div>
-        <label className="flex items-center gap-2 text-sm text-slate-300"><input type="checkbox" checked={sencillo} onChange={(e) => setSencillo(e.target.checked)} />Usar editor de texto sencillo</label>
-        <div className="border border-slate-700 rounded-xl overflow-hidden min-w-0">
-          {sencillo ? <textarea aria-label={mostrandoSolucion ? 'Tu solución Python' : 'Código Python para sustentar'} value={valorEditor} readOnly={editorBloqueado} maxLength={12000} onChange={(e) => cambiarCodigo(e.target.value)} spellCheck={false} className="w-full h-[480px] bg-slate-950 p-4 font-mono text-sm resize-y" /> : <Editor height="480px" language="python" theme={tema} value={valorEditor}
-            loading={<p className="p-4">Cargando editor… Si tarda, activa el editor de texto sencillo.</p>}
-            beforeMount={(monaco) => { monaco.editor.defineTheme('dracula', draculaTheme); monaco.editor.defineTheme('monokai', monokaiTheme) }}
-            onChange={(value) => cambiarCodigo(value || '')}
-            options={{ readOnly: editorBloqueado, ariaLabel: mostrandoSolucion ? 'Tu solución Python' : 'Código Python para sustentar', minimap: { enabled: false }, fontSize: 15, automaticLayout: true, tabSize: 4, scrollBeyondLastLine: false, wordWrap: 'on' }} />}
-        </div>
-        <p className="text-sm text-slate-300">{valorEditor.length}/12000 caracteres. {practica ? 'Escribe tu solución y envíala una vez para cerrar la práctica.' : sesion ? 'Código fijado para esta sesión.' : 'Pega tu código para comenzar.'}</p>
-        <p className="text-xs text-slate-400">Se analiza la sintaxis cuando Python está disponible. No se ejecuta código estudiantil. Progreso y borradores se conservan en este navegador; la sesión caduca a las 2 horas.</p>
-        {avisoGuardado && <p role="status" className="text-amber-200 text-sm">{avisoGuardado}</p>}
-        {!sesion && !tokenRecuperar && <><label className="block text-sm">Máximo de preguntas <select className="bg-slate-900 rounded border border-slate-600 p-2 ml-2" value={maxPreguntas} disabled={bloqueado} onChange={(e) => setMaxPreguntas(Number(e.target.value))}>{[1, 2, 3, 4, 5].map((n) => <option key={n}>{n}</option>)}</select></label><button className={boton} disabled={bloqueado || !codigo.trim() || codigo.length > 12000} onClick={() => enviar('iniciar')}>Comenzar sustentación</button></>}
-        {corregible && <button className={boton} disabled={bloqueado || !codigo.trim()} onClick={() => enviar('corregir')}>Comprobar corrección</button>}
-        {practica && <button className={boton} disabled={evaluacionBloqueada || !codigoPractica.trim() || codigoPractica.length > 12000} onClick={() => enviar('entregar')}>Enviar código y finalizar</button>}
-        {mostrandoSolucion && <details><summary className="cursor-pointer text-sm">Consultar código original</summary><pre className="mt-2 overflow-auto whitespace-pre-wrap rounded bg-slate-950 p-3 text-sm"><code>{codigo}</code></pre></details>}
-        {(sesion || tokenRecuperar) && <button disabled={ocupado} className="border border-slate-600 rounded-xl p-3 w-full disabled:opacity-50" onClick={reiniciar}>Iniciar una nueva práctica</button>}
-      </div>
-      <section aria-label="Sustentación" aria-busy={ocupado} className="min-w-0 space-y-5 bg-slate-900/60 border border-slate-700 p-5 xl:p-7 rounded-xl break-words">
-        <h2 className="text-lg font-bold flex items-center gap-2"><HelpCircle className="text-blue-400" /> Práctica guiada</h2>
-        {espera > 0 && <p className="text-amber-200">Podrás solicitar otra evaluación en {espera} s. Puedes seguir editando tu respuesta.</p>}
-        {error && <div role="alert" className="rounded-lg border border-red-700 p-3 text-red-200"><p>{error}</p>{(sesion || tokenRecuperar) && <button disabled={ocupado} className="underline mt-2" onClick={() => enviar('recuperar', sesion?.token || tokenRecuperar)}>Recuperar estado guardado</button>}</div>}
-        <p role="status" className="text-sm text-slate-400">{ocupado ? 'Procesando el paso…' : tokenRecuperar ? 'Recupera la sesión guardada para continuar.' : sesion ? `${sesion.historial.length} preguntas completadas (incluidas las omitidas) · máximo ${sesion.maxPreguntas}` : 'Pega tu código y comienza la práctica.'}</p>
-        {sesion?.fase === 'pregunta' && <div className="space-y-4">
-          <h3 ref={foco} tabIndex={-1} className="font-semibold text-lg">Pregunta {sesion.numero}</h3><p className="whitespace-pre-wrap">{sesion.pregunta}</p>
-          <details><summary className="cursor-pointer text-sm">Qué se evaluará</summary><ul className="list-disc pl-5 text-sm mt-2">{sesion.rubrica.map((c) => <li key={c.id}>{c.descripcion}</li>)}</ul></details>
-          {sesion.aclaracion && <p role="status" className="rounded-lg border border-blue-600 p-3">{sesion.aclaracion}</p>}
-          <label htmlFor="respuesta" className="block text-sm">Tu explicación</label>
-          <textarea id="respuesta" rows={8} maxLength={4000} value={respuesta} disabled={bloqueado} onChange={(e) => setRespuesta(e.target.value)} className="w-full bg-slate-950 border border-slate-600 rounded-lg p-3" />
-          <p className="text-xs text-slate-400">{respuesta.length}/4000 caracteres</p>
-          <button className={boton} disabled={evaluacionBloqueada || !respuesta.trim()} onClick={() => enviar('responder')}>Enviar respuesta</button>
-          <div className="flex flex-wrap gap-3"><button className="border border-slate-500 px-4 py-2 rounded disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('saltar')}>Saltar pregunta</button><button className="underline disabled:opacity-50" disabled={bloqueado || sesion.aclaraciones >= 2} onClick={() => enviar('aclarar')}>Necesito una aclaración</button></div>
-          <p className="text-xs text-slate-400">Saltar consume una de las preguntas disponibles y se registra sin nota. Aclarar mantiene la misma pregunta.</p>
-        </div>}
-        {sesion?.fase === 'feedback' && ultimo && <div className="space-y-4">
-          <h3 ref={foco} tabIndex={-1} className="font-semibold text-lg">Pregunta {sesion.numero} · {ultimo.feedback.estado} · {ultimo.puntaje === null ? 'Sin calificación' : `${ultimo.puntaje}/10`}</h3>
-          <Retroalimentacion registro={ultimo} />
-          <button className={boton} disabled={bloqueado} onClick={() => enviar('continuar')}>Continuar</button>
-          <details className="text-sm space-y-3"><summary className="cursor-pointer">Solicitar revisión de una evaluación</summary>
-            <p>Indica qué afirmación o criterio requiere revisión. Se conservará la evaluación anterior y se actualizará el diagnóstico con la revisión.</p>
-            <label className="block">Pregunta <select className="ml-2 rounded bg-slate-950 border border-slate-600 p-2" value={numeroRevision || sesion.numero} onChange={(e) => setNumeroRevision(e.target.value)}>{sesion.historial.map((h, i) => <option key={i} value={i + 1} disabled={!revisable(h)}>{i + 1}</option>)}</select></label>
-            <label htmlFor="motivo-revision" className="block">Motivo de la revisión</label><textarea id="motivo-revision" value={motivoRevision} onChange={(e) => setMotivoRevision(e.target.value)} maxLength={1000} rows={3} className="w-full bg-slate-950 border border-slate-600 rounded p-3" />
-            <button className="border border-blue-500 rounded px-4 py-2 disabled:opacity-50" disabled={evaluacionBloqueada || !revisable(sesion.historial[Number(numeroRevision || sesion.numero) - 1]) || !motivoRevision.trim()} onClick={() => enviar('revisar')}>Revisar evaluación</button>
+        <h2 className="font-semibold">{enRefuerzo ? 'Tu solución del refuerzo' : 'Tu código Python'}</h2>
+        {editable ? <>
+          <div className="border border-slate-700 rounded-xl overflow-hidden min-w-0">
+            {sencillo ? <textarea aria-label={etiquetaEditor} value={valorEditor} readOnly={bloqueado} maxLength={12000} onChange={(e) => cambiarCodigo(e.target.value)} spellCheck={false} placeholder="Pega aquí tu código" className="w-full h-[360px] lg:h-[480px] bg-slate-950 p-4 font-mono text-sm resize-y" /> : <Editor height="420px" language="python" theme={tema} value={valorEditor}
+              loading={<p className="p-4">Cargando editor… Si tarda, activa el editor de texto sencillo.</p>}
+              beforeMount={(monaco) => { monaco.editor.defineTheme('dracula', draculaTheme); monaco.editor.defineTheme('monokai', monokaiTheme) }}
+              onChange={(value) => cambiarCodigo(value || '')}
+              options={{ readOnly: bloqueado, ariaLabel: etiquetaEditor, minimap: { enabled: false }, fontSize: 15, automaticLayout: true, tabSize: 4, scrollBeyondLastLine: false, wordWrap: 'on' }} />}
+          </div>
+          <p className="text-sm text-slate-300">{valorEditor.length}/12000 caracteres.</p>
+          {!sesion && (esEjemplo(codigo) ? <p className="text-sm text-blue-200">Este es un programa de ejemplo para conocer la práctica. Reemplázalo por tu código cuando quieras; las prácticas con el ejemplo no cuentan para el estudio.</p>
+            : !codigo.trim() && <button className="text-sm underline" onClick={() => setCodigo(CODIGO_EJEMPLO)}>Usar el código de ejemplo</button>)}
+          <details className="text-sm"><summary className="cursor-pointer text-slate-300">Preferencias del editor</summary>
+            <div className="mt-2 space-y-2">
+              <label className="flex items-center gap-2"><input type="checkbox" checked={sencillo} onChange={(e) => setSencillo(e.target.checked)} />Usar editor de texto sencillo</label>
+              <label>Tema <select value={tema} onChange={(e) => setTema(e.target.value)} className="bg-slate-900 border border-slate-600 rounded p-1"><option value="vs-dark">Oscuro</option><option value="vs">Claro</option><option value="hc-black">Alto contraste</option><option value="dracula">Dracula</option><option value="monokai">Monokai</option></select></label>
+            </div>
+          </details>
+        </> : <details open className="rounded-xl border border-slate-700"><summary className="cursor-pointer p-3 text-sm">Código de esta práctica</summary><pre className="max-h-[320px] lg:max-h-[560px] overflow-auto whitespace-pre-wrap bg-slate-950 p-4 text-sm"><code>{sesion.codigo}</code></pre></details>}
+        {enRefuerzo && <details><summary className="cursor-pointer text-sm">Consultar el código original</summary><pre className="mt-2 overflow-auto whitespace-pre-wrap rounded bg-slate-950 p-3 text-sm"><code>{sesion.codigo}</code></pre></details>}
+        <p className="text-xs text-slate-400">No se ejecuta tu código. Tu código, tus respuestas y la retroalimentación se guardan cifrados y se borran 24 horas después de cerrar o de tu última actividad.</p>
+        {aviso && <p role="status" className="text-amber-200 text-sm">{aviso}</p>}
+        {!sesion && <div className="space-y-4">
+          <button className={boton} disabled={bloqueado || !codigo.trim() || codigo.length > 12000} onClick={() => enviar('iniciar')}>Comenzar práctica</button>
+          {estado.practicaAbierta && <button className={secundario} disabled={bloqueado} onClick={() => enviar('recuperar', { sesion: estado.practicaAbierta })}>Continuar la práctica abierta</button>}
+          {sintaxis && <div role="alert" className="rounded-lg border border-amber-600 p-3 text-amber-100 text-sm">
+            <p>Python no puede interpretar el programa{sintaxis.linea ? ` cerca de la línea ${sintaxis.linea}` : ''}{sintaxis.detalle ? ` (${sintaxis.detalle})` : ''}. Revisa esa línea y la anterior; tu código se conserva y no se registró ninguna práctica.</p>
+            {sintaxis.intentos >= 2 && <p className="mt-2">Puedes revisar esa parte con calma y volver cuando la tengas. Si quieres, practica con un fragmento más pequeño que sí funcione.</p>}
+          </div>}
+          <details className="rounded-xl border border-slate-700 p-4 text-sm"><summary className="cursor-pointer">Opcional: indica tu nivel para ajustar las preguntas</summary>
+          <div className="space-y-4 mt-3">
+          <fieldset className="space-y-2"><legend className="text-sm mb-1">¿Qué has trabajado ya en clase?</legend>
+            {TEMAS.map(([valor, etiqueta]) => <label key={valor} className="flex items-center gap-2 text-sm"><input type="radio" name="temas" value={valor} checked={temas === valor} disabled={bloqueado} onChange={() => setTemas(valor)} />{etiqueta}</label>)}
+          </fieldset>
+          <p className="text-xs text-slate-400">Si no indicas nada, solo se preguntan temas introductorios presentes en tu código.</p>
+          {temas && <button className="text-xs underline" onClick={() => setTemas('')}>Quitar la selección</button>}
+          </div>
           </details>
         </div>}
-        {practica && resultado && <div className="space-y-6">
-          <h3 ref={foco} tabIndex={-1} className="text-xl font-bold">Tu progreso y el reto práctico</h3>
-          <Diagnostico resultado={resultado} />
-          <div className="border border-blue-700 rounded-xl p-4 space-y-3">
-            <h4 className="font-bold text-lg">{resultado.ejercicio.tipo}</h4><p className="text-sm text-blue-200">{resultado.ejercicio.motivo}</p>{!!resultado.ejercicio.fortalezas?.length && <p className="text-sm text-emerald-300">Aprovecha lo demostrado en: {resultado.ejercicio.fortalezas.join(', ')}.</p>}
-            <p><strong>Objetivo:</strong> {resultado.ejercicio.objetivo}</p><EnunciadoEjercicio texto={resultado.ejercicio.enunciado} />
-            <p><strong>Entradas:</strong> {resultado.ejercicio.entradas}</p><p><strong>Salida:</strong> {resultado.ejercicio.salidas}</p>
-            <ul className="list-disc pl-5">{resultado.ejercicio.restricciones.map((r) => <li key={r}>{r}</li>)}</ul>
-            <h5 className="font-semibold">Ejemplos</h5><ul className="space-y-2">{resultado.ejercicio.casos.map((c, i) => <li key={i}><code className="break-all">{c.entrada}</code> → {esperadoBreve(c.esperado)}</li>)}</ul>
-            <h5 className="font-semibold">Criterios de éxito</h5><ul className="list-disc pl-5">{resultado.ejercicio.criterios.map((c) => <li key={c}>{c}</li>)}</ul>
-            <p className="text-sm text-amber-200">{resultado.limitacion}</p>
+      </div>
+      <section aria-label="Práctica" aria-busy={ocupado} className={`min-w-0 space-y-5 bg-slate-900/60 border border-slate-700 p-5 xl:p-7 rounded-xl break-words ${sesion ? 'order-first lg:order-none' : ''}`}>
+        <h2 className="text-lg font-bold flex items-center gap-2"><HelpCircle className="text-blue-400" /> Práctica guiada</h2>
+        {espera > 0 && <p className="text-amber-200">Podrás enviar de nuevo en {espera} s. Puedes seguir editando tu texto.</p>}
+        {error && <div role="alert" className="rounded-lg border border-red-700 p-3 text-red-200"><p>{error}</p>{sesion && <button disabled={ocupado} className="underline mt-2" onClick={() => enviar('recuperar')}>Recuperar el estado guardado</button>}</div>}
+        <p role="status" className="text-sm text-slate-400">{ocupado ? 'Procesando el paso…' : !sesion ? 'Pega tu código y pulsa «Comenzar práctica».' : ['cierre', 'refuerzo', 'refuerzo_revisado'].includes(fase) ? `Práctica cerrada con ${sesion.completadas} ${sesion.completadas === 1 ? 'pregunta' : 'preguntas'}.` : `Pregunta ${sesion.numero || sesion.completadas} de hasta ${sesion.limite}.`}</p>
+        {caducada && <p className="rounded-lg border border-amber-600 p-3 text-amber-100">Esta práctica caducó (2 horas). Puedes revisar lo que hiciste o iniciar una nueva.</p>}
+        {fase === 'confianza' && !caducada && <div className="space-y-4">
+          <h3 ref={foco} tabIndex={-1} className="font-semibold text-lg">Pregunta {sesion.numero} · {sesion.tema.nombre}</h3>
+          {sesion.tema.reemplazo && <p className="text-sm text-slate-300">Esta pregunta reemplaza la anterior, que no cuenta en tu contra.</p>}
+          {sesion.tema.fragmento && <pre className="overflow-x-auto rounded-lg bg-slate-950 p-3 text-sm"><code>{sesion.tema.fragmento}</code></pre>}
+          <p id="confianza">Antes de ver la pregunta: sobre esta parte del programa, ¿qué tan seguro te sientes para explicarla?</p>
+          <div role="group" aria-labelledby="confianza" className="grid grid-cols-5 gap-2">
+            {CONFIANZA.map(([valor, etiqueta]) => <button key={valor} disabled={bloqueado} onClick={() => enviar('confianza', { valor })} aria-label={`${valor}${etiqueta ? `, ${etiqueta}` : ''}`} className="rounded-lg border border-slate-500 py-3 hover:border-blue-400 disabled:opacity-50"><span className="block text-lg font-bold">{valor}</span><span className="block text-xs text-slate-300 min-h-4">{etiqueta}</span></button>)}
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button className={secundario} disabled={bloqueado} onClick={() => enviar('confianza', { valor: null })}>Prefiero no responder</button>
+            <button className={secundario} disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'tema_no_cursado' })}>No he visto este tema</button>
+            {sesion.completadas > 0 && <button className="underline disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('cerrar')}>Terminar aquí</button>}
           </div>
         </div>}
-        {sesion?.fase === 'final' && sesion.evaluacionFinal && <div className="space-y-4"><h3 ref={foco} tabIndex={-1} className="text-xl font-bold">Evaluación final de tu código</h3><EvaluacionFinal evaluacion={sesion.evaluacionFinal} /><details><summary className="cursor-pointer">Consultar diagnóstico de la sustentación</summary><div className="mt-3"><Diagnostico resultado={resultado} /></div></details></div>}
-        {!!sesion?.historial.length && <details className="border-t border-slate-700 pt-3"><summary className="cursor-pointer">Historial de respuestas y evaluaciones</summary><ol className="space-y-5 mt-3">{sesion.historial.map((h, i) => <li key={i} className="text-sm space-y-2"><p className="font-semibold">{i + 1}. {h.pregunta}</p><p className="whitespace-pre-wrap text-slate-300">{h.respuesta}</p><p>{h.feedback.estado} · {h.puntaje === null ? 'Sin calificación' : `${h.puntaje}/10`}</p><Retroalimentacion registro={h} /></li>)}</ol></details>}
+        {fase === 'pregunta' && !caducada && <div className="space-y-4">
+          <h3 ref={foco} tabIndex={-1} className="font-semibold text-lg">Pregunta {sesion.numero}</h3>
+          <p className="whitespace-pre-wrap">{sesion.pregunta}</p>
+          <details><summary className="cursor-pointer text-sm">Qué se observará</summary><ul className="list-disc pl-5 text-sm mt-2">{sesion.objetivos.map((o) => <li key={o}>{o}</li>)}</ul></details>
+          {sesion.aclaracion && <p role="status" className="rounded-lg border border-blue-600 p-3">{sesion.aclaracion}</p>}
+          <label htmlFor="respuesta" className="block text-sm">Cuéntalo con tus palabras</label>
+          <textarea id="respuesta" rows={7} maxLength={4000} value={respuesta} disabled={bloqueado} onChange={(e) => setRespuesta(e.target.value)} className="w-full bg-slate-950 border border-slate-600 rounded-lg p-3" />
+          <p className="text-xs text-slate-400">{respuesta.length}/4000 caracteres</p>
+          <button className={boton} disabled={evaluacionBloqueada || !respuesta.trim()} onClick={() => enviar('responder', { respuesta })}>Enviar respuesta</button>
+          <div className="flex flex-wrap gap-3">
+            <button className={secundario} disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'no_se' })}>No sé / prefiero pasar</button>
+            <button className={secundario} disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'tema_no_cursado' })}>No he visto este tema</button>
+            <button className="underline disabled:opacity-50" disabled={bloqueado || sesion.aclaraciones >= 2} onClick={() => enviar('aclarar')}>Necesito una aclaración</button>
+          </div>
+          <p className="text-xs text-slate-400">Omitir usa una de las tres preguntas y no cuenta como error. {sesion.puedeReemplazar ? '«No he visto este tema» la reemplaza una vez sin usar una pregunta.' : '«No he visto este tema» la retira sin contarla en tu contra.'} Aclarar mantiene la misma pregunta.</p>
+        </div>}
+        {fase === 'feedback' && ultimo && <div className="space-y-4">
+          <h3 ref={foco} tabIndex={-1} className="font-semibold text-lg">Pregunta {sesion.completadas} · {ultimo.feedback.estado}</h3>
+          <Retroalimentacion registro={ultimo} />
+          {!ultimo.omitida && ultimo.clasificacion !== 'sin_evidencia' && <div className="flex flex-wrap items-center gap-3 text-sm">
+            <span>¿Te sirvió esta observación?</span>
+            {[['util', 'Sí'], ['no_util', 'No']].map(([valor, etiqueta]) => <button key={valor} className={secundario} aria-pressed={utilidad[`${ultimo.instancia}:${ultimo.version}`] === valor} disabled={!!utilidad[`${ultimo.instancia}:${ultimo.version}`]} onClick={() => utilidadFeedback(ultimo, valor)}>{etiqueta}</button>)}
+          </div>}
+          {sesion.puedeReparar && !caducada && <details className="text-sm space-y-3"><summary className="cursor-pointer">¿Algo no encaja con lo que quisiste decir?</summary>
+            <p className="mt-2 text-slate-300">Puedes pedir una reparación por pregunta. No cambia ninguna nota, porque no hay nota.</p>
+            <div className="flex flex-wrap gap-3 mt-2">
+              <button className={secundario} disabled={evaluacionBloqueada} onClick={() => enviar('reparar', { tipo: 'reformular' })}>No entendí la explicación</button>
+              <button className={secundario} disabled={bloqueado} aria-pressed={reparacion.tipo === 'intencion'} onClick={() => setReparacion({ tipo: 'intencion', texto: '' })}>Esto no refleja lo que quise decir</button>
+              <button className={secundario} disabled={bloqueado} aria-pressed={reparacion.tipo === 'error_factual'} onClick={() => setReparacion({ tipo: 'error_factual', texto: '' })}>Creo que hay un error en el análisis del código</button>
+            </div>
+            {reparacion.tipo && <div className="space-y-2 mt-3">
+              <label htmlFor="reparacion" className="block">{reparacion.tipo === 'intencion' ? 'Explica brevemente qué quisiste decir' : 'Qué crees que está mal (opcional)'}</label>
+              <textarea id="reparacion" rows={3} maxLength={300} value={reparacion.texto} onChange={(e) => setReparacion({ ...reparacion, texto: e.target.value })} className="w-full bg-slate-950 border border-slate-600 rounded p-3" />
+              <p className="text-xs text-slate-400">{reparacion.texto.length}/300 caracteres</p>
+              <button className="border border-blue-500 rounded px-4 py-2 disabled:opacity-50" disabled={evaluacionBloqueada || (reparacion.tipo === 'intencion' && !reparacion.texto.trim())} onClick={() => enviar('reparar', { tipo: reparacion.tipo, texto: reparacion.texto.trim() || null })}>Enviar</button>
+            </div>}
+          </details>}
+          {!caducada && (sesion.siguiente === 'pregunta' ? <div className="grid sm:grid-cols-2 gap-3">
+            <button className={boton} disabled={bloqueado} onClick={() => enviar('continuar')}>Explorar otra parte</button>
+            <button className={`${secundario} py-3`} disabled={bloqueado} onClick={() => enviar('cerrar')}>Cerrar con lo que descubriste</button>
+          </div> : <button className={boton} disabled={bloqueado} onClick={() => enviar('continuar')}>Ver el cierre</button>)}
+        </div>}
+        {fase === 'cierre' && sesion.resumen && <div className="space-y-5">
+          <h3 ref={foco} tabIndex={-1} className="text-xl font-bold">Cierre de la práctica</h3>
+          <Resumen resumen={sesion.resumen} />
+          {sesion.resumen.refuerzoDisponible && <div className="rounded-xl border border-blue-700 p-4 space-y-3">
+            <p>Si quieres, practica la misma idea con un ejercicio pequeño. Es opcional y no cambia tu cierre.</p>
+            <button className={secundario} disabled={bloqueado} onClick={() => enviar('refuerzo')}>Probar un ejercicio opcional</button>
+          </div>}
+          <button className={boton} disabled={ocupado} onClick={nuevaPractica}>Nueva práctica</button>
+        </div>}
+        {enRefuerzo && sesion.refuerzo && <div className="space-y-4">
+          <h3 ref={foco} tabIndex={-1} className="text-xl font-bold">Refuerzo opcional</h3>
+          {fase === 'refuerzo' ? <div className="border border-blue-700 rounded-xl p-4 space-y-3">
+            <p className="text-sm text-blue-200">{sesion.refuerzo.motivo}</p>
+            <p><strong>Objetivo:</strong> {sesion.refuerzo.objetivo}</p><EnunciadoEjercicio texto={sesion.refuerzo.enunciado} />
+            <p><strong>Entradas:</strong> {sesion.refuerzo.entradas}</p><p><strong>Salida:</strong> {sesion.refuerzo.salidas}</p>
+            <ul className="list-disc pl-5">{sesion.refuerzo.restricciones.map((r) => <li key={r}>{r}</li>)}</ul>
+            <h4 className="font-semibold">Ejemplos</h4><ul className="space-y-2">{sesion.refuerzo.casos.map((c, i) => <li key={i}><code className="break-all">{c.entrada}</code> → {c.esperado}</li>)}</ul>
+            <p className="text-sm text-amber-200">{sesion.analisis.limitacion}</p>
+            <button className={boton} disabled={evaluacionBloqueada || !codigoRefuerzo.trim() || codigoRefuerzo.length > 12000} onClick={() => enviar('entregar', { codigo: codigoRefuerzo })}>Enviar mi solución</button>
+          </div> : <EvaluacionRefuerzo evaluacion={sesion.evaluacionRefuerzo} />}
+          <details><summary className="cursor-pointer">Volver a ver el cierre</summary><div className="mt-3"><Resumen resumen={sesion.resumen} /></div></details>
+          <button className={secundario} disabled={ocupado} onClick={nuevaPractica}>{fase === 'refuerzo' ? 'Terminar por ahora' : 'Nueva práctica'}</button>
+        </div>}
+        {!!sesion?.historial.length && <details className="border-t border-slate-700 pt-3"><summary className="cursor-pointer">Tus respuestas en esta práctica</summary><ol className="space-y-5 mt-3">{sesion.historial.map((h, i) => <li key={h.instancia || i} className="text-sm space-y-2"><p className="font-semibold">{i + 1}. {h.pregunta}</p>{h.respuesta && <p className="whitespace-pre-wrap text-slate-300">{h.respuesta}</p>}<p>{h.feedback.estado}</p><Retroalimentacion registro={h} /></li>)}</ol></details>}
       </section>
     </div>
+    <details className="text-sm text-slate-400"><summary className="cursor-pointer">Retirar mi participación</summary>
+      <p className="mt-2">Se borrarán tus prácticas, tareas y eventos de uso. Si participas en el estudio, solo quedará constancia de tu retiro, sin datos tuyos.</p>
+      <button className="mt-2 border border-red-600 text-red-200 rounded-lg px-4 py-2 disabled:opacity-50" disabled={ocupado} onClick={retirar}>Retirar y borrar mis datos</button>
+    </details>
   </main>
 }
