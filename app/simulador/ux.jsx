@@ -35,11 +35,18 @@ export function CodigoResaltado({ codigo, fragmento }) {
 
 const MENSAJES = {
   iniciar: 'Analizando tu código y preparando la primera pregunta…', confianza: 'Mostrando la pregunta…', responder: 'El tutor está leyendo tu explicación. Puede tardar unos segundos…',
-  reparar: 'Revisando de nuevo la retroalimentación…', entregar: 'Revisando tu solución…', continuar: 'Preparando el siguiente paso…', cerrar: 'Preparando tu cierre…', recuperar: 'Recuperando tu práctica…',
+  reparar: 'Revisando de nuevo la retroalimentación…', entregar: 'Revisando tu solución…', continuar: 'Preparando el siguiente paso…', saltar: 'Preparando la siguiente pregunta…', cerrar: 'Preparando tu cierre…', recuperar: 'Recuperando tu práctica…',
 }
 export function Procesando({ accion }) {
-  return <div role="status" className="flex items-center gap-3 rounded-lg border border-blue-800 bg-blue-950/40 p-3 text-sm text-blue-100">
-    <Loader2 aria-hidden="true" className="h-5 w-5 shrink-0 motion-safe:animate-spin" />{MENSAJES[accion] || 'Procesando el paso…'}
+  const preparandoPregunta = ['iniciar', 'confianza', 'continuar', 'saltar'].includes(accion)
+  return <div role="status" aria-live="polite" aria-atomic="true" className="space-y-4 rounded-lg border border-blue-800 bg-blue-950/40 p-3 text-sm text-blue-100">
+    <div className="flex items-center gap-3"><Loader2 aria-hidden="true" className="h-5 w-5 shrink-0 motion-safe:animate-spin" /><span>{MENSAJES[accion] || 'Procesando el paso…'}</span></div>
+    {preparandoPregunta && <div aria-hidden="true" className="space-y-3 motion-safe:animate-pulse">
+      <div className="h-4 w-3/4 rounded bg-slate-700" />
+      <div className="h-4 w-full rounded bg-slate-700/70" />
+      <div className="h-4 w-5/6 rounded bg-slate-700/70" />
+      <div className="h-20 w-full rounded-lg border border-slate-700 bg-slate-800/60" />
+    </div>}
   </div>
 }
 

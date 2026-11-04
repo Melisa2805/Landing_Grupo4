@@ -7,7 +7,8 @@ import { Retroalimentacion, Resumen, EvaluacionRefuerzo } from './components'
 import { Progreso, CodigoResaltado, Procesando, GuardarResumen } from './ux'
 import { PUNTOS_CONSENTIMIENTO, VERSION_CONSENTIMIENTO } from '../../lib/consentimiento'
 import { CODIGO_EJEMPLO, esEjemplo } from '../../lib/ejemplo'
-import { Code2, HelpCircle, RotateCcw, CheckCircle2, MessageSquare, Lightbulb, Lock } from 'lucide-react'
+import { leerArchivoPython } from '../../lib/archivo-python'
+import { Code2, HelpCircle, RotateCcw, CheckCircle2, MessageSquare, Lightbulb, Lock, Upload } from 'lucide-react'
 
 // Definición nativa del tema Dracula
 const draculaTheme = {
@@ -89,6 +90,12 @@ export default function SimuladorPage() {
   const [utilidad, setUtilidad] = useState({})
   const [accionEnCurso, setAccionEnCurso] = useState(null)
   const [codigoVisible, setCodigoVisible] = useState(true)
+  const [nombreArchivo, setNombreArchivo] = useState('')
+  const [errorArchivo, setErrorArchivo] = useState('')
+  const [arrastrando, setArrastrando] = useState(false)
+  const [leyendoArchivo, setLeyendoArchivo] = useState(false)
+  const inputArchivo = useRef(null)
+  const lecturaArchivo = useRef(null)
   const ultima = useRef(null)
   const solicitud = useRef(null)
   const foco = useRef(null)
@@ -115,7 +122,7 @@ export default function SimuladorPage() {
       sessionStorage.setItem('pydefense-visita', visita.current)
     } catch { visita.current = crypto.randomUUID() }
     setListo(true)
-    return () => { solicitud.current?.abort(); solicitud.current = null }
+    return () => { solicitud.current?.abort(); solicitud.current = null; lecturaArchivo.current = null }
   }, [clave])
   useEffect(() => {
     if (!listo || !clave) return
@@ -179,6 +186,8 @@ export default function SimuladorPage() {
   }, [sesion])
 
   function nuevaPractica() {
+    lecturaArchivo.current = null
+    setLeyendoArchivo(false); setNombreArchivo(''); setErrorArchivo(''); setArrastrando(false)
     solicitud.current?.abort()
     solicitud.current = null
     setOcupado(false); setAccionEnCurso(null); setSesion(null); setRespuesta(''); setCodigoRefuerzo(''); setError(''); setSintaxis(null); setReparacion({ tipo: '', texto: '' })
@@ -186,7 +195,7 @@ export default function SimuladorPage() {
     inicio.current = null
   }
   async function enviar(accion, extra = {}) {
-    if (solicitud.current) return
+    if (solicitud.current || lecturaArchivo.current) return
     if (['responder', 'reparar', 'entregar'].includes(accion) && esperaHasta > Date.now()) return
     const controller = new AbortController()
     solicitud.current = controller
@@ -260,6 +269,32 @@ export default function SimuladorPage() {
     publicar('/api/sustentacion', { accion: 'acuse', tipo: 'utilidad', sesion: sesion.sesion, instancia: h.instancia, version: h.version, valor }).catch(() => {})
   }
 
+  async function cargarArchivoPython(archivo) {
+    if (!archivo || ocupado || !listo || sesion || lecturaArchivo.current) return
+    const lectura = {}
+    lecturaArchivo.current = lectura
+    setLeyendoArchivo(true); setErrorArchivo('')
+    try {
+      const contenido = await leerArchivoPython(archivo)
+      if (lecturaArchivo.current !== lectura) return
+      setCodigo(contenido); setNombreArchivo(archivo.name); setSintaxis(null)
+    } catch (e) {
+      if (lecturaArchivo.current === lectura) setErrorArchivo(e.message)
+    } finally {
+      if (lecturaArchivo.current === lectura) { lecturaArchivo.current = null; setLeyendoArchivo(false) }
+    }
+  }
+  function arrastrarArchivo(e) {
+    if (!e.dataTransfer?.types?.includes('Files')) return
+    e.preventDefault(); e.stopPropagation()
+    if (!ocupado && listo && !sesion && !lecturaArchivo.current) setArrastrando(true)
+  }
+  function soltarArchivo(e) {
+    if (!e.dataTransfer?.types?.includes('Files')) return
+    e.preventDefault(); e.stopPropagation(); setArrastrando(false)
+    cargarArchivoPython(e.dataTransfer.files?.[0])
+  }
+
   if (!isLoaded) return <main className="max-w-2xl mx-auto px-4 py-12"><p role="status">Cargando…</p></main>
   if (!isSignedIn) return <main className="max-w-2xl mx-auto px-4 py-12 space-y-6">
     <h1 className="text-3xl font-bold flex items-center gap-2"><Code2 className="text-blue-400" /> Practica la explicación de tu código</h1>
@@ -285,7 +320,7 @@ export default function SimuladorPage() {
   const fase = sesion?.fase
   const editable = !sesion || fase === 'refuerzo'
   const enRefuerzo = ['refuerzo', 'refuerzo_revisado'].includes(fase)
-  const bloqueado = ocupado || !listo
+  const bloqueado = ocupado || !listo || leyendoArchivo
   const espera = Math.max(0, Math.ceil((esperaHasta - ahora) / 1000))
   const evaluacionBloqueada = bloqueado || espera > 0
   const caducada = sesion && !sesion.vigente && ['confianza', 'pregunta', 'feedback'].includes(fase)
@@ -302,7 +337,17 @@ export default function SimuladorPage() {
       <div className="min-w-0 space-y-4 lg:sticky lg:top-24">
         <h2 className="font-semibold">{enRefuerzo ? 'Tu solución del refuerzo' : 'Tu código Python'}</h2>
         {editable ? <>
-          <div className="border border-slate-700 rounded-xl overflow-hidden min-w-0">
+          {!sesion && <div className="space-y-2 text-xs">
+            <div className="flex flex-wrap items-center gap-3">
+              <input ref={inputArchivo} type="file" accept=".py" aria-label="Subir archivo Python" disabled={bloqueado} className="hidden" onChange={(e) => { cargarArchivoPython(e.target.files?.[0]); e.target.value = '' }} />
+              <button type="button" disabled={bloqueado} onClick={() => inputArchivo.current?.click()} className={`${secundario} inline-flex items-center gap-2`}><Upload aria-hidden="true" className="h-4 w-4" />Subir archivo .py</button>
+              <span className="text-slate-400">o arrastra un archivo al editor · máximo 200 KB y 12000 caracteres</span>
+            </div>
+            {leyendoArchivo ? <p role="status" className="text-blue-200">Leyendo archivo…</p> : nombreArchivo && <p role="status" className="text-slate-300 break-all">Archivo cargado: {nombreArchivo}</p>}
+            {errorArchivo && <p role="alert" className="text-red-300">{errorArchivo}</p>}
+          </div>}
+          <div onDragOverCapture={!sesion ? arrastrarArchivo : undefined} onDropCapture={!sesion ? soltarArchivo : undefined} onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setArrastrando(false) }} className={`relative border border-slate-700 rounded-xl overflow-hidden min-w-0 ${arrastrando ? 'ring-2 ring-blue-400' : ''}`}>
+            {arrastrando && <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-blue-950/90 p-4 text-center text-blue-100">Suelta tu archivo .py para cargarlo en el editor</div>}
             {sencillo ? <textarea aria-label={etiquetaEditor} value={valorEditor} readOnly={bloqueado} maxLength={12000} onChange={(e) => cambiarCodigo(e.target.value)} spellCheck={false} placeholder="Pega aquí tu código" className="w-full h-[360px] lg:h-[480px] bg-slate-950 p-4 font-mono text-sm resize-y" /> : <Editor height="420px" language="python" theme={tema} value={valorEditor}
               loading={<p className="p-4">Cargando editor… Si tarda, activa el editor de texto sencillo.</p>}
               beforeMount={(monaco) => { monaco.editor.defineTheme('dracula', draculaTheme); monaco.editor.defineTheme('monokai', monokaiTheme) }}
@@ -311,7 +356,7 @@ export default function SimuladorPage() {
           </div>
           <p className="text-sm text-slate-300">{valorEditor.length}/12000 caracteres.</p>
           {!sesion && (esEjemplo(codigo) ? <p className="text-sm text-blue-200">Este es un programa de ejemplo para conocer la práctica. Reemplázalo por tu código cuando quieras; las prácticas con el ejemplo no cuentan para el estudio.</p>
-            : !codigo.trim() && <button className="text-sm underline" onClick={() => setCodigo(CODIGO_EJEMPLO)}>Usar el código de ejemplo</button>)}
+            : !codigo.trim() && <button className="text-sm underline" disabled={leyendoArchivo} onClick={() => setCodigo(CODIGO_EJEMPLO)}>Usar el código de ejemplo</button>)}
           <details className="text-sm"><summary className="cursor-pointer text-slate-300">Preferencias del editor</summary>
             <div className="mt-2 space-y-2">
               <label className="flex items-center gap-2"><input type="checkbox" checked={sencillo} onChange={(e) => setSencillo(e.target.checked)} />Usar editor de texto sencillo</label>
