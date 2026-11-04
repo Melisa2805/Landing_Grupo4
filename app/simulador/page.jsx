@@ -1,8 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Editor from '@monaco-editor/react'
-import { Code2, HelpCircle, Palette, AlertOctagon, CheckCircle2 } from 'lucide-react'
+import { Code2, HelpCircle, Palette, AlertOctagon, CheckCircle2, Upload } from 'lucide-react'
+
+// Tamaño máximo permitido para archivos .py subidos (200 KB)
+const MAX_TAMANO_ARCHIVO = 200 * 1024
 
 // Definición nativa del tema Dracula
 const draculaTheme = {
@@ -59,6 +62,61 @@ export default function SimuladorPage() {
   const [evaluacion, setEvaluacion] = useState(null)
   const [errorApi, setErrorApi] = useState(null)
   const [evaluando, setEvaluando] = useState(false)
+  const [nombreArchivo, setNombreArchivo] = useState(null)
+  const [errorArchivo, setErrorArchivo] = useState(null)
+  const [arrastrando, setArrastrando] = useState(false)
+  const inputArchivoRef = useRef(null)
+
+  // Lee un archivo .py y carga su contenido en el editor
+  const cargarArchivoPython = async (archivo) => {
+    if (!archivo) return
+    setErrorArchivo(null)
+
+    if (!archivo.name.toLowerCase().endsWith('.py')) {
+      setErrorArchivo('Solo se permiten archivos con extensión .py')
+      return
+    }
+    if (archivo.size > MAX_TAMANO_ARCHIVO) {
+      setErrorArchivo('El archivo supera el tamaño máximo de 200 KB')
+      return
+    }
+
+    try {
+      const contenido = await archivo.text()
+      setCodigo(contenido)
+      setNombreArchivo(archivo.name)
+    } catch (e) {
+      console.error(e)
+      setErrorArchivo('No se pudo leer el archivo')
+    }
+  }
+
+  const handleSeleccionArchivo = (e) => {
+    cargarArchivoPython(e.target.files?.[0])
+    // Permite volver a subir el mismo archivo después de editarlo
+    e.target.value = ''
+  }
+
+  // Arrastrar y soltar: se intercepta antes de que llegue a Monaco
+  const handleDragOver = (e) => {
+    if (!e.dataTransfer?.types?.includes('Files')) return
+    e.preventDefault()
+    e.stopPropagation()
+    setArrastrando(true)
+  }
+
+  const handleDragLeave = (e) => {
+    if (e.currentTarget.contains(e.relatedTarget)) return
+    setArrastrando(false)
+  }
+
+  const handleDrop = (e) => {
+    if (!e.dataTransfer?.files?.length) return
+    e.preventDefault()
+    e.stopPropagation()
+    setArrastrando(false)
+    cargarArchivoPython(e.dataTransfer.files[0])
+  }
 
   // Registramos los temas en Monaco
   const handleEditorWillMount = (monaco) => {
@@ -229,7 +287,44 @@ export default function SimuladorPage() {
             </div>
           </div>
 
-          <div className="border border-slate-800 rounded-xl overflow-hidden shadow-lg bg-[#1e1e1e]">
+          {/* Subir archivo .py (botón o arrastrar y soltar sobre el editor) */}
+          <div className="flex items-center gap-3 text-xs">
+            <input
+              ref={inputArchivoRef}
+              type="file"
+              accept=".py"
+              onChange={handleSeleccionArchivo}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => inputArchivoRef.current?.click()}
+              className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 hover:border-blue-500 rounded px-2 py-1 text-slate-300 transition"
+            >
+              <Upload className="w-3.5 h-3.5" /> Subir archivo .py
+            </button>
+            {errorArchivo ? (
+              <span className="text-red-400">{errorArchivo}</span>
+            ) : nombreArchivo ? (
+              <span className="text-slate-400">
+                Archivo cargado: <span className="font-mono text-slate-300">{nombreArchivo}</span>
+              </span>
+            ) : (
+              <span className="text-slate-500">o arrastra un archivo al editor</span>
+            )}
+          </div>
+
+          <div
+            onDragOverCapture={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDropCapture={handleDrop}
+            className={`relative border rounded-xl overflow-hidden shadow-lg bg-[#1e1e1e] ${arrastrando ? 'border-blue-500' : 'border-slate-800'}`}
+          >
+            {arrastrando && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/80 text-sm text-blue-400 pointer-events-none">
+                Suelta tu archivo .py aquí
+              </div>
+            )}
             <Editor
               height="280px"
               defaultLanguage="python"
