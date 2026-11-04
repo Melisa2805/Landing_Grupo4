@@ -5,6 +5,7 @@ import Editor from '@monaco-editor/react'
 import { useAuth, SignInButton } from '@clerk/nextjs'
 import { Retroalimentacion, Resumen, EvaluacionRefuerzo } from './components'
 import { Progreso, CodigoResaltado, Procesando, GuardarResumen } from './ux'
+import Compartir from './compartir'
 import { PUNTOS_CONSENTIMIENTO, VERSION_CONSENTIMIENTO } from '../../lib/consentimiento'
 import { CODIGO_EJEMPLO, esEjemplo } from '../../lib/ejemplo'
 import { leerArchivoPython } from '../../lib/archivo-python'
@@ -490,6 +491,7 @@ export default function SimuladorPage() {
           <button className={secundario} disabled={ocupado} onClick={otroPrograma}>{fase === 'refuerzo' ? 'Terminar por ahora' : 'Practicar con otro programa'}</button>
         </div>}
         {!!sesion?.historial.length && <details className="border-t border-slate-700 pt-3"><summary className="cursor-pointer">Tus respuestas en esta práctica</summary><ol className="space-y-5 mt-3">{sesion.historial.map((h, i) => <li key={h.instancia || i} className="text-sm space-y-2"><p className="font-semibold">{i + 1}. {h.pregunta}</p>{h.respuesta && <p className="whitespace-pre-wrap text-slate-300">{h.respuesta}</p>}<p>{h.feedback.estado}</p><Retroalimentacion registro={h} /></li>)}</ol></details>}
+        {sesion?.resumen && ['cierre', 'refuerzo', 'refuerzo_revisado'].includes(fase) && <Compartir key={sesion.sesion} />}
       </section>
     </div>
     <details className="text-sm text-slate-400"><summary className="cursor-pointer">Retirar mi participación</summary>
