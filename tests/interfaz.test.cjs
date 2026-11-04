@@ -6,6 +6,38 @@ const { renderToStaticMarkup } = require('react-dom/server')
 const { entorno } = require('./entorno.cjs')
 const sinCifras = (html) => !/\d+\/10|\d+\s*%|Promedio|Dominio|Nota sustituida/.test(html)
 
+test('archivos Python: conserva el contenido y valida extensión, tamaño, vacío y errores de lectura', async () => {
+  const e = await entorno()
+  const { leerArchivoPython } = await e.importar('lib/archivo-python.js')
+  const contenido = '# Acentos: explicación\r\nprint("hola")\r\n'
+  const archivo = { name: 'ejemplo.PY', size: Buffer.byteLength(contenido), text: async () => contenido }
+  assert.equal(await leerArchivoPython(archivo), contenido)
+  assert.equal(await leerArchivoPython({ ...archivo, text: async () => 'x'.repeat(12000) }), 'x'.repeat(12000))
+  let lecturas = 0
+  const sinLeer = { ...archivo, text: async () => { lecturas++; return contenido } }
+  await assert.rejects(leerArchivoPython({ ...sinLeer, name: 'ejemplo.py.txt' }), /extensión .py/)
+  await assert.rejects(leerArchivoPython({ ...sinLeer, size: 200 * 1024 + 1 }), /200 KB/)
+  assert.equal(lecturas, 0)
+  await assert.rejects(leerArchivoPython({ ...archivo, text: async () => ' \n\t' }), /vacío/)
+  await assert.rejects(leerArchivoPython({ ...archivo, text: async () => 'x'.repeat(12001) }), /12000 caracteres/)
+  await assert.rejects(leerArchivoPython({ ...archivo, text: async () => { throw new Error('lectura fallida') } }), /No se pudo leer.*se conserva/)
+})
+
+test('render: espera de preguntas con spinner, bloques de carga y texto accesible', async () => {
+  const e = await entorno()
+  const { Procesando } = await e.importar('app/simulador/ux.jsx')
+  for (const accion of ['iniciar', 'confianza', 'continuar', 'saltar']) {
+    const html = renderToStaticMarkup(React.createElement(Procesando, { accion }))
+    assert.ok(html.includes('role="status"'))
+    assert.ok(html.includes('aria-live="polite"'))
+    assert.ok(html.includes('motion-safe:animate-spin'))
+    assert.ok(html.includes('aria-hidden="true" class="space-y-3 motion-safe:animate-pulse"'))
+  }
+  const respuesta = renderToStaticMarkup(React.createElement(Procesando, { accion: 'responder' }))
+  assert.ok(respuesta.includes('El tutor está leyendo tu explicación'))
+  assert.ok(!respuesta.includes('animate-pulse'))
+})
+
 test('render: explicación completa sin siguiente paso ni bloque de pendientes', async () => {
   const e = await entorno()
   const { Retroalimentacion } = await e.importar('app/simulador/components.jsx')
