@@ -10,6 +10,10 @@ import { PUNTOS_CONSENTIMIENTO, VERSION_CONSENTIMIENTO } from '../../lib/consent
 import { CODIGO_EJEMPLO, esEjemplo } from '../../lib/ejemplo'
 import { leerArchivoPython } from '../../lib/archivo-python'
 import { Code2, HelpCircle, RotateCcw, CheckCircle2, MessageSquare, Lightbulb, Lock, Upload } from 'lucide-react'
+import { Code2, HelpCircle, Palette, AlertOctagon, CheckCircle2, Upload } from 'lucide-react'
+
+// Tamaño máximo permitido para archivos .py subidos (200 KB)
+const MAX_TAMANO_ARCHIVO = 200 * 1024
 
 // Definición nativa del tema Dracula
 const draculaTheme = {
@@ -382,6 +386,86 @@ export default function SimuladorPage() {
           </fieldset>
           <p className="text-xs text-slate-400">Si no indicas nada, solo se preguntan temas introductorios presentes en tu código.</p>
           {temas && <button className="text-xs underline" onClick={() => setTemas('')}>Quitar la selección</button>}
+
+          {/* Subir archivo .py (botón o arrastrar y soltar sobre el editor) */}
+          <div className="flex items-center gap-3 text-xs">
+            <input
+              ref={inputArchivoRef}
+              type="file"
+              accept=".py"
+              onChange={handleSeleccionArchivo}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => inputArchivoRef.current?.click()}
+              className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 hover:border-blue-500 rounded px-2 py-1 text-slate-300 transition"
+            >
+              <Upload className="w-3.5 h-3.5" /> Subir archivo .py
+            </button>
+            {errorArchivo ? (
+              <span className="text-red-400">{errorArchivo}</span>
+            ) : nombreArchivo ? (
+              <span className="text-slate-400">
+                Archivo cargado: <span className="font-mono text-slate-300">{nombreArchivo}</span>
+              </span>
+            ) : (
+              <span className="text-slate-500">o arrastra un archivo al editor</span>
+            )}
+          </div>
+
+          <div
+            onDragOverCapture={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDropCapture={handleDrop}
+            className={`relative border rounded-xl overflow-hidden shadow-lg bg-[#1e1e1e] ${arrastrando ? 'border-blue-500' : 'border-slate-800'}`}
+          >
+            {arrastrando && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/80 text-sm text-blue-400 pointer-events-none">
+                Suelta tu archivo .py aquí
+              </div>
+            )}
+            <Editor
+              height="280px"
+              defaultLanguage="python"
+              theme={tema}
+              value={codigo}
+              beforeMount={handleEditorWillMount}
+              onMount={handleEditorDidMount}
+              onChange={(value) => setCodigo(value || '')}
+              options={{
+                minimap: { enabled: false },
+                fontSize: 13,
+                lineNumbers: 'on',
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                tabSize: 4,
+                insertSpaces: true,
+                padding: { top: 12, bottom: 12 },
+              }}
+            />
+          </div>
+
+          {/* PANEL DE ESTADO DE ERRORES EN TIEMPO REAL */}
+          <div className="p-3 rounded-xl border text-xs space-y-1 bg-slate-950 border-slate-800">
+            {errores.length > 0 ? (
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-red-400 font-semibold">
+                  <AlertOctagon className="w-4 h-4" /> Se detectaron {errores.length} problema(s) de sintaxis/estructura:
+                </div>
+                <ul className="pl-6 list-disc space-y-0.5 text-slate-400 font-mono">
+                  {errores.map((err, i) => (
+                    <li key={i}>
+                      Línea {err.startLineNumber}: {err.message}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-green-400">
+                <CheckCircle2 className="w-4 h-4" /> Sintaxis válida (sin errores detectados)
+              </div>
+            )}
           </div>
           </details>
         </div>}
