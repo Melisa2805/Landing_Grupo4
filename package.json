@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "npm run test:rag && npm run test:adaptativo && npm run test:pedagogia && npm run test:interfaz && npm run test:estabilidad && npm run test:persistencia && npm run test:medicion",
+    "test": "node scripts/pruebas.cjs",
     "test:pedagogia": "node --experimental-vm-modules tests/pedagogia.test.cjs",
     "test:interfaz": "node --experimental-vm-modules tests/interfaz.test.cjs",
     "test:rag": "node --experimental-vm-modules tests/rag.test.cjs",

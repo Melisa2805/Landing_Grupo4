@@ -47,16 +47,17 @@ test('AST: prueba estructural del ejemplo, sin inferir por nombre; no ejecuta ef
   assert.equal((await analizarPython('['.repeat(4000))).estado, 'invalida')
 })
 
-test('primera pregunta tras la confianza; sintaxis inválida no crea práctica; máximo fijo de tres', async () => {
+test('consigna visible antes de la confianza y sin cambios al responderla; sintaxis inválida no crea práctica; máximo fijo de tres', async () => {
   const e = await practica()
   for (const codigo of [factorial, doble, 'for i in range(3):\n    print(i)', 'datos=[1,2]\nprint(datos[0])', 'x="hola"\nprint(x.upper())']) {
     const c = await e.iniciar(codigo, { maxPreguntas: 5 })
     assert.equal(c.fase, 'confianza')
-    assert.equal(c.pregunta, null)
+    // Contract since fae9b14: the student reads the question, then states confidence.
+    assert.match(c.pregunta, /^Explica con tus palabras/)
     assert.equal(c.tema.nombre, 'Propósito de la solución')
     assert.equal(c.limite, 3)
     const s = await e.paso(c, 'confianza', { valor: 4 })
-    assert.match(s.pregunta, /^Explica con tus palabras/)
+    assert.equal(s.pregunta, c.pregunta)
     assert.ok(!s.pregunta.includes('devuelve 1'))
     assert.ok(!JSON.stringify(s.analisis).includes('retorno_constante'))
     assert.ok(s.objetivos.length >= 2)
