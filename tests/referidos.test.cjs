@@ -179,3 +179,16 @@ test('encuesta voluntaria: categorías cerradas, sin identidad, mismo origen y r
   const r = await reporteExpo(e.db, { desde: `${hoy}T00:00:00Z`, hasta: '2100-01-01T00:00:00Z' })
   assert.equal(r.encuestas.respuestas, 7); assert.equal(r.encuestas.rol.estudiante, 6); assert.equal(r.encuestas.rol.docente, '<5'); assert.equal(r.encuestas.decisor.institucion, 6)
 })
+
+test('salud del despliegue: solo con token de operador; informa el método de análisis sin datos de personas', async () => {
+  const sin = await entorno()
+  const r0 = await (await sin.importar('app/api/salud/route.js')).GET(new Request(`${ORIGEN}/api/salud`))
+  assert.equal(r0.status, 404)
+  for (const [python, metodo] of [[true, 'ast'], [false, 'aproximado']]) {
+    const e = await entorno({ env: { LLM_BASE_URL: 'https://llm.test/v1', LLM_MODEL: 'm', LLM_API_KEY: 'k', PYDEFENSE_SALUD_TOKEN: 'token-de-operador-largo' }, pythonDisponible: python })
+    const { GET } = await e.importar('app/api/salud/route.js')
+    assert.equal((await GET(new Request(`${ORIGEN}/api/salud`, { headers: { Authorization: 'Bearer otro-token-cualquiera' } }))).status, 404)
+    const d = await (await GET(new Request(`${ORIGEN}/api/salud`, { headers: { Authorization: 'Bearer token-de-operador-largo' } }))).json()
+    assert.equal(d.metodoAnalisis, metodo); assert.equal(d.proveedorConfigurado, true); assert.equal(d.esquema, 5)
+  }
+})
