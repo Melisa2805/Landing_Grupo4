@@ -257,6 +257,29 @@ test('413 del proveedor (solicitud mayor que el límite por minuto) no se presen
   await assert.rejects(chatCompletion({ system: '', user: '' }), { code: 'LLM_SOLICITUD', detalle: 'http_413' }); assert.equal(n, 1)
 })
 
+test('envío en curso: otra cuenta con la misma sesión, revisión y carga no recibe la práctica ajena; el duplicado propio sí se comparte', async () => {
+  let liberar
+  const retenido = new Promise((r) => { liberar = r })
+  let llamadas = 0
+  const e = await preparar({ transport: async (url, opciones) => {
+    llamadas++
+    await retenido
+    return Response.json({ choices: [{ message: { content: JSON.stringify(tutor()(JSON.parse(opciones.body))) } }] })
+  } })
+  await e.consentir('user_prueba_b')
+  const s = await e.abrir(codigo)
+  const propia = e.paso(s, 'responder', { respuesta })
+  while (llamadas === 0) await new Promise((r) => setImmediate(r))
+  const duplicada = e.paso(s, 'responder', { respuesta })
+  // Before the fix, the other account joined the pending promise and waited for it.
+  const limite = new Promise((_, rechazar) => setTimeout(() => rechazar(Object.assign(new Error('La otra cuenta quedó esperando el envío ajeno.'), { code: 'COMPARTIDO' })), 3000))
+  await assert.rejects(Promise.race([e.paso(s, 'responder', { respuesta }, 'user_prueba_b'), limite]), { code: 'SESION_INVALIDA' })
+  liberar()
+  const [a, b] = await Promise.all([propia, duplicada])
+  assert.equal(a.fase, 'feedback'); assert.equal(b.revision, a.revision)
+  assert.equal(llamadas, 1)
+})
+
 test('refuerzo: la cita de código tolera indentación distinta; una conclusión sin cita real queda sin verificar', async () => {
   const e = await preparar()
   let s = await e.contestar(await e.iniciar('def contar(estados):\n    n = 0\n    for e in estados:\n        n += 1\n    return n'), 'Recorre la lista y cuenta cuántos estados hay, devolviendo ese número.', tutor({ concepto: 'recorridos' }))
