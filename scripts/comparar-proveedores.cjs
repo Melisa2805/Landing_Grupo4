@@ -32,6 +32,11 @@ const CASOS = [
     respuesta: 'Recibe una lista de notas, suma todas y divide el total entre la cantidad de notas para obtener el promedio.' },
   { id: 'ejercicio-correcto', tipo: 'ejercicio', ejercicio: 'sumar_pares', esperado: 'coincide',
     codigo: 'def sumar_pares(numeros):\n    total = 0\n    for n in numeros:\n        if n % 2 == 0:\n            total += n\n    return total' },
+  { id: 'ejercicio-matriz-correcto', tipo: 'ejercicio', ejercicio: 'multiplicar_vector', esperado: 'coincide',
+    codigo: 'def multiplicar_vector(matriz, vector):\n    resultado = []\n    for fila in matriz:\n        total = 0\n        for j in range(len(vector)):\n            total += fila[j] * vector[j]\n        resultado.append(total)\n    return resultado' },
+  // Classic dimension slip: the accumulator is not reset for each row.
+  { id: 'ejercicio-matriz-con-error', tipo: 'ejercicio', ejercicio: 'multiplicar_vector', esperado: 'difiere',
+    codigo: 'def multiplicar_vector(matriz, vector):\n    resultado = []\n    total = 0\n    for fila in matriz:\n        for j in range(len(vector)):\n            total += fila[j] * vector[j]\n        resultado.append(total)\n    return resultado' },
   { id: 'ejercicio-con-error', tipo: 'ejercicio', ejercicio: 'sumar_pares', esperado: 'difiere',
     codigo: 'def sumar_pares(numeros):\n    total = 0\n    for n in numeros:\n        if n % 2 == 1:\n            total += n\n    return total' },
 ]
