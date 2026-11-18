@@ -1,11 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Share2 } from 'lucide-react'
 
-export async function compartirInvitacion(direccion, navegador) {
-  // Invita a la app, sin parámetros, fragmentos ni información de la práctica.
-  const url = new URL('/', direccion).href
+export async function compartirInvitacion(direccion, navegador, codigo) {
+  // Invita a la app con etiquetas UTM genéricas (canal y campaña) para saber que
+  // la visita viene de un enlace compartido. No incluye datos de la persona ni
+  // de la práctica.
+  const enlace = new URL('/', direccion)
+  enlace.searchParams.set('utm_source', 'pydefense')
+  enlace.searchParams.set('utm_medium', 'compartir')
+  enlace.searchParams.set('utm_campaign', 'invitacion')
+  // Código opaco de quien invita; no revela su identidad.
+  if (codigo) enlace.searchParams.set('ref', codigo)
+  const url = enlace.href
   if (typeof navegador.share === 'function') {
     try {
       await navegador.share({ title: 'PyDefense', text: '¡Practica la explicación de tu código Python conmigo en PyDefense!', url })
@@ -26,12 +34,21 @@ export async function compartirInvitacion(direccion, navegador) {
 export default function Compartir() {
   const [ocupado, setOcupado] = useState(false)
   const [resultado, setResultado] = useState(null)
+  const [codigo, setCodigo] = useState(null)
+
+  // Se pide al abrir para que el botón comparta de inmediato, sin esperar a la red.
+  useEffect(() => {
+    let activo = true
+    fetch('/api/participacion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion: 'codigo_referido' }) })
+      .then((r) => (r.ok ? r.json() : null)).then((d) => { if (activo && d?.codigo) setCodigo(d.codigo) }).catch(() => {})
+    return () => { activo = false }
+  }, [])
 
   async function compartir() {
     if (ocupado) return
     setOcupado(true)
     setResultado(null)
-    try { setResultado(await compartirInvitacion(window.location.href, navigator)) }
+    try { setResultado(await compartirInvitacion(window.location.href, navigator, codigo)) }
     finally { setOcupado(false) }
   }
 

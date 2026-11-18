@@ -10,10 +10,6 @@ import { PUNTOS_CONSENTIMIENTO, VERSION_CONSENTIMIENTO } from '../../lib/consent
 import { CODIGO_EJEMPLO, esEjemplo } from '../../lib/ejemplo'
 import { leerArchivoPython } from '../../lib/archivo-python'
 import { Code2, HelpCircle, RotateCcw, CheckCircle2, MessageSquare, Lightbulb, Lock, Upload } from 'lucide-react'
-import { Code2, HelpCircle, Palette, AlertOctagon, CheckCircle2, Upload } from 'lucide-react'
-
-// Tamaño máximo permitido para archivos .py subidos (200 KB)
-const MAX_TAMANO_ARCHIVO = 200 * 1024
 
 // Definición nativa del tema Dracula
 const draculaTheme = {
@@ -68,6 +64,10 @@ const CONFIANZA = [[1, 'Nada seguro'], [2, 'Poco'], [3, 'Algo seguro'], [4, 'Bas
 const DIA_MS = 24 * 3600_000
 const boton = 'w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-white'
 const secundario = 'border border-slate-500 px-4 py-2 rounded-lg disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white'
+
+function leerReferido() {
+  try { return sessionStorage.getItem('pydefense-ref') || undefined } catch { return undefined }
+}
 
 async function publicar(ruta, body, signal) {
   const res = await fetch(ruta, { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal, body: JSON.stringify(body) })
@@ -141,7 +141,7 @@ export default function SimuladorPage() {
       llegadaLocal = Number(sessionStorage.getItem('pydefense-llegada')) || null
       sessionStorage.removeItem('pydefense-llegada')
     } catch {}
-    publicar('/api/participacion', { accion: 'estado', visita: visita.current, llegadaLocal }).then(({ res, data }) => {
+    publicar('/api/participacion', { accion: 'estado', visita: visita.current, llegadaLocal, referido: leerReferido() }).then(({ res, data }) => {
       if (!res.ok) return setError(data.error || 'No se pudo cargar tu participación. Recarga la página.')
       setEstado(data)
       if (!data.consentimiento.vigente) return
@@ -245,7 +245,7 @@ export default function SimuladorPage() {
   }
   async function consentir() {
     setOcupado(true)
-    const { res, data } = await publicar('/api/participacion', { accion: 'consentir', version: VERSION_CONSENTIMIENTO }).catch(() => ({ res: { ok: false }, data: {} }))
+    const { res, data } = await publicar('/api/participacion', { accion: 'consentir', version: VERSION_CONSENTIMIENTO, referido: leerReferido() }).catch(() => ({ res: { ok: false }, data: {} }))
     setOcupado(false)
     if (!res.ok) return setError(data.error || 'No se pudo registrar tu aceptación. Reintenta.')
     setEstado(data)
@@ -300,7 +300,7 @@ export default function SimuladorPage() {
     cargarArchivoPython(e.dataTransfer.files?.[0])
   }
 
-  if (!isLoaded) return <main className="max-w-2xl mx-auto px-4 py-12"><p role="status">Cargando…</p></main>
+  if (!isLoaded) return <main className="max-w-2xl mx-auto px-4 py-12 flex flex-col items-center gap-2"><img src="/cargando.gif" alt="" aria-hidden="true" className="h-56 w-56 sm:h-72 sm:w-72" /><p role="status">Cargando…</p></main>
   if (!isSignedIn) return <main className="max-w-2xl mx-auto px-4 py-12 space-y-6">
     <h1 className="text-3xl font-bold flex items-center gap-2"><Code2 className="text-blue-400" /> Practica la explicación de tu código</h1>
     <p className="text-slate-300">Ensaya tu sustentación antes de la entrega: respondes hasta tres preguntas sobre tu propio programa y descubres qué te conviene repasar.</p>
@@ -336,17 +336,37 @@ export default function SimuladorPage() {
   return <main className="simulador mx-auto w-full max-w-[1680px] px-4 lg:px-8 py-6 space-y-6">
     <header className="border-b border-slate-800 pb-4">
       <h1 className="text-2xl font-bold flex items-center gap-2"><Code2 className="text-blue-400" /> Practica tu sustentación</h1>
-      <p className="text-slate-300 mt-2">Pega el código que necesitas explicar. Hasta tres preguntas; puedes cerrar después de cada explicación. No hay nota: recibes lo que explicaste, lo que falta y un siguiente paso.</p>
+      <p className="text-slate-300 mt-2">Pega tu código y practica explicarlo. Hasta tres preguntas, sin nota.</p>
     </header>
     <div className="grid lg:grid-cols-2 gap-5 xl:gap-8 items-start">
       <div className="min-w-0 space-y-4 lg:sticky lg:top-24">
         <h2 className="font-semibold">{enRefuerzo ? 'Tu solución del refuerzo' : 'Tu código Python'}</h2>
         {editable ? <>
+          {!sesion && <details className="rounded-xl border border-slate-700 p-4 text-sm">
+            <summary className="cursor-pointer font-semibold">¿Qué has trabajado ya en clase? <span className="font-normal text-slate-400">(opcional){temas ? ` · ${TEMAS.find(([v]) => v === temas)?.[1]}` : ''}</span></summary>
+            <fieldset className="mt-3 space-y-2">
+              <legend className="sr-only">Temas trabajados en clase</legend>
+              {TEMAS.map(([valor, etiqueta]) => <label key={valor} className="flex items-center gap-2"><input type="radio" name="temas" value={valor} checked={temas === valor} disabled={bloqueado} onChange={() => {}} onClick={() => setTemas(temas === valor ? '' : valor)} />{etiqueta}</label>)}
+              <p className="text-xs text-slate-400">Vuelve a hacer clic en la opción elegida para quitarla. Si no indicas nada, solo se preguntan temas introductorios presentes en tu código.</p>
+            </fieldset>
+          </details>}
+          {sesion && <div className="flex justify-end text-xs"><details className="relative ml-auto text-sm text-slate-400"><summary aria-label="Preferencias del editor" title="Preferencias del editor" className="flex cursor-pointer list-none items-center gap-2 rounded-lg border border-slate-700 px-2 py-1 hover:border-blue-400 [&::-webkit-details-marker]:hidden"><img src="/config.png" alt="" aria-hidden="true" className="h-5 w-5" />Editor</summary>
+              <div className="absolute right-0 z-20 mt-2 w-60 space-y-2 rounded-xl border border-slate-600 bg-slate-900 p-3 text-slate-200 shadow-xl">
+                <label className="flex items-center gap-2"><input type="checkbox" checked={sencillo} onChange={(e) => setSencillo(e.target.checked)} />Editor de texto sencillo</label>
+                <label className="flex items-center justify-between gap-2">Tema <select value={tema} onChange={(e) => setTema(e.target.value)} className="bg-slate-950 border border-slate-600 rounded p-1"><option value="vs-dark">Oscuro</option><option value="vs">Claro</option><option value="hc-black">Alto contraste</option><option value="dracula">Dracula</option><option value="monokai">Monokai</option></select></label>
+              </div>
+            </details></div>}
           {!sesion && <div className="space-y-2 text-xs">
             <div className="flex flex-wrap items-center gap-3">
               <input ref={inputArchivo} type="file" accept=".py" aria-label="Subir archivo Python" disabled={bloqueado} className="hidden" onChange={(e) => { cargarArchivoPython(e.target.files?.[0]); e.target.value = '' }} />
               <button type="button" disabled={bloqueado} onClick={() => inputArchivo.current?.click()} className={`${secundario} inline-flex items-center gap-2`}><Upload aria-hidden="true" className="h-4 w-4" />Subir archivo .py</button>
-              <span className="text-slate-400">o arrastra un archivo al editor · máximo 200 KB y 12000 caracteres</span>
+              <span className="text-slate-400">o arrastra un archivo al editor</span>
+            <details className="relative ml-auto text-sm text-slate-400"><summary aria-label="Preferencias del editor" title="Preferencias del editor" className="flex cursor-pointer list-none items-center gap-2 rounded-lg border border-slate-700 px-2 py-1 hover:border-blue-400 [&::-webkit-details-marker]:hidden"><img src="/config.png" alt="" aria-hidden="true" className="h-5 w-5" />Editor</summary>
+              <div className="absolute right-0 z-20 mt-2 w-60 space-y-2 rounded-xl border border-slate-600 bg-slate-900 p-3 text-slate-200 shadow-xl">
+                <label className="flex items-center gap-2"><input type="checkbox" checked={sencillo} onChange={(e) => setSencillo(e.target.checked)} />Editor de texto sencillo</label>
+                <label className="flex items-center justify-between gap-2">Tema <select value={tema} onChange={(e) => setTema(e.target.value)} className="bg-slate-950 border border-slate-600 rounded p-1"><option value="vs-dark">Oscuro</option><option value="vs">Claro</option><option value="hc-black">Alto contraste</option><option value="dracula">Dracula</option><option value="monokai">Monokai</option></select></label>
+              </div>
+            </details>
             </div>
             {leyendoArchivo ? <p role="status" className="text-blue-200">Leyendo archivo…</p> : nombreArchivo && <p role="status" className="text-slate-300 break-all">Archivo cargado: {nombreArchivo}</p>}
             {errorArchivo && <p role="alert" className="text-red-300">{errorArchivo}</p>}
@@ -354,23 +374,17 @@ export default function SimuladorPage() {
           <div onDragOverCapture={!sesion ? arrastrarArchivo : undefined} onDropCapture={!sesion ? soltarArchivo : undefined} onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setArrastrando(false) }} className={`relative border border-slate-700 rounded-xl overflow-hidden min-w-0 ${arrastrando ? 'ring-2 ring-blue-400' : ''}`}>
             {arrastrando && <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-blue-950/90 p-4 text-center text-blue-100">Suelta tu archivo .py para cargarlo en el editor</div>}
             {sencillo ? <textarea aria-label={etiquetaEditor} value={valorEditor} readOnly={bloqueado} maxLength={12000} onChange={(e) => cambiarCodigo(e.target.value)} spellCheck={false} placeholder="Pega aquí tu código" className="w-full h-[360px] lg:h-[480px] bg-slate-950 p-4 font-mono text-sm resize-y" /> : <Editor height="420px" language="python" theme={tema} value={valorEditor}
-              loading={<p className="p-4">Cargando editor… Si tarda, activa el editor de texto sencillo.</p>}
+              loading={<p role="status" className="p-4 text-sm text-slate-300">Cargando editor… Si tarda, usa el editor sencillo (botón Editor).</p>}
               beforeMount={(monaco) => { monaco.editor.defineTheme('dracula', draculaTheme); monaco.editor.defineTheme('monokai', monokaiTheme) }}
               onChange={(value) => cambiarCodigo(value || '')}
               options={{ readOnly: bloqueado, ariaLabel: etiquetaEditor, minimap: { enabled: false }, fontSize: 15, automaticLayout: true, tabSize: 4, scrollBeyondLastLine: false, wordWrap: 'on' }} />}
           </div>
-          <p className="text-sm text-slate-300">{valorEditor.length}/12000 caracteres.</p>
-          {!sesion && (esEjemplo(codigo) ? <p className="text-sm text-blue-200">Este es un programa de ejemplo para conocer la práctica. Reemplázalo por tu código cuando quieras; las prácticas con el ejemplo no cuentan para el estudio.</p>
+          {!sesion && (esEjemplo(codigo) ? <p className="text-sm text-blue-200">Código de ejemplo: reemplázalo por el tuyo. No cuenta para el estudio.</p>
             : !codigo.trim() && <button className="text-sm underline" disabled={leyendoArchivo} onClick={() => setCodigo(CODIGO_EJEMPLO)}>Usar el código de ejemplo</button>)}
-          <details className="text-sm"><summary className="cursor-pointer text-slate-300">Preferencias del editor</summary>
-            <div className="mt-2 space-y-2">
-              <label className="flex items-center gap-2"><input type="checkbox" checked={sencillo} onChange={(e) => setSencillo(e.target.checked)} />Usar editor de texto sencillo</label>
-              <label>Tema <select value={tema} onChange={(e) => setTema(e.target.value)} className="bg-slate-900 border border-slate-600 rounded p-1"><option value="vs-dark">Oscuro</option><option value="vs">Claro</option><option value="hc-black">Alto contraste</option><option value="dracula">Dracula</option><option value="monokai">Monokai</option></select></label>
-            </div>
-          </details>
+          {valorEditor.length > 10000 && <p className="text-sm text-slate-400">{valorEditor.length}/12000 caracteres</p>}
         </> : <details open={codigoVisible} onToggle={(e) => setCodigoVisible(e.currentTarget.open)} className="rounded-xl border border-slate-700 overflow-hidden"><summary className="cursor-pointer p-3 text-sm">Código de esta práctica{fragmentoActivo ? ' · la parte de la pregunta está resaltada' : ''}</summary><CodigoResaltado codigo={sesion.codigo} fragmento={fragmentoActivo} /></details>}
         {enRefuerzo && <details><summary className="cursor-pointer text-sm">Consultar el código original</summary><pre className="mt-2 overflow-auto whitespace-pre-wrap rounded bg-slate-950 p-3 text-sm"><code>{sesion.codigo}</code></pre></details>}
-        <p className="text-xs text-slate-400">No se ejecuta tu código. Tu código, tus respuestas y la retroalimentación se guardan cifrados y se borran 24 horas después de cerrar o de tu última actividad.</p>
+        <details className="text-xs text-slate-400"><summary className="cursor-pointer inline-flex items-center gap-1"><Lock aria-hidden="true" className="h-3 w-3" />Privacidad</summary><p className="mt-1">No se ejecuta tu código. Tu código, tus respuestas y la retroalimentación se guardan cifrados y se borran 24 horas después de cerrar o de tu última actividad. Máximo 200 KB y 12000 caracteres.</p></details>
         {aviso && <p role="status" className="text-amber-200 text-sm">{aviso}</p>}
         {!sesion && <div className="space-y-4">
           <button className={boton} disabled={bloqueado || !codigo.trim() || codigo.length > 12000} onClick={() => enviar('iniciar')}>Comenzar práctica</button>
@@ -379,95 +393,6 @@ export default function SimuladorPage() {
             <p>Python no puede interpretar el programa{sintaxis.linea ? ` cerca de la línea ${sintaxis.linea}` : ''}{sintaxis.detalle ? ` (${sintaxis.detalle})` : ''}. Revisa esa línea y la anterior; tu código se conserva y no se registró ninguna práctica.</p>
             {sintaxis.intentos >= 2 && <p className="mt-2">Puedes revisar esa parte con calma y volver cuando la tengas. Si quieres, practica con un fragmento más pequeño que sí funcione.</p>}
           </div>}
-          <details className="rounded-xl border border-slate-700 p-4 text-sm"><summary className="cursor-pointer">Opcional: indica tu nivel para ajustar las preguntas</summary>
-          <div className="space-y-4 mt-3">
-          <fieldset className="space-y-2"><legend className="text-sm mb-1">¿Qué has trabajado ya en clase?</legend>
-            {TEMAS.map(([valor, etiqueta]) => <label key={valor} className="flex items-center gap-2 text-sm"><input type="radio" name="temas" value={valor} checked={temas === valor} disabled={bloqueado} onChange={() => setTemas(valor)} />{etiqueta}</label>)}
-          </fieldset>
-          <p className="text-xs text-slate-400">Si no indicas nada, solo se preguntan temas introductorios presentes en tu código.</p>
-          {temas && <button className="text-xs underline" onClick={() => setTemas('')}>Quitar la selección</button>}
-
-          {/* Subir archivo .py (botón o arrastrar y soltar sobre el editor) */}
-          <div className="flex items-center gap-3 text-xs">
-            <input
-              ref={inputArchivoRef}
-              type="file"
-              accept=".py"
-              onChange={handleSeleccionArchivo}
-              className="hidden"
-            />
-            <button
-              type="button"
-              onClick={() => inputArchivoRef.current?.click()}
-              className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 hover:border-blue-500 rounded px-2 py-1 text-slate-300 transition"
-            >
-              <Upload className="w-3.5 h-3.5" /> Subir archivo .py
-            </button>
-            {errorArchivo ? (
-              <span className="text-red-400">{errorArchivo}</span>
-            ) : nombreArchivo ? (
-              <span className="text-slate-400">
-                Archivo cargado: <span className="font-mono text-slate-300">{nombreArchivo}</span>
-              </span>
-            ) : (
-              <span className="text-slate-500">o arrastra un archivo al editor</span>
-            )}
-          </div>
-
-          <div
-            onDragOverCapture={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDropCapture={handleDrop}
-            className={`relative border rounded-xl overflow-hidden shadow-lg bg-[#1e1e1e] ${arrastrando ? 'border-blue-500' : 'border-slate-800'}`}
-          >
-            {arrastrando && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/80 text-sm text-blue-400 pointer-events-none">
-                Suelta tu archivo .py aquí
-              </div>
-            )}
-            <Editor
-              height="280px"
-              defaultLanguage="python"
-              theme={tema}
-              value={codigo}
-              beforeMount={handleEditorWillMount}
-              onMount={handleEditorDidMount}
-              onChange={(value) => setCodigo(value || '')}
-              options={{
-                minimap: { enabled: false },
-                fontSize: 13,
-                lineNumbers: 'on',
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                tabSize: 4,
-                insertSpaces: true,
-                padding: { top: 12, bottom: 12 },
-              }}
-            />
-          </div>
-
-          {/* PANEL DE ESTADO DE ERRORES EN TIEMPO REAL */}
-          <div className="p-3 rounded-xl border text-xs space-y-1 bg-slate-950 border-slate-800">
-            {errores.length > 0 ? (
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-red-400 font-semibold">
-                  <AlertOctagon className="w-4 h-4" /> Se detectaron {errores.length} problema(s) de sintaxis/estructura:
-                </div>
-                <ul className="pl-6 list-disc space-y-0.5 text-slate-400 font-mono">
-                  {errores.map((err, i) => (
-                    <li key={i}>
-                      Línea {err.startLineNumber}: {err.message}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 text-green-400">
-                <CheckCircle2 className="w-4 h-4" /> Sintaxis válida (sin errores detectados)
-              </div>
-            )}
-          </div>
-          </details>
         </div>}
       </div>
       <section aria-label="Práctica" aria-busy={ocupado} className={`min-w-0 space-y-5 bg-slate-900/60 border border-slate-700 p-5 xl:p-7 rounded-xl break-words ${sesion ? 'order-first lg:order-none' : ''}`}>
@@ -480,27 +405,25 @@ export default function SimuladorPage() {
           <div className="flex flex-wrap gap-3">{ultima.current && espera === 0 && <button disabled={ocupado} className="inline-flex items-center gap-2 rounded-lg border border-red-500 px-3 py-1.5 text-sm" onClick={reintentar}><RotateCcw aria-hidden="true" className="h-4 w-4" />Reintentar</button>}
             {sesion && <button disabled={ocupado} className="underline text-sm" onClick={() => enviar('recuperar')}>Recuperar el estado guardado</button>}</div></div>}
         {ocupado ? <Procesando accion={accionEnCurso} /> : !sesion && <div className="space-y-3 text-slate-300">
-          <p>Pega tu código a la izquierda y pulsa «Comenzar práctica».</p>
-          <ul className="space-y-2 text-sm text-slate-400">
-            <li className="flex gap-2"><CheckCircle2 aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-400" />Hasta tres preguntas sobre tu propio programa.</li>
-            <li className="flex gap-2"><CheckCircle2 aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-400" />Después de cada respuesta ves lo que explicaste, lo que falta y un siguiente paso.</li>
-            <li className="flex gap-2"><CheckCircle2 aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-400" />Puedes cerrar cuando quieras; no hay nota.</li>
-          </ul>
+          <ol className="grid gap-3 sm:grid-cols-3 text-center text-sm">
+            {[[Code2, 'Pega', 'tu código'], [MessageSquare, 'Responde', 'hasta 3 preguntas'], [Lightbulb, 'Recibe ayuda', 'sin nota']].map(([Icono, titulo, sub]) => <li key={titulo} className="rounded-xl border border-slate-700 bg-slate-950/40 p-4"><Icono aria-hidden="true" className="mx-auto h-7 w-7 text-blue-400" /><p className="mt-2 font-semibold text-slate-100">{titulo}</p><p className="text-xs text-slate-400">{sub}</p></li>)}
+          </ol>
         </div>}
         {caducada && <p className="rounded-lg border border-amber-600 p-3 text-amber-100">Esta práctica caducó (2 horas). Puedes revisar lo que hiciste o iniciar una nueva.</p>}
         {fase === 'confianza' && !caducada && <div className="space-y-4">
           <h3 ref={foco} tabIndex={-1} className="font-semibold text-lg">Pregunta {sesion.numero} · {sesion.tema.nombre}</h3>
           {sesion.tema.reemplazo && <p className="text-sm text-slate-300">Esta pregunta reemplaza la anterior, que no cuenta en tu contra.</p>}
           {sesion.tema.fragmento && <pre className="overflow-x-auto rounded-lg bg-slate-950 p-3 text-sm"><code>{sesion.tema.fragmento}</code></pre>}
-          <p id="confianza">Antes de ver la pregunta: sobre esta parte del programa, ¿qué tan seguro te sientes para explicarla?</p>
+          {sesion.pregunta && <p className="whitespace-pre-wrap text-lg leading-relaxed">{sesion.pregunta}</p>}
+          <p id="confianza">Antes de responder: ¿qué tan seguro te sientes para responder esta pregunta?</p>
           <div role="group" aria-labelledby="confianza" className="grid grid-cols-5 gap-2">
             {CONFIANZA.map(([valor, etiqueta]) => <button key={valor} disabled={bloqueado} onClick={() => enviar('confianza', { valor })} aria-label={`${valor}, ${etiqueta}`} className="rounded-xl border border-slate-600 bg-slate-950/60 py-3 transition hover:-translate-y-0.5 hover:border-blue-400 hover:bg-blue-950/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400 disabled:opacity-50"><span className="block text-xl font-bold">{valor}</span><span className="block text-[11px] leading-tight text-slate-300 min-h-4 px-1">{etiqueta}</span></button>)}
           </div>
-          <p className="text-xs text-slate-500">Atajo: pulsa una tecla del 1 al 5. No hay respuesta correcta; solo nos ayuda a entender cómo te sientes.</p>
+          <p className="text-xs text-slate-500">Tecla 1–5 como atajo.</p>
           <div className="flex flex-wrap gap-3">
-            <button className={secundario} disabled={bloqueado} onClick={() => enviar('confianza', { valor: null })}>Prefiero no responder</button>
-            <button className={secundario} disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'tema_no_cursado' })}>No he visto este tema</button>
-            {sesion.completadas > 0 && <button className="underline disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('cerrar')}>Terminar aquí</button>}
+            <button className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('confianza', { valor: null })}>Prefiero no responder</button>
+            <button className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'tema_no_cursado' })}>No he visto este tema</button>
+            {sesion.completadas > 0 && <button className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('cerrar')}>Terminar aquí</button>}
           </div>
         </div>}
         {fase === 'pregunta' && !caducada && <div className="space-y-4">
@@ -515,11 +438,10 @@ export default function SimuladorPage() {
           <p className="text-xs text-slate-400">{respuesta.length}/4000 caracteres · Ctrl + Enter para enviar · tu borrador se guarda en este navegador</p>
           <button className={boton} disabled={evaluacionBloqueada || !respuesta.trim()} onClick={() => enviar('responder', { respuesta })}>Enviar respuesta</button>
           <div className="flex flex-wrap gap-3">
-            <button className={secundario} disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'no_se' })}>No sé / prefiero pasar</button>
-            <button className={secundario} disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'tema_no_cursado' })}>No he visto este tema</button>
-            <button className="underline disabled:opacity-50" disabled={bloqueado || sesion.aclaraciones >= 2} onClick={() => enviar('aclarar')}>Necesito una aclaración</button>
+            <button title="Usa una de las tres preguntas y no cuenta como error" className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'no_se' })}>No sé / prefiero pasar</button>
+            <button title={sesion.puedeReemplazar ? 'La reemplaza una vez sin usar una pregunta' : 'La retira sin contarla en tu contra'} className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'tema_no_cursado' })}>No he visto este tema</button>
+            <button title="Mantiene la misma pregunta" className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado || sesion.aclaraciones >= 2} onClick={() => enviar('aclarar')}>Necesito una aclaración</button>
           </div>
-          <p className="text-xs text-slate-400">Omitir usa una de las tres preguntas y no cuenta como error. {sesion.puedeReemplazar ? '«No he visto este tema» la reemplaza una vez sin usar una pregunta.' : '«No he visto este tema» la retira sin contarla en tu contra.'} Aclarar mantiene la misma pregunta.</p>
         </div>}
         {fase === 'feedback' && ultimo && <div className="space-y-4">
           <h3 ref={foco} tabIndex={-1} className="font-semibold text-lg">Pregunta {sesion.completadas} · {ultimo.feedback.estado}</h3>
