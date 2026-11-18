@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
             <LogoLink />
             <div>
               <Show when="signed-out">
-                <SignInButton mode="modal">
+                <SignInButton mode="modal" forceRedirectUrl="/simulador" signUpForceRedirectUrl="/simulador">
                   <button className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-lg text-sm transition">
                     Iniciar sesión
                   </button>
