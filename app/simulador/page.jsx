@@ -495,8 +495,15 @@ export default function SimuladorPage() {
             <ul className="list-disc pl-5">{sesion.refuerzo.restricciones.map((r) => <li key={r}>{r}</li>)}</ul>
             <h4 className="font-semibold">Ejemplos</h4><ul className="space-y-2">{sesion.refuerzo.casos.map((c, i) => <li key={i}><code className="break-all">{c.entrada}</code> → {c.esperado}</li>)}</ul>
             <p className="text-sm text-amber-200">{sesion.analisis.limitacion}</p>
-            <button className={boton} disabled={evaluacionBloqueada || !codigoRefuerzo.trim() || codigoRefuerzo.length > 12000} onClick={() => enviar('entregar', { codigo: codigoRefuerzo })}>Enviar mi solución</button>
-          </div> : <EvaluacionRefuerzo evaluacion={sesion.evaluacionRefuerzo} />}
+            {!!sesion.versionesRefuerzo?.length && <p className="text-sm text-slate-300">Estás corrigiendo tu solución. La revisión anterior se conserva y podrás compararla.</p>}
+            <button className={boton} disabled={evaluacionBloqueada || !codigoRefuerzo.trim() || codigoRefuerzo.length > 12000} onClick={() => enviar('entregar', { codigo: codigoRefuerzo })}>{sesion.versionesRefuerzo?.length ? 'Enviar mi solución corregida' : 'Enviar mi solución'}</button>
+          </div> : <div className="space-y-4">
+            <EvaluacionRefuerzo evaluacion={sesion.evaluacionRefuerzo} />
+            {sesion.cambiosRefuerzo && <div className="rounded-xl border border-blue-800 p-4 space-y-1"><h4 className="font-semibold">Qué cambió respecto a tu entrega anterior</h4>
+              {sesion.cambiosRefuerzo.length ? <ul className="list-disc pl-5 text-sm">{sesion.cambiosRefuerzo.map((c) => <li key={c.nombre}>{c.nombre}: {c.antes} → {c.ahora}</li>)}</ul> : <p className="text-sm text-slate-300">La revisión no cambió en ningún punto.</p>}</div>}
+            {!!sesion.versionesRefuerzo?.length && <details className="text-sm"><summary className="cursor-pointer">Ver la revisión de tu primera entrega</summary><div className="mt-3"><EvaluacionRefuerzo evaluacion={sesion.versionesRefuerzo[0]} /></div></details>}
+            {sesion.puedeCorregir && <button className={secundario} disabled={ocupado} onClick={() => enviar('corregir')}>Corregir mi solución (una vez)</button>}
+          </div>}
           <details><summary className="cursor-pointer">Volver a ver el cierre</summary><div className="mt-3"><Resumen resumen={sesion.resumen} /></div></details>
           <button className={secundario} disabled={ocupado} onClick={otroPrograma}>{fase === 'refuerzo' ? 'Terminar por ahora' : 'Practicar con otro programa'}</button>
         </div>}

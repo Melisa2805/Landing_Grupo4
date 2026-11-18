@@ -325,6 +325,28 @@ test('refuerzo: prácticas consecutivas rotan variantes de la misma idea; agotad
   assert.equal(elegirRefuerzo(forzado, politica, ['costo_taxi']).nombre, 'total_compra')
 })
 
+test('refuerzo: una corrección versionada conserva la primera revisión, muestra qué cambió y no reabre el cierre', async () => {
+  const e = await preparar()
+  let s = await e.contestar(await e.iniciar('def contar(estados):\n    n = 0\n    for e in estados:\n        n += 1\n    return n'), 'Recorre la lista y cuenta cuántos estados hay, devolviendo ese número.', tutor({ concepto: 'recorridos' }))
+  s = await e.paso(await e.paso(s, 'cerrar'), 'refuerzo')
+  const cierre = s.resumen
+  e.responder(revisor({ conclusion: 'difiere', nivel: 1, cita: 'return 0' }))
+  s = await e.paso(s, 'entregar', { codigo: 'def contar_pendientes(estados):\n    return 0' })
+  assert.equal(s.puedeCorregir, true); assert.equal(s.versionesRefuerzo.length, 0); assert.equal(s.cambiosRefuerzo, null)
+  s = await e.paso(s, 'corregir')
+  assert.equal(s.fase, 'refuerzo'); assert.equal(s.versionesRefuerzo.length, 1); assert.equal(s.puedeCorregir, false)
+  const antes = e.llamadas.length
+  const solucion = 'def contar_pendientes(estados):\n    pendientes = 0\n    for estado in estados:\n        if estado == 0:\n            pendientes += 1\n    return pendientes'
+  e.responder(revisor({ cita: 'pendientes += 1' }))
+  s = await e.paso(s, 'entregar', { codigo: solucion })
+  assert.equal(e.llamadas.length, antes + 1)
+  assert.equal(s.fase, 'refuerzo_revisado'); assert.equal(s.versionesRefuerzo[0].estado, 'La revisión estática señala aspectos por revisar')
+  assert.ok(s.cambiosRefuerzo.some((c) => c.antes !== c.ahora && c.ahora === 'Explicado'))
+  assert.equal(JSON.stringify(s.resumen), JSON.stringify(cierre), 'el cierre no se reabre')
+  await assert.rejects(e.paso(s, 'corregir'), { code: 'PASO_INVALIDO' })
+  assert.ok((await e.eventos('reinforcement_correction_started')).length === 1)
+})
+
 test('recorrido completo del promedio: correcta, parcial, fallo recuperable y falsa hasta el cierre y el refuerzo', async () => {
   const e = await preparar(); let s = await e.iniciar(codigo, { temas: 'ciclos_listas' })
   const vistas = new Set()
