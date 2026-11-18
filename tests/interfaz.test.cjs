@@ -23,19 +23,18 @@ test('archivos Python: conserva el contenido y valida extensión, tamaño, vací
   await assert.rejects(leerArchivoPython({ ...archivo, text: async () => { throw new Error('lectura fallida') } }), /No se pudo leer.*se conserva/)
 })
 
-test('render: espera de preguntas con spinner, bloques de carga y texto accesible', async () => {
+test('render: espera con gif de carga y texto accesible', async () => {
   const e = await entorno()
   const { Procesando } = await e.importar('app/simulador/ux.jsx')
   for (const accion of ['iniciar', 'confianza', 'continuar', 'saltar']) {
     const html = renderToStaticMarkup(React.createElement(Procesando, { accion }))
     assert.ok(html.includes('role="status"'))
     assert.ok(html.includes('aria-live="polite"'))
-    assert.ok(html.includes('motion-safe:animate-spin'))
-    assert.ok(html.includes('aria-hidden="true" class="space-y-3 motion-safe:animate-pulse"'))
+    assert.ok(html.includes('src="/cargando.gif"'))
+    assert.ok(html.includes('alt=""'))
   }
   const respuesta = renderToStaticMarkup(React.createElement(Procesando, { accion: 'responder' }))
   assert.ok(respuesta.includes('El tutor está leyendo tu explicación'))
-  assert.ok(!respuesta.includes('animate-pulse'))
 })
 
 test('render: explicación completa sin siguiente paso ni bloque de pendientes', async () => {

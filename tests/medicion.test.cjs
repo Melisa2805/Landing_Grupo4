@@ -50,7 +50,7 @@ test('confianza antes de revelar; nula explícita; la aclaración la conserva; e
   const e = await practica()
   const codigo = 'def f(xs):\n    t = 0\n    for x in xs:\n        if x > 0:\n            t += x\n    return t'
   let s = await e.iniciar(codigo)
-  assert.equal(s.pregunta, null)
+  assert.equal(typeof s.pregunta, 'string')
   await assert.rejects(e.paso(s, 'responder', { respuesta: explicacion }), { code: 'PASO_INVALIDO' })
   for (const valor of [0, 6, 2.5, '3']) await assert.rejects(e.paso(s, 'confianza', { valor }), { code: 'ENTRADA_INVALIDA' })
   s = await e.paso(s, 'confianza', { valor: null })

@@ -2,6 +2,8 @@ import { ClerkProvider, Show, SignInButton, UserButton } from '@clerk/nextjs'
 import './globals.css'
 import LogoLink from './components/logo-link'
 import LimpiezaLocal from './components/limpieza-local'
+import CapturaReferido from './components/captura-referido'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata = {
   title: 'PyDefense - Practica tu sustentación de código Python',
@@ -14,6 +16,7 @@ export default function RootLayout({ children }) {
       <html lang="es">
         <body>
           <LimpiezaLocal />
+          <CapturaReferido />
           <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-4 flex flex-wrap gap-3 justify-between items-center max-w-7xl mx-auto rounded-b-xl">
             <LogoLink />
             <div>
@@ -33,6 +36,7 @@ export default function RootLayout({ children }) {
             </div>
           </header>
           {children}
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
