@@ -62,3 +62,31 @@ Antes, las preguntas eran plantillas fijas: la primera era siempre igual y la se
   - Debe tener un tipo y una longitud válidos.
 - Si se rechaza, se reintenta una vez indicando el motivo. Si vuelve a fallar, se usa la plantilla y el evento `question_prepared` registra `fuente`, `tipo` y `motivoPlantilla`.
 - Cuesta una llamada por pregunta y suma 2–5 s. `PYDEFENSE_PREGUNTAS_GENERADAS=desactivado` vuelve a las plantillas. Las suites anteriores usan las plantillas por defecto (`tests/entorno.cjs`); `tests/preguntas.test.cjs` prueba la redacción por IA.
+
+## Evaluación del sistema con programas nuevos (`npm run evaluar-generacion`)
+
+Conjunto: 8 programas que no se usaron para ajustar los prompts (`tests/fixtures/generacion/programas.json`): búsqueda binaria, palíndromo con dos índices, burbuja, Fibonacci iterativo, máximo, tabla de multiplicar, promedios en un diccionario y palabras largas. Cada uno con una respuesta correcta y otra con un error típico: 16 sesiones completas, con `gpt-6-luna` para preguntas y evaluación.
+
+| Métrica | v1 (sin solución de referencia) | v2 (actual) |
+| --- | --- | --- |
+| Preguntas redactadas por IA | 46/48 | **48/48** (3 tipos distintos por sesión) |
+| Sesiones con ejercicio | 12/16 | **16/16** |
+| Logrados en el primer intento | 10 | 13 (3 rechazos corregidos: 2 por técnica distinta, 1 por estructura) |
+| Ejercicios de nivel claramente inferior sin errores | burbuja → «contar negativos»; diccionario → etiquetas | ninguno claro (ver límites) |
+| Ejercicios sin relación con la técnica | Fibonacci → «sumar una lista»; búsqueda binaria → «contar mayores» | ninguno |
+| Mediana del paso de refuerzo | 12 s | 12 s |
+| Costo de las 16 sesiones | 0,11 USD | 0,24 USD (≈0,015 USD por sesión) |
+
+En v2 se comprobaron a mano los 32 resultados esperados visibles, y todos son correctos. Ejemplos:
+
+- **Búsqueda binaria correcta:** `primera_aparicion` (con repetidos), de nivel superior.
+- **Búsqueda binaria con error:** `primer_paso_binario`, el mismo algoritmo, un paso más simple.
+- **Fibonacci correcta:** `par_de_terminos(n, primero, segundo)`.
+- **Máximo correcta:** `frecuencia_del_mayor`.
+- **Tabla correcta:** `tabla_productos_rectangular(filas, columnas)`.
+
+Límites observados:
+
+- En la burbuja con respuestas correctas el ejercicio fue `pasada_burbuja` (una sola pasada), discutiblemente algo por debajo del programa.
+- `promedios_taller` es casi el mismo programa. Es de nivel similar, pero aporta poca variación.
+- Con 16 sesiones esto es evidencia, no una garantía: conviene repetir la evaluación con programas reales del curso.

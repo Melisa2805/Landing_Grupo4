@@ -1,0 +1,663 @@
+{
+  "generado": "2026-11-18T19:50:27.743Z",
+  "resumen": {
+    "sesiones": 16,
+    "erroresSesion": 0,
+    "preguntas": 48,
+    "preguntasGeneradas": 48,
+    "motivosPlantilla": {},
+    "tiposDistintosPorSesion": 3,
+    "refuerzosGenerados": 16,
+    "refuerzosPrimerIntento": 13,
+    "refuerzosNoDisponibles": 0,
+    "rechazosPrevios": [
+      "tecnica.distinta",
+      "tecnica.distinta",
+      "estructura.matriz"
+    ],
+    "medianaMsRefuerzo": 12141,
+    "costoTotalUSD": 0.240281
+  },
+  "resultados": [
+    {
+      "programa": "busqueda_binaria",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve «busqueda_binaria», qué representan «lista» y «objetivo», y qué significa el resultado? Describe la idea general que sigue para buscarlo, sin explicar el código línea por línea.",
+        "¿Qué papel cumple «len(lista) - 1» al asignar «fin»? Justifica qué representa ese límite con un ejemplo de lista ordenada y relaciónalo con los índices que usa «busqueda_binaria».",
+        "Compara cómo se evalúa «if lista[medio] == objetivo:» en «busqueda_binaria([2, 5, 8], 5)» y «busqueda_binaria([2, 5, 8], 6)». ¿Qué parte del programa justifica la diferencia?"
+      ],
+      "estados": [
+        "Tu explicación coincide con lo pedido",
+        "Explicación parcial",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 10977,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "primera_aparicion",
+        "motivo": "Opcional: Conservas la búsqueda por mitades de tu programa y practicas cómo una comparación concreta, como 5 == 5 frente a 5 == 6, determina qué rama se ejecuta.",
+        "enunciado": "Escribe una función que busque un entero en una lista ordenada que puede contener repetidos. Si lo encuentra, devuelve el índice de su primera aparición; si no, devuelve -1. En cada paso, compara el elemento central del intervalo con el objetivo y reduce el intervalo. Si coinciden, guarda el índice, pero sigue buscando a la izquierda: puede haber otra aparición anterior.",
+        "casos": [
+          {
+            "entrada": "primera_aparicion([2, 5, 5, 5, 8], 5)",
+            "esperado": "1"
+          },
+          {
+            "entrada": "primera_aparicion([2, 5, 5, 5, 8], 6)",
+            "esperado": "-1"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "comparar"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.016122
+    },
+    {
+      "programa": "busqueda_binaria",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué problema resuelve «busqueda_binaria»? Explica qué representan la lista y el objetivo que recibe, qué estrategia general sigue para localizarlo y qué significa el resultado que entrega.",
+        "Con la lista ordenada [2, 5, 8, 11] y el objetivo 11, ¿por qué «elif lista[medio] < objetivo:» hace que cambie inicio y no fin? Justifica tu explicación con los valores de la lista.",
+        "En «fin = medio - 1», ¿qué papel cumple esa línea cuando el valor del medio supera el objetivo? Justifica tu explicación con una lista ordenada y un objetivo concretos."
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 12212,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "primer_paso_binario",
+        "motivo": "Opcional: Este ejercicio aísla la primera decisión de tu búsqueda binaria para practicar cuándo mover inicio, cuándo mover fin y cuándo devolver el índice.",
+        "enunciado": "Realiza solo el primer paso de una búsqueda binaria. El intervalo inicial abarca toda la lista. Calcula el índice central redondeando hacia abajo y compara el valor de esa posición con el objetivo. Si son iguales, devuelve el índice central. Si el valor central es menor que el objetivo, devuelve una lista con los límites del intervalo que queda a la derecha. Si es mayor, devuelve los límites del intervalo que queda a la izquierda. En ambos casos excluye la posición central. Si el intervalo queda vacío, devuelve -1. No sigas buscando después de esta comparación.",
+        "casos": [
+          {
+            "entrada": "primer_paso_binario([2, 5, 8, 11], 11)",
+            "esperado": "[2, 3]"
+          },
+          {
+            "entrada": "primer_paso_binario([2, 5, 8, 11], 2)",
+            "esperado": "[0, 0]"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "explicar_linea"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.013753
+    },
+    {
+      "programa": "palindromo",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve `es_palindromo` y qué representan el texto que recibe y el valor que devuelve? Describe, en general, cómo decide si el texto se lee igual de izquierda a derecha y al revés.",
+        "En «limpio[izquierda]», ¿qué carácter representa esa posición del texto preparado? Justifica tu explicación con «es_palindromo(\"casa\")».",
+        "Compara «es_palindromo(\"casa\")» y «es_palindromo(\"saca\")»: en cada llamada, ¿qué carácter corresponde a «limpio[izquierda]» en la primera comparación? Explica cómo lo identificas en el texto preparado."
+      ],
+      "estados": [
+        "Tu explicación coincide con lo pedido",
+        "Explicación parcial",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 16785,
+        "intento": 2,
+        "rechazoPrevio": "tecnica.distinta",
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "caracter_del_primer_desajuste",
+        "motivo": "Opcional: Como en tu programa, recorres la cadena desde ambos extremos, pero aquí ya está preparada y devuelves el carácter que señala el índice izquierdo cuando aparece una diferencia.",
+        "enunciado": "Escribe una función que reciba una cadena ya preparada: está en minúsculas y no contiene espacios. Empieza con un índice en el primer carácter y otro en el último. Mientras el índice izquierdo sea menor que el derecho, compara los caracteres de esas posiciones. Si son distintos, devuelve de inmediato el carácter señalado por el índice izquierdo. Si coinciden, mueve el índice izquierdo una posición a la derecha y el derecho una posición a la izquierda. Si no encuentras diferencias, devuelve la cadena vacía.",
+        "casos": [
+          {
+            "entrada": "caracter_del_primer_desajuste('casa')",
+            "esperado": "'c'"
+          },
+          {
+            "entrada": "caracter_del_primer_desajuste('saca')",
+            "esperado": "'s'"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "comparar"
+      ],
+      "llamadas": 9,
+      "costoUSD": 0.023922
+    },
+    {
+      "programa": "palindromo",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué problema real resuelve «es_palindromo»? ¿Qué representa el texto que recibe y qué significa cada resultado que puede entregar? Describe en general cómo decide.",
+        "¿Por qué se usa «len(limpio) - 1» para iniciar «derecha»? Explica qué papel tiene ese valor al comparar el texto y justifica tu explicación con un ejemplo válido.",
+        "Para «es_palindromo('A n a')», ¿qué representa el argumento y qué resultado esperas? Justifica tu respuesta con una parte del programa."
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 18331,
+        "intento": 2,
+        "rechazoPrevio": "tecnica.distinta",
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "es_simetrico_sin_espacios",
+        "motivo": "Opcional: Como en tu programa, quitas los espacios y comparas con dos índices sin invertir el texto; al recibir ya las letras en minúscula, puedes concentrarte en por qué el índice derecho depende de la longitud del texto limpio y cómo cada comparación determina el valor devuelto.",
+        "enunciado": "Escribe una función que indique si un texto se lee igual en ambos sentidos al ignorar los espacios. Las letras ya vienen en minúscula. Quita los espacios antes de calcular los índices: si quedan tres caracteres, el último está en la posición 2. Usa dos índices para comparar los extremos y avánzalos hacia el centro, uno hacia la derecha y el otro hacia la izquierda. Si encuentras una diferencia, devuelve False en ese momento. Si no encuentras diferencias, devuelve True, incluso si no queda ningún carácter.",
+        "casos": [
+          {
+            "entrada": "es_simetrico_sin_espacios('a n a ')",
+            "esperado": "True"
+          },
+          {
+            "entrada": "es_simetrico_sin_espacios('a b c ')",
+            "esperado": "False"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "predecir"
+      ],
+      "llamadas": 9,
+      "costoUSD": 0.022619
+    },
+    {
+      "programa": "burbuja",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve «ordenar_burbuja»? ¿Qué representa la lista que recibe y qué significa la lista que entrega? Describe en general cómo obtiene ese resultado.",
+        "¿Qué dos situaciones distingue «if datos[j] > datos[j + 1]:» y qué hace el programa en cada una? Justifica tu explicación con un ejemplo de dos valores vecinos.",
+        "Si llamas «ordenar_burbuja([3, 1, 2])», ¿qué resultado esperarías y qué representa cada valor de entrada? Justifica tu respuesta con cómo se usan esos valores en el programa."
+      ],
+      "estados": [
+        "Explicación parcial",
+        "Explicación parcial",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 12907,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "pasada_burbuja",
+        "motivo": "Opcional: Tu programa repite esta misma pasada; hacerla una sola vez te permite explicar qué representa cada valor de entrada y predecir la lista exacta que se devuelve.",
+        "enunciado": "Escribe una función que haga una sola pasada de burbuja sobre una copia de la lista. Empieza por el primer par de vecinos y avanza de izquierda a derecha. Si el valor de la izquierda es mayor que el de la derecha, intercámbialos; si no, déjalos como están. Cada comparación usa la lista tal como quedó después del paso anterior. Devuelve la copia después de esa pasada, aunque todavía no esté ordenada por completo. Antes de programar, explica qué representan los valores de [4, 3, 1, 2] y predice la lista exacta que se devuelve siguiendo las comparaciones.",
+        "casos": [
+          {
+            "entrada": "pasada_burbuja([4, 3, 1, 2])",
+            "esperado": "[3, 1, 2, 4]"
+          },
+          {
+            "entrada": "pasada_burbuja([1, 3, 2])",
+            "esperado": "[1, 2, 3]"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "predecir"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.015155
+    },
+    {
+      "programa": "burbuja",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué problema resolverías usando «ordenar_burbuja([4, 2, 3])»? Explica qué representan los números de entrada, qué significa el resultado y, en general, cómo obtiene el programa ese resultado.",
+        "En «for j in range(n - 1 - i):», ¿por qué el límite depende de i? Usa «ordenar_burbuja([4, 2, 3])» para explicar cómo cambia ese recorrido entre pasadas.",
+        "¿Qué papel cumple «datos = numeros[:]» y qué representa cada elemento de esa lista? Justifica tu explicación con «ordenar_burbuja([4, 2, 3])»."
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 12802,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "pasada_burbuja",
+        "motivo": "Opcional: Esta función aísla el ciclo interno de tu ordenamiento para que practiques cómo acortar el recorrido según cuántos elementos del final queden fuera de cada pasada.",
+        "enunciado": "Escribe una función que haga una sola pasada de burbuja sobre una copia de la lista. Los últimos «fijos» elementos quedan fuera de la pasada. Recorre de izquierda a derecha la parte restante y compara cada pareja de vecinos que esté completamente dentro de esa parte. Si el número de la izquierda es mayor que el de la derecha, intercámbialos. Usa el estado de la copia después de cada intercambio para continuar la pasada. Si quedan menos de dos elementos por recorrer, devuelve la copia sin cambios. No hagas pasadas adicionales.",
+        "casos": [
+          {
+            "entrada": "pasada_burbuja([4, 2, 3], 0)",
+            "esperado": "[2, 3, 4]"
+          },
+          {
+            "entrada": "pasada_burbuja([3, 2, 1, 0], 1)",
+            "esperado": "[2, 1, 3, 0]"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "explicar_linea",
+        "justificar"
+      ],
+      "llamadas": 9,
+      "costoUSD": 0.013934
+    },
+    {
+      "programa": "fibonacci",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué representa el valor que entrega «fibonacci(5)» en la sucesión de Fibonacci, y qué información indica el número que recibe la función? Describe en general cómo obtiene ese valor.",
+        "¿Por qué la función devuelve «a» al final y no «b»? Justifica tu explicación siguiendo qué representan esos valores para una entrada concreta, por ejemplo «fibonacci(3)».",
+        "Para «fibonacci(3)», ¿qué valores quedan en «a» y «b» al terminar el ciclo, y cuál corresponde al término que devuelve la función? Explica cómo llegas a esos valores siguiendo las actualizaciones."
+      ],
+      "estados": [
+        "Tu explicación coincide con lo pedido",
+        "Explicación parcial",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 10377,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "par_de_terminos",
+        "motivo": "Opcional: Como en tu función fibonacci, avanzas un par en cada repetición, pero al devolver ambos términos practicas distinguir cuál queda en la posición n y cuál en la siguiente.",
+        "enunciado": "Implementa una función que devuelva los términos de las posiciones n y n + 1 de una sucesión. Los términos de las posiciones 0 y 1 son primero y segundo, respectivamente. A partir de la posición 2, cada término es la suma de los dos anteriores. Empieza con el par inicial y usa un ciclo para avanzar una posición por repetición. Al terminar, devuelve el par en el mismo orden en que aparece en la sucesión.",
+        "casos": [
+          {
+            "entrada": "par_de_terminos(3, 2, 4)",
+            "esperado": "(10, 16)"
+          },
+          {
+            "entrada": "par_de_terminos(4, 1, 3)",
+            "esperado": "(11, 18)"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "predecir"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.013195
+    },
+    {
+      "programa": "fibonacci",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué problema resuelve «fibonacci(n)», qué representa «n» y qué significa el valor que devuelve? Describe la estrategia general con la que lo obtiene, sin explicar línea por línea.",
+        "¿Por qué «for _ in range(n):» hace que «n» indique cuántas veces se actualizan los valores, y cómo ayuda «return a» a entender qué devuelve la función? Justifica tu explicación con un ejemplo válido.",
+        "Compara fibonacci(3) y fibonacci(4): ¿qué diferencia esperas entre los valores que devuelve y cómo la justificas a partir de las repeticiones del ciclo y de «return a»?"
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 8286,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "termino_pares",
+        "motivo": "Opcional: Como en tu función de Fibonacci, n indica cuántos pasos das para llegar al término que devuelves; aquí basta con actualizar una sola variable.",
+        "enunciado": "Escribe una función que devuelva el término de índice n de la secuencia 0, 2, 4, 6, …, cuyo primer término tiene índice 0. Empieza en 0 y usa un ciclo para avanzar un término por repetición, sumando 2 al valor actual. Al terminar, devuelve solo el valor alcanzado, no una lista.",
+        "casos": [
+          {
+            "entrada": "termino_pares(3)",
+            "esperado": "6"
+          },
+          {
+            "entrada": "termino_pares(4)",
+            "esperado": "8"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "comparar"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.010817
+    },
+    {
+      "programa": "maximo",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve «maximo»? Explica qué representa la lista que recibe, qué significa el resultado y la idea general que sigue para obtenerlo.",
+        "¿Por qué «mayor = numeros[0]» usa el primer número de la lista para iniciar la búsqueda? Justifica tu explicación con una lista válida de ejemplo.",
+        "Compara «maximo([4, 2, 7])» y «maximo([4, 7, 7])»: ¿qué papel cumple «if x > mayor:» al llegar al último número en cada caso? Justifica tu explicación con los valores que se comparan."
+      ],
+      "estados": [
+        "Tu explicación coincide con lo pedido",
+        "Tu explicación coincide con lo pedido",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 10683,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "frecuencia_del_mayor",
+        "motivo": "Opcional: Como en maximo, guardas el mayor mientras recorres la lista; aquí practicas identificar los valores que comparas y distinguir entre superar el mayor e igualarlo.",
+        "enunciado": "Práctica opcional: escribe una función que recorra una lista de enteros y devuelva cuántas veces aparece su valor más grande. Durante el recorrido, si encuentras un número que supera al mayor guardado, empieza la cuenta del nuevo mayor en uno. Si lo iguala, suma uno a la cuenta. Si es menor, no cambies nada. Para comprobar tu función, indica en cada ejemplo visible qué dos valores se comparan en el último paso y qué pasa con la cuenta.",
+        "casos": [
+          {
+            "entrada": "frecuencia_del_mayor([4, 4, 7])",
+            "esperado": "1"
+          },
+          {
+            "entrada": "frecuencia_del_mayor([4, 7, 7])",
+            "esperado": "2"
+          }
+        ]
+      },
+      "tipos": [
+        "explicar_linea",
+        "justificar",
+        "comparar"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.013012
+    },
+    {
+      "programa": "maximo",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué problema resuelve «maximo»? ¿Qué representa la lista que recibe y qué significa el valor que entrega? Describe la idea general con la que obtiene ese resultado.",
+        "¿Por qué «maximo» compara cada número con «mayor» antes de cambiarlo? Justifica qué aporta esa condición siguiendo el recorrido de la lista [4, 2, 7, 5].",
+        "Compara «maximo([6, 2])» y «maximo([2, 6])»: ¿qué representa «numeros[0]» en cada llamada y qué papel tiene en el programa? Justifica tu explicación con el código."
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 10800,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "primer_superior_al_inicio",
+        "motivo": "Opcional: Como en maximo, empiezas con el primer valor y comparas los siguientes, pero aquí la referencia no cambia: practicas cuándo seguir y cuándo devolver el número encontrado.",
+        "enunciado": "Escribe una función que tome el primer número de la lista como referencia y recorra los demás de izquierda a derecha. Si encuentra un número estrictamente mayor que la referencia, debe devolver ese número en ese momento. Si el número es menor o igual, debe seguir buscando. Si ninguno supera al primero, debe devolver el primer número.",
+        "casos": [
+          {
+            "entrada": "primer_superior_al_inicio([4, 2, 7, 9])",
+            "esperado": "7"
+          },
+          {
+            "entrada": "primer_superior_al_inicio([-3, -5, -3])",
+            "esperado": "-3"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "comparar"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.011478
+    },
+    {
+      "programa": "tabla",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve «tabla_multiplicar» y qué representa la tabla que devuelve para un valor de «n»? Explica también qué significa ese valor de entrada y la idea general que sigue el programa.",
+        "¿Por qué la función recibe «n» y lo usa en ambos «range(1, n + 1)», en vez de fijar esos límites? Justifica tu explicación con cómo cambiaría la tabla al cambiar «n».",
+        "¿Qué representa «tabla.append(fila)» en la tabla de multiplicar, y por qué se hace después de recorrer los valores de «j»? Justifica tu explicación con el caso «tabla_multiplicar(2)»."
+      ],
+      "estados": [
+        "Explicación parcial",
+        "Explicación parcial",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 10141,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "tabla_productos_rectangular",
+        "motivo": "Opcional: Como en tu tabla de multiplicar, completas cada fila antes de agregarla; aquí puedes cambiar por separado el límite de cada recorrido.",
+        "enunciado": "Escribe una función que construya una tabla rectangular de multiplicar. Numera las filas desde 1 hasta filas y las columnas desde 1 hasta columnas. En cada celda guarda el producto de los números de su fila y su columna. Construye una fila a la vez y agrégala a la tabla solo cuando hayas calculado todos sus productos. Devuelve la tabla completa.",
+        "casos": [
+          {
+            "entrada": "tabla_productos_rectangular(2, 2)",
+            "esperado": "[[1, 2], [2, 4]]"
+          },
+          {
+            "entrada": "tabla_productos_rectangular(2, 3)",
+            "esperado": "[[1, 2, 3], [2, 4, 6]]"
+          }
+        ]
+      },
+      "tipos": [
+        "explicar_linea",
+        "justificar",
+        "relacionar_problema"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.013521
+    },
+    {
+      "programa": "tabla",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué representa la lista que devuelve «tabla_multiplicar(3)» en el problema, qué significa el valor que recibe la función y qué idea general sigue para construir ese resultado?",
+        "¿Qué aporta «tabla.append(fila)» a la estructura que devuelve la función, y qué parte del programa te ayuda a justificarlo?",
+        "Para «tabla_multiplicar(2)», compara la estructura que se construye con el programa actual con la de una versión que añade a «tabla» los valores de cada fila por separado. ¿Qué diferencia habría y qué partes del programa te permiten justificarlo?"
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 17140,
+        "intento": 2,
+        "rechazoPrevio": "estructura.matriz",
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "tabla_dobles",
+        "motivo": "Opcional: Como en tabla_multiplicar, reúnes filas completas en una lista, pero aquí cada fila tiene dos valores y puedes construirla sin un segundo ciclo.",
+        "enunciado": "Escribe una función que construya una tabla de dos columnas. Para cada entero del 1 al n, en ese orden, crea una fila con el entero en la primera columna y su doble en la segunda. Devuelve la tabla como una lista de listas: cada elemento de la lista exterior debe ser una fila completa.",
+        "casos": [
+          {
+            "entrada": "tabla_dobles(2)",
+            "esperado": "[[1, 2], [2, 4]]"
+          },
+          {
+            "entrada": "tabla_dobles(3)",
+            "esperado": "[[1, 2], [2, 4], [3, 6]]"
+          }
+        ]
+      },
+      "tipos": [
+        "justificar",
+        "explicar_linea",
+        "comparar"
+      ],
+      "llamadas": 9,
+      "costoUSD": 0.021596
+    },
+    {
+      "programa": "promedios_dict",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué información recibe «promedios» y qué representa el resultado que devuelve? Explica en general cómo transforma esa información para obtenerlo.",
+        "En «resultado[nombre]», ¿qué representa el valor y por qué se guarda asociado a «nombre»? Apóyate en un ejemplo de entrada válido.",
+        "Para «promedios({'Ana': [6, 8], 'Luis': []})», ¿qué pares nombre-valor tendría el diccionario devuelto? Explica cómo se relaciona cada nombre con su valor usando el programa."
+      ],
+      "estados": [
+        "Tu explicación coincide con lo pedido",
+        "Explicación parcial",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 12382,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "promedios_taller",
+        "motivo": "Opcional: Como en tu función promedios, cada nombre identifica a quién pertenece el promedio; aquí puedes practicar esa asociación con valores concretos sin tener que tratar listas vacías.",
+        "enunciado": "Escribe la función promedios_taller. Recibe un diccionario con los nombres de los participantes de un taller y sus listas de notas. Todas las listas tienen al menos una nota. Devuelve un diccionario nuevo con los mismos nombres, pero reemplaza cada lista por su promedio. Después de escribir la función, elige uno de los ejemplos visibles: indica qué pares nombre-promedio devuelve y explica, usando las notas de cada participante, por qué cada promedio queda asociado a ese nombre.",
+        "casos": [
+          {
+            "entrada": "promedios_taller({'Eva': [4, 8], 'Leo': [9]})",
+            "esperado": "{'Eva': 6.0, 'Leo': 9.0}"
+          },
+          {
+            "entrada": "promedios_taller({'Sol': [5, 8], 'Paz': [3, 3, 6]})",
+            "esperado": "{'Sol': 6.5, 'Paz': 4.0}"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "predecir"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.014948
+    },
+    {
+      "programa": "promedios_dict",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué información representa el parámetro de «promedios» y qué representa cada elemento del diccionario que devuelve?",
+        "En «resultado[nombre]», ¿por qué se usa «nombre» como clave y qué papel cumple el valor guardado para ese estudiante, incluso si no tiene notas? Justifica tu explicación con una parte del programa.",
+        "Compara qué significa el valor guardado para un estudiante con notas frente al de uno sin notas. ¿Qué partes del programa justifican esa diferencia?"
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 12141,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "contar_notas_por_estudiante",
+        "motivo": "Opcional: Como en tu programa de promedios, conservas el nombre como clave y guardas un resultado para cada estudiante, pero aquí solo necesitas contar sus notas.",
+        "enunciado": "Escribe una función que reciba un diccionario donde cada nombre de estudiante está asociado con su lista de notas. Construye y devuelve un diccionario nuevo con los mismos nombres como claves. Para cada nombre, guarda cuántas notas tiene ese estudiante, sin contar las de los demás. Conserva también a los estudiantes que no tienen notas: su valor debe ser 0.",
+        "casos": [
+          {
+            "entrada": "contar_notas_por_estudiante({'Ana': [8, 10], 'Luis': [7]})",
+            "esperado": "{'Ana': 2, 'Luis': 1}"
+          },
+          {
+            "entrada": "contar_notas_por_estudiante({'Eva': [], 'Ivo': [9, 6, 8]})",
+            "esperado": "{'Eva': 0, 'Ivo': 3}"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "comparar"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.012952
+    },
+    {
+      "programa": "palabras_largas",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve «palabras_largas»? Explica qué información recibe, qué representa el número que devuelve y la idea general que sigue para obtenerlo.",
+        "¿Qué representa «minimo» para quien usa «palabras_largas» y cómo puedes justificar su papel con la condición «len(palabra) >= minimo»?",
+        "Si cambiaras «if len(palabra) >= minimo:» por una condición que exigiera que la palabra fuera más larga que «minimo», ¿qué palabras dejarían de sumarse? Justifica tu respuesta con un ejemplo."
+      ],
+      "estados": [
+        "Tu explicación coincide con lo pedido",
+        "Tu explicación coincide con lo pedido",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 12171,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "contar_por_longitud",
+        "motivo": "Opcional: Como en palabras_largas, recorres el texto y cuentas palabras según su longitud, pero ahora separas las que antes contabas juntas con >=: las que igualan el mínimo y las que lo superan.",
+        "enunciado": "Escribe una función que recorra las palabras de un texto y lleve dos conteos: cuántas tienen exactamente la longitud indicada y cuántas son más largas. Las palabras más cortas no cuentan. Separa las palabras por espacios en blanco, incluidas las tabulaciones y los saltos de línea.",
+        "casos": [
+          {
+            "entrada": "contar_por_longitud('sol luna mar a', 3)",
+            "esperado": "[2, 1]"
+          },
+          {
+            "entrada": "contar_por_longitud('pan\\tpan\\nqueso', 3)",
+            "esperado": "[2, 1]"
+          }
+        ]
+      },
+      "tipos": [
+        "explicar_linea",
+        "justificar",
+        "modificar"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.012439
+    },
+    {
+      "programa": "palabras_largas",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué problema permite resolver «palabras_largas(texto, minimo)»? Explica qué representan sus dos datos de entrada y qué significa el número que devuelve.",
+        "En «if len(palabra) >= minimo:», ¿qué diferencia hace que una palabra sume a «cuenta» o no? Justifica tu explicación con una palabra de ejemplo y un valor de «minimo».",
+        "¿Qué devolvería «palabras_largas(\"a sol nube\", 3)»? Explica qué palabras sumarían a «cuenta» y cómo decides si cada una cumple la condición."
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 9264,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloGenerador": "gpt-6.2-sol",
+        "nombre": "contar_palabras_de_tres",
+        "motivo": "Opcional: Como en tu programa, recorres las palabras y cuentas las que alcanzan un mínimo, pero aquí el mínimo es fijo para que practiques cuándo sumar y cuándo no.",
+        "enunciado": "Escribe una función que recorra las palabras de un texto. Si una palabra tiene tres caracteres o más, suma uno al conteo. Si tiene menos de tres, no lo cambies. Al final, devuelve el conteo.",
+        "casos": [
+          {
+            "entrada": "contar_palabras_de_tres('a sol nube')",
+            "esperado": "2"
+          },
+          {
+            "entrada": "contar_palabras_de_tres('yo y tu')",
+            "esperado": "0"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "predecir"
+      ],
+      "llamadas": 9,
+      "costoUSD": 0.010818
+    }
+  ]
+}
