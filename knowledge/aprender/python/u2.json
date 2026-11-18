@@ -1,0 +1,336 @@
+{
+  "formato": 1,
+  "ruta": "python-fundamentos",
+  "unidad": "u2",
+  "version": "2026-11-17.1",
+  "estado": "borrador_pendiente_revision_docente",
+  "titulo": "El descuento",
+  "subtitulo": "Unidad 2 · Comparaciones y decisiones",
+  "proyecto": "Al terminar la unidad podrás explicar cuándo un programa aplica un descuento y qué pasa exactamente en el límite.",
+  "requiere": "u1",
+  "habilidades": {
+    "py.comparacion": { "nombre": "Comparaciones", "observable": "Predice si una comparación es True o False y distingue = de ==." },
+    "py.rama": { "nombre": "Decisiones con if/else", "observable": "Sigue qué camino de un if/else se ejecuta y qué líneas corren siempre." },
+    "py.limite": { "nombre": "Límites de una condición", "observable": "Elige entre > y >= según la regla y explica qué ocurre en el valor frontera." }
+  },
+  "lecciones": [
+    {
+      "id": "u2-l1",
+      "habilidad": "py.comparacion",
+      "titulo": "Comparar valores",
+      "objetivo": "Al terminar podrás predecir si una comparación es verdadera o falsa.",
+      "explicacion": [
+        "Una comparación pregunta algo sobre dos valores. Su resultado es `True` (verdadero) o `False` (falso).",
+        "Los operadores son `>` (mayor que), `<` (menor que), `>=` (mayor o igual), `<=` (menor o igual), `==` (igual) y `!=` (distinto).",
+        "No confundas `=` con `==`: `=` guarda un valor; `==` pregunta si dos valores son iguales."
+      ],
+      "ampliada": [
+        "`print(5 > 3)` muestra `True`. `print(5 > 5)` muestra `False`, porque 5 no es mayor que sí mismo; en cambio `5 >= 5` es `True`.",
+        "Puedes guardar el resultado de una comparación: `es_mayor = edad >= 18` guarda `True` o `False` en es_mayor.",
+        "Los textos también se comparan: `\"a\" == \"a\"` es `True`, y las mayúsculas cuentan: `\"A\" == \"a\"` es `False`."
+      ],
+      "ejemplo": {
+        "codigo": "total = 12000\nminimo = 10000\nprint(total >= minimo)\nprint(total == minimo)",
+        "pasos": [
+          "Líneas 1 y 2: guardan el total de la compra y el mínimo para el descuento.",
+          "Línea 3: pregunta si `12000 >= 10000`. Es verdad: muestra `True`.",
+          "Línea 4: pregunta si `12000 == 10000`. No son iguales: muestra `False`."
+        ],
+        "salida": "True\nFalse"
+      },
+      "cierre": "Ya puedes predecir el resultado de una comparación y explicar la diferencia entre guardar (=) y comparar (==).",
+      "proyecto": "Ya sabes preguntar si una compra alcanza el mínimo del descuento.",
+      "secuencia": ["u2-l1-a01", "u2-l1-a02", "u2-l1-a03"],
+      "actividades": [
+        { "id": "u2-l1-a01", "version": 1, "familia": "py.comparacion.resultado", "uso": "guiada", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "precio = 8000\nprint(precio > 5000)", "salida": "True",
+          "ayuda": "Una comparación no muestra los números: muestra True o False.",
+          "opciones": [
+            { "id": "a", "texto": "True", "porque": "Correcto: 8000 es mayor que 5000." },
+            { "id": "b", "texto": "False", "porque": "8000 sí es mayor que 5000, así que la comparación es verdadera." },
+            { "id": "c", "texto": "8000", "porque": "print recibe el resultado de la comparación, no el precio." }
+          ],
+          "correcta": "a", "pista": "Pregúntate: ¿8000 es mayor que 5000?", "explicacion": "La comparación 8000 > 5000 es verdadera, así que print muestra True." },
+        { "id": "u2-l1-a02", "version": 1, "familia": "py.comparacion.explicar", "uso": "aplicacion", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Cuál explicación describe correctamente la segunda línea?", "codigo": "cantidad = 4\nhay_descuento = cantidad >= 4",
+          "opciones": [
+            { "id": "a", "texto": "Compara si cantidad es mayor o igual que 4 y guarda el resultado (True) en hay_descuento.", "porque": "Correcto: primero se compara y el resultado se guarda." },
+            { "id": "b", "texto": "Cambia el valor de cantidad a 4.", "porque": ">= compara; no cambia cantidad." },
+            { "id": "c", "texto": "Muestra True en la pantalla.", "porque": "No hay print: el resultado se guarda, no se muestra." }
+          ],
+          "correcta": "a", "pista": "La línea tiene un = y un >=. ¿Qué hace cada uno?", "explicacion": "cantidad >= 4 vale True, y el = guarda ese True en hay_descuento." },
+        { "id": "u2-l1-a03", "version": 1, "familia": "py.comparacion.distinto", "uso": "aplicacion", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "a = 7\nb = 7\nprint(a != b)", "salida": "False",
+          "opciones": [
+            { "id": "a", "texto": "False", "porque": "Correcto: != pregunta si son distintos, y 7 y 7 son iguales." },
+            { "id": "b", "texto": "True", "porque": "True sería la respuesta de a == b. != pregunta lo contrario." },
+            { "id": "c", "texto": "0", "porque": "Una comparación muestra True o False, no un número." }
+          ],
+          "correcta": "a", "pista": "Lee != como «es distinto de».", "explicacion": "a y b valen 7. ¿7 es distinto de 7? No: la comparación es False." },
+        { "id": "u2-l1-p01", "version": 1, "familia": "py.comparacion.igual", "uso": "practica", "nivel": "basico", "formato": "fichas",
+          "consigna": "Completa para preguntar si la edad es exactamente 18.", "codigo": "edad = 18\nprint(edad ___ 18)", "salida": "True",
+          "fichas": [
+            { "id": "a", "texto": "==", "porque": "Correcto: == pregunta si los dos valores son iguales." },
+            { "id": "b", "texto": "=", "porque": "= guarda valores; dentro de print produce un error porque no compara." },
+            { "id": "c", "texto": ">", "porque": "> pregunta si es mayor, no si es igual." }
+          ],
+          "correcta": "a", "pista": "Necesitas el operador que pregunta por igualdad.", "explicacion": "edad == 18 compara y da True." },
+        { "id": "u2-l1-p02", "version": 1, "familia": "py.comparacion.resultado", "uso": "practica", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "print(10 <= 9)", "salida": "False",
+          "opciones": [
+            { "id": "a", "texto": "True", "porque": "10 no es menor ni igual que 9." },
+            { "id": "b", "texto": "False", "porque": "Correcto: 10 es mayor que 9." },
+            { "id": "c", "texto": "9", "porque": "print muestra el resultado de la comparación." }
+          ],
+          "correcta": "b", "pista": "Lee <= como «es menor o igual que».", "explicacion": "¿10 es menor o igual que 9? No, así que se muestra False." },
+        { "id": "u2-l1-p03", "version": 1, "familia": "py.comparacion.limite", "uso": "practica", "nivel": "moderado", "formato": "linea",
+          "consigna": "Con un saldo de 5000 alcanza para pagar algo de 5000, así que debería mostrarse True. El programa muestra False. Elige la línea que causa el problema.",
+          "lineas": ["saldo = 5000", "precio = 5000", "print(saldo > precio)"], "correctas": [3], "salida": "False",
+          "porque": { "1": "El saldo es correcto.", "2": "El precio es correcto.", "3": "Correcto: > excluye el caso en que son iguales; hace falta >=." },
+          "pista": "¿Qué pasa con > cuando los dos valores son iguales?", "explicacion": "Con valores iguales, saldo > precio es False. Para incluir ese caso: saldo >= precio." },
+        { "id": "u2-l1-p04", "version": 1, "familia": "py.comparacion.explicar", "uso": "practica", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "Alguien explica la segunda línea así: «Compara la nota con 3». ¿Qué le falta?", "codigo": "nota = 3\naprobo = nota >= 3",
+          "opciones": [
+            { "id": "a", "texto": "Que el resultado de la comparación (True) se guarda en aprobo.", "porque": "Correcto: la explicación no dice qué pasa con el resultado." },
+            { "id": "b", "texto": "Que muestra si aprobó.", "porque": "No hay print." },
+            { "id": "c", "texto": "Que convierte la nota en 3.", "porque": ">= no cambia la nota." }
+          ],
+          "correcta": "a", "pista": "¿Dónde termina el True o False de la comparación?", "explicacion": "nota >= 3 es True y ese valor queda guardado en aprobo." },
+        { "id": "u2-l1-p05", "version": 1, "familia": "py.comparacion.igual", "uso": "practica", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "x = 5\nprint(x == 5.0)", "salida": "True",
+          "opciones": [
+            { "id": "a", "texto": "True", "porque": "Correcto: 5 y 5.0 representan el mismo número." },
+            { "id": "b", "texto": "False", "porque": "Python compara el valor numérico: 5 y 5.0 son iguales." },
+            { "id": "c", "texto": "Un error", "porque": "Comparar un entero con un decimal es válido." }
+          ],
+          "correcta": "a", "pista": "¿5 y 5.0 son el mismo número?", "explicacion": "== compara valores: 5 es igual a 5.0, así que muestra True." },
+        { "id": "u2-l1-t01", "version": 1, "familia": "py.comparacion.textos", "uso": "transferencia", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "palabra = \"Hola\"\nprint(palabra == \"hola\")", "salida": "False",
+          "opciones": [
+            { "id": "a", "texto": "False", "porque": "Correcto: la H mayúscula hace que los textos sean distintos." },
+            { "id": "b", "texto": "True", "porque": "Python distingue mayúsculas: Hola y hola no son iguales." },
+            { "id": "c", "texto": "Hola", "porque": "print muestra el resultado de la comparación." }
+          ],
+          "correcta": "a", "pista": "Compara las dos palabras letra por letra.", "explicacion": "\"Hola\" y \"hola\" difieren en la primera letra, así que == da False." },
+        { "id": "u2-l1-t02", "version": 1, "familia": "py.comparacion.resultado", "uso": "transferencia", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "limite = 100\nvalor = 99 + 1\nprint(valor >= limite)", "salida": "True",
+          "opciones": [
+            { "id": "a", "texto": "True", "porque": "Correcto: valor es 100 y 100 >= 100." },
+            { "id": "b", "texto": "False", "porque": ">= incluye el caso igual." },
+            { "id": "c", "texto": "100", "porque": "print muestra el resultado de la comparación." }
+          ],
+          "correcta": "a", "pista": "Calcula primero valor.", "explicacion": "valor vale 100; 100 >= 100 es True porque >= incluye la igualdad." }
+      ]
+    },
+    {
+      "id": "u2-l2",
+      "habilidad": "py.rama",
+      "titulo": "Elegir un camino con if/else",
+      "objetivo": "Al terminar podrás decir qué camino de un if/else se ejecuta.",
+      "explicacion": [
+        "`if` ejecuta un bloque solo si la condición es `True`. `else` ejecuta otro bloque cuando es `False`.",
+        "El bloque son las líneas con sangría (cuatro espacios) debajo del `if` o del `else`.",
+        "En cada ejecución corre solo uno de los dos caminos. Después el programa sigue con la siguiente línea sin sangría."
+      ],
+      "ampliada": [
+        "Los dos puntos `:` al final de `if` y de `else` son obligatorios.",
+        "Una línea sin sangría ya no pertenece al bloque: se ejecuta siempre.",
+        "Sin `else`, cuando la condición es `False` simplemente se salta el bloque del `if`."
+      ],
+      "ejemplo": {
+        "codigo": "dinero = 3000\nif dinero >= 2500:\n    print(\"Compro el jugo\")\nelse:\n    print(\"Me falta dinero\")\nprint(\"Fin\")",
+        "pasos": [
+          "Línea 2: `3000 >= 2500` es `True`, así que se ejecuta el bloque del if.",
+          "Línea 3: muestra Compro el jugo. El bloque del else se salta.",
+          "Línea 6: no tiene sangría, así que se ejecuta siempre: muestra Fin."
+        ],
+        "salida": "Compro el jugo\nFin"
+      },
+      "cierre": "Ya puedes explicar qué camino toma un programa y qué líneas se ejecutan siempre.",
+      "proyecto": "Ya sabes decidir si una compra recibe el descuento.",
+      "secuencia": ["u2-l2-a01", "u2-l2-a02", "u2-l2-a03"],
+      "actividades": [
+        { "id": "u2-l2-a01", "version": 1, "familia": "py.rama.seguir", "uso": "guiada", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "temperatura = 15\nif temperatura > 20:\n    print(\"Calor\")\nelse:\n    print(\"Frío\")", "salida": "Frío",
+          "ayuda": "Primero decide si 15 > 20 es True o False. Solo corre un camino.",
+          "opciones": [
+            { "id": "a", "texto": "Calor", "porque": "15 no es mayor que 20, así que el bloque del if no corre." },
+            { "id": "b", "texto": "Frío", "porque": "Correcto: la condición es False y corre el else." },
+            { "id": "c", "texto": "Calor y después Frío", "porque": "if y else nunca corren los dos en la misma ejecución." }
+          ],
+          "correcta": "b", "pista": "Evalúa la condición con el valor de temperatura.", "explicacion": "15 > 20 es False, así que se salta el if y se ejecuta el else: Frío." },
+        { "id": "u2-l2-a02", "version": 1, "familia": "py.rama.condicion", "uso": "aplicacion", "nivel": "moderado", "formato": "linea",
+          "consigna": "El envío es gratis desde 5 artículos. Con 2 artículos debería mostrarse «Envío normal», pero se muestra «Envío gratis». Elige la línea que causa el problema.",
+          "lineas": ["articulos = 2", "if articulos < 5:", "    print(\"Envío gratis\")", "else:", "    print(\"Envío normal\")"], "correctas": [2], "salida": "Envío gratis",
+          "porque": { "1": "Dos artículos es el caso que queremos probar.", "2": "Correcto: la condición está invertida; debería ser articulos >= 5.", "3": "El mensaje es el adecuado para el envío gratis.", "4": "El else es necesario para el otro caso.", "5": "El mensaje es el adecuado para el envío normal." },
+          "pista": "¿Para qué cantidades es verdadera la condición de la línea 2?", "explicacion": "articulos < 5 es True con 2, así que da envío gratis justo a quien no le corresponde. La regla pide articulos >= 5." },
+        { "id": "u2-l2-a03", "version": 1, "familia": "py.rama.explicar", "uso": "aplicacion", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Cuál explicación es correcta?", "codigo": "nota = 2.5\nif nota >= 3:\n    print(\"Aprobó\")\nelse:\n    print(\"Debe recuperar\")", "salida": "Debe recuperar",
+          "opciones": [
+            { "id": "a", "texto": "Como 2.5 no es mayor o igual que 3, la condición es False y se muestra «Debe recuperar».", "porque": "Correcto: explica la condición, su resultado y el camino que corre." },
+            { "id": "b", "texto": "Muestra «Aprobó» y luego «Debe recuperar».", "porque": "Solo corre uno de los dos caminos." },
+            { "id": "c", "texto": "Muestra «Aprobó» porque 2.5 está cerca de 3.", "porque": "La condición no considera la cercanía: 2.5 >= 3 es False." }
+          ],
+          "correcta": "a", "pista": "Calcula 2.5 >= 3 antes de elegir.", "explicacion": "2.5 >= 3 es False, así que corre el else y se muestra Debe recuperar." },
+        { "id": "u2-l2-p01", "version": 1, "familia": "py.rama.siempre", "uso": "practica", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "x = 10\nif x > 5:\n    print(\"A\")\nprint(\"B\")", "salida": "A\nB",
+          "opciones": [
+            { "id": "a", "texto": "A y después B", "porque": "Correcto: la condición es True y B no tiene sangría." },
+            { "id": "b", "texto": "Solo A", "porque": "B no tiene sangría: se muestra siempre." },
+            { "id": "c", "texto": "Solo B", "porque": "10 > 5 es True, así que A también se muestra." }
+          ],
+          "correcta": "a", "pista": "Mira la sangría de cada print.", "explicacion": "10 > 5 es True: se muestra A. B está fuera del bloque y se muestra siempre." },
+        { "id": "u2-l2-p02", "version": 1, "familia": "py.rama.siempre", "uso": "practica", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "x = 3\nif x > 5:\n    print(\"A\")\nprint(\"B\")", "salida": "B",
+          "opciones": [
+            { "id": "a", "texto": "A y después B", "porque": "3 > 5 es False, así que A no se muestra." },
+            { "id": "b", "texto": "Solo B", "porque": "Correcto: se salta el bloque y B se muestra siempre." },
+            { "id": "c", "texto": "Nada", "porque": "B está fuera del if y se ejecuta igual." }
+          ],
+          "correcta": "b", "pista": "¿La condición es True o False? ¿Qué línea no depende de ella?", "explicacion": "3 > 5 es False: se salta print(\"A\"). print(\"B\") no tiene sangría y se ejecuta." },
+        { "id": "u2-l2-p03", "version": 1, "familia": "py.rama.estructura", "uso": "practica", "nivel": "basico", "formato": "fichas",
+          "consigna": "Completa para que el programa decida si alcanza el dinero.", "codigo": "dinero = 2000\nprecio = 2500\n___ dinero >= precio:\n    print(\"Alcanza\")\nelse:\n    print(\"No alcanza\")", "salida": "No alcanza",
+          "fichas": [
+            { "id": "a", "texto": "if", "porque": "Correcto: if introduce la condición que decide el camino." },
+            { "id": "b", "texto": "else", "porque": "else no lleva condición y va después del if." },
+            { "id": "c", "texto": "print", "porque": "print muestra algo; no decide entre caminos." }
+          ],
+          "correcta": "a", "pista": "¿Qué palabra empieza una decisión?", "explicacion": "if dinero >= precio: decide; con 2000 y 2500 es False y se muestra No alcanza." },
+        { "id": "u2-l2-p04", "version": 1, "familia": "py.rama.sangria", "uso": "practica", "nivel": "moderado", "formato": "linea",
+          "consigna": "El programa debería mostrar «Fin» siempre, pero con edad 15 no muestra nada. Elige la línea que causa el problema.",
+          "lineas": ["edad = 15", "if edad >= 18:", "    print(\"Adulto\")", "    print(\"Fin\")"], "correctas": [4], "salida": "",
+          "porque": { "1": "La edad es el caso que queremos probar.", "2": "La condición es la adecuada para adultos.", "3": "Este mensaje sí debe depender de la condición.", "4": "Correcto: tiene sangría, así que quedó dentro del if y solo corre para adultos." },
+          "pista": "¿Qué líneas pertenecen al bloque del if?", "explicacion": "print(\"Fin\") tiene sangría y solo corre si la condición es True. Sin sangría se ejecutaría siempre." },
+        { "id": "u2-l2-p05", "version": 1, "familia": "py.rama.explicar", "uso": "practica", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "Alguien explica el programa así: «Si tienes muchos puntos, muestra Ganaste». ¿Qué le falta?", "codigo": "puntos = 80\nif puntos >= 70:\n    print(\"Ganaste\")\nelse:\n    print(\"Intenta otra vez\")", "salida": "Ganaste",
+          "opciones": [
+            { "id": "a", "texto": "El límite exacto (70 o más) y qué se muestra en el otro caso.", "porque": "Correcto: «muchos» es impreciso y falta el camino del else." },
+            { "id": "b", "texto": "Que muestra los puntos.", "porque": "El programa no muestra los puntos." },
+            { "id": "c", "texto": "Que repite la pregunta hasta ganar.", "porque": "if no repite nada; decide una vez." }
+          ],
+          "correcta": "a", "pista": "¿Una persona podría saber, solo con esa explicación, qué pasa con 69 puntos?", "explicacion": "Una explicación completa dice la condición exacta (puntos >= 70) y los dos resultados posibles." },
+        { "id": "u2-l2-t01", "version": 1, "familia": "py.rama.seguir", "uso": "transferencia", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "saldo = 10000\nif saldo >= 12000:\n    saldo = saldo - 12000\nelse:\n    saldo = saldo - 2000\nprint(saldo)", "salida": "8000",
+          "opciones": [
+            { "id": "a", "texto": "8000", "porque": "Correcto: la condición es False y se restan 2000." },
+            { "id": "b", "texto": "-2000", "porque": "Ese sería el resultado del if, que no se ejecuta." },
+            { "id": "c", "texto": "10000", "porque": "Uno de los dos caminos siempre cambia el saldo." }
+          ],
+          "correcta": "a", "pista": "Decide el camino y después sigue el valor de saldo.", "explicacion": "10000 >= 12000 es False: corre el else, saldo pasa a 8000 y se muestra." },
+        { "id": "u2-l2-t02", "version": 1, "familia": "py.rama.explicar", "uso": "transferencia", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué hace este programa para cualquier par de valores de a y b?", "codigo": "a = 4\nb = 9\nif a > b:\n    print(a)\nelse:\n    print(b)", "salida": "9",
+          "opciones": [
+            { "id": "a", "texto": "Muestra el mayor de los dos números (o b si son iguales).", "porque": "Correcto: generaliza lo que hace la decisión." },
+            { "id": "b", "texto": "Muestra siempre a.", "porque": "Con a = 4 y b = 9 muestra b." },
+            { "id": "c", "texto": "Muestra la suma de a y b.", "porque": "No hay ninguna suma." }
+          ],
+          "correcta": "a", "pista": "Prueba mentalmente con a mayor y con b mayor.", "explicacion": "Si a es mayor muestra a; si no, muestra b: siempre el mayor (b cuando empatan)." }
+      ]
+    },
+    {
+      "id": "u2-l3",
+      "habilidad": "py.limite",
+      "titulo": "El límite del descuento",
+      "objetivo": "Al terminar podrás elegir entre > y >= y explicar qué ocurre en el valor límite.",
+      "explicacion": [
+        "En el límite se decide si un caso está incluido. `>=` incluye el valor límite; `>` lo excluye.",
+        "Lee la regla con cuidado: «desde 4 artículos» incluye el 4; «más de 4» no lo incluye.",
+        "Para comprobar un límite, prueba el valor exacto y uno a cada lado: 3, 4 y 5."
+      ],
+      "ampliada": [
+        "`<=` incluye el límite por arriba («hasta 10» incluye el 10); `<` lo excluye.",
+        "Muchos errores de programas reales están en el límite: funcionan con casi todos los valores menos con uno.",
+        "Explicar un límite es decir qué pasa exactamente en el valor frontera y por qué."
+      ],
+      "ejemplo": {
+        "codigo": "articulos = 4\nif articulos >= 4:\n    print(\"Con descuento\")\nelse:\n    print(\"Sin descuento\")",
+        "pasos": [
+          "La regla es «descuento desde 4 artículos», así que el 4 está incluido.",
+          "Línea 2: `4 >= 4` es `True`: se muestra Con descuento.",
+          "Si se hubiera escrito `articulos > 4`, con 4 artículos la condición sería `False` y el cliente perdería el descuento."
+        ],
+        "salida": "Con descuento"
+      },
+      "cierre": "Ya puedes justificar qué ocurre exactamente en el límite de una condición.",
+      "proyecto": "Completaste el descuento: sabes aplicarlo y explicar qué pasa justo en el límite.",
+      "secuencia": ["u2-l3-a01", "u2-l3-a02", "u2-l3-a03"],
+      "actividades": [
+        { "id": "u2-l3-a01", "version": 1, "familia": "py.limite.incluir", "uso": "guiada", "nivel": "basico", "formato": "fichas",
+          "consigna": "La regla dice: «el envío es gratis desde 50000». Completa la condición.", "codigo": "total = 50000\nif total ___ 50000:\n    print(\"Envío gratis\")\nelse:\n    print(\"Pagas envío\")", "salida": "Envío gratis",
+          "ayuda": "«Desde 50000» incluye exactamente 50000.",
+          "fichas": [
+            { "id": "a", "texto": ">=", "porque": "Correcto: incluye el 50000, como pide la regla." },
+            { "id": "b", "texto": ">", "porque": "Excluye el 50000: con ese total cobraría envío." },
+            { "id": "c", "texto": "<", "porque": "Daría envío gratis a las compras pequeñas." }
+          ],
+          "correcta": "a", "pista": "¿El valor 50000 debe recibir envío gratis?", "explicacion": "total >= 50000 incluye el límite: con 50000 el envío es gratis." },
+        { "id": "u2-l3-a02", "version": 1, "familia": "py.limite.detectar", "uso": "aplicacion", "nivel": "moderado", "formato": "linea",
+          "consigna": "El descuento empieza con 4 artículos, incluidos los 4. Con exactamente 4 artículos el programa no aplica el descuento. Elige la línea que causa el problema.",
+          "lineas": ["cantidad = 4", "if cantidad > 4:", "    descuento = True", "else:", "    descuento = False"], "correctas": [2], "salida": "",
+          "porque": { "1": "El caso de prueba es justo el límite.", "2": "Correcto: > excluye el 4; la regla necesita >=.", "3": "Asignar True es lo correcto dentro del if.", "4": "El else cubre los demás casos.", "5": "Sin descuento es lo correcto en el else." },
+          "pista": "Comprueba qué sucede exactamente cuando hay cuatro.", "explicacion": "4 > 4 es False, así que cae en el else. Con cantidad >= 4 el límite queda incluido." },
+        { "id": "u2-l3-a03", "version": 1, "familia": "py.limite.explicar", "uso": "aplicacion", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "Un programa tenía edad > 18 y se cambió por edad >= 18. ¿Cuál explicación describe mejor el efecto del cambio?", "codigo": "edad = 18\nif edad >= 18:\n    print(\"Puede votar\")", "salida": "Puede votar",
+          "opciones": [
+            { "id": "a", "texto": "Ahora una persona de exactamente 18 años también puede votar; antes quedaba excluida.", "porque": "Correcto: el cambio solo afecta al valor límite." },
+            { "id": "b", "texto": "No cambia nada: ambas condiciones son iguales.", "porque": "Difieren justo en el 18." },
+            { "id": "c", "texto": "Ahora las personas de 17 años también pueden votar.", "porque": "17 >= 18 sigue siendo False." }
+          ],
+          "correcta": "a", "pista": "¿Para qué edad dan resultados distintos las dos condiciones?", "explicacion": "> y >= solo difieren cuando la edad es exactamente 18: ahora ese caso queda incluido." },
+        { "id": "u2-l3-p01", "version": 1, "familia": "py.limite.incluir", "uso": "practica", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "nota = 3.0\nif nota > 3.0:\n    print(\"Aprobado\")\nelse:\n    print(\"Reprobado\")", "salida": "Reprobado",
+          "opciones": [
+            { "id": "a", "texto": "Aprobado", "porque": "> excluye el 3.0." },
+            { "id": "b", "texto": "Reprobado", "porque": "Correcto: 3.0 > 3.0 es False." },
+            { "id": "c", "texto": "Aprobado y después Reprobado", "porque": "Solo corre un camino." }
+          ],
+          "correcta": "b", "pista": "¿Un número es mayor que sí mismo?", "explicacion": "3.0 > 3.0 es False, así que corre el else." },
+        { "id": "u2-l3-p02", "version": 1, "familia": "py.limite.probar", "uso": "practica", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Con cuál valor de puntos se comprueba mejor el límite de esta condición?", "codigo": "if puntos >= 100:\n    print(\"Premio\")",
+          "opciones": [
+            { "id": "a", "texto": "100", "porque": "Correcto: es el valor frontera, donde > y >= se distinguen." },
+            { "id": "b", "texto": "50", "porque": "Está lejos del límite: no revela si se usó > o >=." },
+            { "id": "c", "texto": "1000", "porque": "Cualquier condición razonable daría premio con 1000." }
+          ],
+          "correcta": "a", "pista": "¿Dónde se equivocaría un programa que usara > en lugar de >=?", "explicacion": "El valor 100 es el único donde puntos > 100 y puntos >= 100 dan resultados distintos." },
+        { "id": "u2-l3-p03", "version": 1, "familia": "py.limite.incluir", "uso": "practica", "nivel": "moderado", "formato": "fichas",
+          "consigna": "Regla: «hasta 10 kilos el envío cuesta 5000; más de 10 cuesta 9000». Completa.", "codigo": "kilos = 10\nif kilos ___ 10:\n    print(5000)\nelse:\n    print(9000)", "salida": "5000",
+          "fichas": [
+            { "id": "a", "texto": "<=", "porque": "Correcto: «hasta 10» incluye el 10." },
+            { "id": "b", "texto": "<", "porque": "Con 10 kilos cobraría 9000." },
+            { "id": "c", "texto": ">=", "porque": "Invertiría la regla." }
+          ],
+          "correcta": "a", "pista": "¿10 kilos deben costar 5000?", "explicacion": "kilos <= 10 incluye el límite: con 10 kilos se cobra 5000." },
+        { "id": "u2-l3-p04", "version": 1, "familia": "py.limite.detectar", "uso": "practica", "nivel": "moderado", "formato": "linea",
+          "consigna": "Hay recargo cuando se pagan menos de 20000: con 19999 sí hay recargo y con 20000 no. Con 20000 el programa cobra recargo. Elige la línea que causa el problema.",
+          "lineas": ["total = 20000", "if total <= 20000:", "    print(\"Con recargo\")", "else:", "    print(\"Sin recargo\")"], "correctas": [2], "salida": "Con recargo",
+          "porque": { "1": "Es el caso límite que queremos probar.", "2": "Correcto: <= incluye el 20000; «menos de» pide <.", "3": "El mensaje corresponde al caso con recargo.", "4": "El else cubre el otro caso.", "5": "El mensaje corresponde al caso sin recargo." },
+          "pista": "«Menos de 20000», ¿incluye el 20000?", "explicacion": "La regla excluye el 20000, así que la condición debe ser total < 20000." },
+        { "id": "u2-l3-p05", "version": 1, "familia": "py.limite.explicar", "uso": "practica", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa y por qué?", "codigo": "edad = 59\nif edad >= 60:\n    print(\"Tarifa reducida\")\nelse:\n    print(\"Tarifa normal\")", "salida": "Tarifa normal",
+          "opciones": [
+            { "id": "a", "texto": "Tarifa normal, porque 59 no es mayor ni igual que 60.", "porque": "Correcto: el límite empieza en 60." },
+            { "id": "b", "texto": "Tarifa reducida, porque 59 está muy cerca de 60.", "porque": "La condición no considera cercanía." },
+            { "id": "c", "texto": "Tarifa reducida y Tarifa normal.", "porque": "Solo corre un camino." }
+          ],
+          "correcta": "a", "pista": "Calcula 59 >= 60.", "explicacion": "59 >= 60 es False, así que corre el else." },
+        { "id": "u2-l3-t01", "version": 1, "familia": "py.limite.incluir", "uso": "transferencia", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "velocidad = 80\nif velocidad > 80:\n    print(\"Multa\")\nelse:\n    print(\"Sin multa\")", "salida": "Sin multa",
+          "opciones": [
+            { "id": "a", "texto": "Sin multa", "porque": "Correcto: ir exactamente a 80 no supera el límite." },
+            { "id": "b", "texto": "Multa", "porque": "80 > 80 es False." },
+            { "id": "c", "texto": "Un error", "porque": "El programa es válido." }
+          ],
+          "correcta": "a", "pista": "¿80 es mayor que 80?", "explicacion": "La multa es solo por encima de 80; con 80 exacto corre el else." },
+        { "id": "u2-l3-t02", "version": 1, "familia": "py.limite.regla", "uso": "transferencia", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "La regla dice «los menores de 12 años entran gratis». ¿Qué condición la cumple?",
+          "opciones": [
+            { "id": "a", "texto": "edad < 12", "porque": "Correcto: «menores de 12» excluye a quien tiene 12." },
+            { "id": "b", "texto": "edad <= 12", "porque": "Incluiría a quien tiene 12, que no es menor de 12." },
+            { "id": "c", "texto": "edad > 12", "porque": "Invertiría la regla." }
+          ],
+          "correcta": "a", "pista": "Una persona de 12 años, ¿entra gratis?", "explicacion": "«Menor de 12» significa edad < 12: el 12 queda fuera." }
+      ]
+    }
+  ]
+}

@@ -85,7 +85,8 @@
           ],
           "correcta": "a",
           "pista": "Fíjate en qué valor se guardó con el nombre jugo en la primera línea.",
-          "explicacion": "La primera línea guarda 2500 en jugo. print(jugo) busca ese nombre y muestra su valor: 2500."
+          "explicacion": "La primera línea guarda 2500 en jugo. print(jugo) busca ese nombre y muestra su valor: 2500.",
+          "salida": "2500"
         },
         {
           "id": "u1-l1-a02",
@@ -115,7 +116,8 @@
           ],
           "correcta": "a",
           "pista": "Mira si dentro de print hay comillas o no.",
-          "explicacion": "Con comillas, \"bebida\" es un texto y print lo muestra literalmente. La variable bebida existe, pero esta línea no la usa."
+          "explicacion": "Con comillas, \"bebida\" es un texto y print lo muestra literalmente. La variable bebida existe, pero esta línea no la usa.",
+          "salida": "bebida"
         },
         {
           "id": "u1-l1-a03",
@@ -175,7 +177,8 @@
           ],
           "correcta": "a",
           "pista": "¿Qué valor tiene galleta después de la primera línea?",
-          "explicacion": "galleta guarda 1200 y print(galleta) muestra ese valor."
+          "explicacion": "galleta guarda 1200 y print(galleta) muestra ese valor.",
+          "salida": "1200"
         },
         {
           "id": "u1-l1-p02",
@@ -205,7 +208,8 @@
           ],
           "correcta": "a",
           "pista": "El nombre debe escribirse exactamente igual que en la primera línea y sin comillas.",
-          "explicacion": "print(precio) usa la variable creada en la primera línea, escrita igual, y muestra 3000."
+          "explicacion": "print(precio) usa la variable creada en la primera línea, escrita igual, y muestra 3000.",
+          "salida": "3000"
         },
         {
           "id": "u1-l1-p03",
@@ -229,7 +233,8 @@
             "3": "Correcto: con comillas se muestra la palabra producto en vez del valor guardado."
           },
           "pista": "Compara lo que debería mostrarse con lo que hay dentro de print.",
-          "explicacion": "print(\"producto\") muestra la palabra producto. Para mostrar empanada hay que usar la variable sin comillas: print(producto)."
+          "explicacion": "print(\"producto\") muestra la palabra producto. Para mostrar empanada hay que usar la variable sin comillas: print(producto).",
+          "salida": "producto"
         },
         {
           "id": "u1-l1-p04",
@@ -289,7 +294,8 @@
           ],
           "correcta": "a",
           "pista": "¿Cuántas líneas del programa usan print?",
-          "explicacion": "La segunda línea evalúa x pero no la muestra. Solo print(\"listo\") produce salida."
+          "explicacion": "La segunda línea evalúa x pero no la muestra. Solo print(\"listo\") produce salida.",
+          "salida": "listo"
         },
         {
           "id": "u1-l1-t01",
@@ -319,7 +325,8 @@
           ],
           "correcta": "a",
           "pista": "Analiza cada print por separado: ¿tiene comillas?",
-          "explicacion": "print(mensaje) muestra el valor Hola. print(\"mensaje\") muestra el texto mensaje."
+          "explicacion": "print(mensaje) muestra el valor Hola. print(\"mensaje\") muestra el texto mensaje.",
+          "salida": "Hola\nmensaje"
         },
         {
           "id": "u1-l1-t02",
@@ -414,7 +421,8 @@
           ],
           "correcta": "c",
           "pista": "Resuelve primero el lado derecho de la segunda línea con el valor que tenía puntos.",
-          "explicacion": "puntos empieza en 2. La segunda línea calcula 2 + 3 = 5 y lo guarda en puntos. print muestra 5."
+          "explicacion": "puntos empieza en 2. La segunda línea calcula 2 + 3 = 5 y lo guarda en puntos. print muestra 5.",
+          "salida": "5"
         },
         {
           "id": "u1-l2-a02",
@@ -468,7 +476,8 @@
             "3": "Mostrar empanadas está bien; el problema es que su valor nunca cambió."
           },
           "pista": "¿En qué línea debería cambiar el valor de empanadas? ¿Cambia de verdad?",
-          "explicacion": "empanadas + 3 calcula 10 y lo descarta. Para conservarlo hay que asignarlo: empanadas = empanadas + 3."
+          "explicacion": "empanadas + 3 calcula 10 y lo descarta. Para conservarlo hay que asignarlo: empanadas = empanadas + 3.",
+          "salida": "7"
         },
         {
           "id": "u1-l2-p01",
@@ -498,7 +507,8 @@
           ],
           "correcta": "a",
           "pista": "Sustituye vasos por 10 en el lado derecho de la segunda línea.",
-          "explicacion": "vasos empieza en 10, la segunda línea calcula 10 - 4 = 6 y lo guarda. Se muestra 6."
+          "explicacion": "vasos empieza en 10, la segunda línea calcula 10 - 4 = 6 y lo guarda. Se muestra 6.",
+          "salida": "6"
         },
         {
           "id": "u1-l2-p02",
@@ -528,7 +538,8 @@
           ],
           "correcta": "a",
           "pista": "Para aumentar un contador hay que partir de su valor actual.",
-          "explicacion": "pedidos = pedidos + 1 lee el 5, calcula 6 y lo guarda en pedidos."
+          "explicacion": "pedidos = pedidos + 1 lee el 5, calcula 6 y lo guarda en pedidos.",
+          "salida": "6"
         },
         {
           "id": "u1-l2-p03",
@@ -558,7 +569,8 @@
           ],
           "correcta": "b",
           "pista": "Anota el valor de total después de cada línea.",
-          "explicacion": "total vale 0, luego 0 + 2000 = 2000, luego 2000 + 3000 = 5000. Se muestra 5000."
+          "explicacion": "total vale 0, luego 0 + 2000 = 2000, luego 2000 + 3000 = 5000. Se muestra 5000.",
+          "salida": "5000"
         },
         {
           "id": "u1-l2-p04",
@@ -584,7 +596,8 @@
             "4": "Mostrar el precio está bien; el valor se calculó mal antes."
           },
           "pista": "¿A qué cantidad se le quita la otra?",
-          "explicacion": "El descuento se resta del precio: precio = precio - descuento, que da 2500."
+          "explicacion": "El descuento se resta del precio: precio = precio - descuento, que da 2500.",
+          "salida": "-2500"
         },
         {
           "id": "u1-l2-p05",
@@ -644,7 +657,8 @@
           ],
           "correcta": "a",
           "pista": "Anota el valor de a y de b después de cada línea.",
-          "explicacion": "Después de b = a, b vale 3. a = 5 cambia solo a. print(b) muestra 3."
+          "explicacion": "Después de b = a, b vale 3. a = 5 cambia solo a. print(b) muestra 3.",
+          "salida": "3"
         },
         {
           "id": "u1-l2-t02",
@@ -674,7 +688,8 @@
           ],
           "correcta": "b",
           "pista": "En cada línea, usa el valor que x tenía justo antes.",
-          "explicacion": "x vale 1, luego 1 + 1 = 2, luego 2 + 2 = 4."
+          "explicacion": "x vale 1, luego 1 + 1 = 2, luego 2 + 2 = 4.",
+          "salida": "4"
         }
       ]
     },
@@ -740,7 +755,8 @@
           ],
           "correcta": "a",
           "pista": "¿Qué operación repite un valor varias veces?",
-          "explicacion": "El costo total es el precio multiplicado por la cantidad: 3000 * 3 = 9000."
+          "explicacion": "El costo total es el precio multiplicado por la cantidad: 3000 * 3 = 9000.",
+          "salida": ""
         },
         {
           "id": "u1-l3-a02",
@@ -800,7 +816,8 @@
           ],
           "correcta": "a",
           "pista": "¿Qué operación hace Python primero, la suma o la multiplicación?",
-          "explicacion": "La multiplicación va antes que la suma: 500 * 2 = 1000, y 2000 + 1000 = 3000."
+          "explicacion": "La multiplicación va antes que la suma: 500 * 2 = 1000, y 2000 + 1000 = 3000.",
+          "salida": "3000"
         },
         {
           "id": "u1-l3-p01",
@@ -830,7 +847,8 @@
           ],
           "correcta": "b",
           "pista": "Recuerda qué tipo de número produce siempre la división con /.",
-          "explicacion": "6 / 2 vale 3.0: la división / produce un decimal aunque el resultado sea exacto."
+          "explicacion": "6 / 2 vale 3.0: la división / produce un decimal aunque el resultado sea exacto.",
+          "salida": "3.0"
         },
         {
           "id": "u1-l3-p02",
@@ -856,7 +874,8 @@
             "4": "Mostrar el total está bien; el cálculo anterior es el problema."
           },
           "pista": "¿Cómo se calcula el costo de varios jugos del mismo precio?",
-          "explicacion": "El costo de los jugos es jugos * precio_jugo = 10000; más la empanada da 13000: total = jugos * precio_jugo + 3000."
+          "explicacion": "El costo de los jugos es jugos * precio_jugo = 10000; más la empanada da 13000: total = jugos * precio_jugo + 3000.",
+          "salida": "5504"
         },
         {
           "id": "u1-l3-p03",
@@ -886,7 +905,8 @@
           ],
           "correcta": "a",
           "pista": "¿Qué operación iría primero si no hubiera paréntesis?",
-          "explicacion": "Los paréntesis cambian el orden: (4 + 5) / 2 = 4.5, el promedio de las dos notas."
+          "explicacion": "Los paréntesis cambian el orden: (4 + 5) / 2 = 4.5, el promedio de las dos notas.",
+          "salida": ""
         },
         {
           "id": "u1-l3-p04",
@@ -946,7 +966,8 @@
           ],
           "correcta": "b",
           "pista": "Haz primero la multiplicación.",
-          "explicacion": "y * 2 = 6 se calcula primero; después 10 - 6 = 4."
+          "explicacion": "y * 2 = 6 se calcula primero; después 10 - 6 = 4.",
+          "salida": "4"
         },
         {
           "id": "u1-l3-t01",
@@ -1006,7 +1027,8 @@
           ],
           "correcta": "a",
           "pista": "Calcula primero el valor de descuento.",
-          "explicacion": "descuento vale 10000 * 0.1 = 1000.0. El precio final es 10000 - 1000.0 = 9000.0; al operar con un decimal el resultado también es decimal."
+          "explicacion": "descuento vale 10000 * 0.1 = 1000.0. El precio final es 10000 - 1000.0 = 9000.0; al operar con un decimal el resultado también es decimal.",
+          "salida": "9000.0"
         }
       ]
     }

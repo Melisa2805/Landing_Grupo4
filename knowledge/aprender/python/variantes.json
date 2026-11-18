@@ -1,0 +1,2367 @@
+{
+  "formato": 1,
+  "origen": "a0ddff43235804d8c2f9f43a8c2b233c2fab42dc09a43514ae665e104494604c",
+  "lecciones": {
+    "u1-l1": [
+      {
+        "id": "pl-u1-l1-valor-2e3019b3",
+        "version": 1,
+        "familia": "py.valor.mostrar",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l1-valor",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "jugo = 3800\nprint(jugo)",
+        "salida": "3800",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "3800",
+            "porque": "Correcto: el programa muestra 3800."
+          },
+          {
+            "id": "b",
+            "texto": "jugo",
+            "porque": "Sin comillas, print(jugo) muestra el valor guardado, no el nombre."
+          },
+          {
+            "id": "c",
+            "texto": "Nada",
+            "porque": "La segunda línea tiene print, así que sí se muestra algo."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Qué valor se guardó con el nombre jugo?",
+        "explicacion": "jugo guarda 3800 y print(jugo) muestra ese valor: 3800."
+      },
+      {
+        "id": "pl-u1-l1-valor-7c388e02",
+        "version": 1,
+        "familia": "py.valor.mostrar",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l1-valor",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "arepa = 1200\nprint(arepa)",
+        "salida": "1200",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "1200",
+            "porque": "Correcto: el programa muestra 1200."
+          },
+          {
+            "id": "b",
+            "texto": "arepa",
+            "porque": "Sin comillas, print(arepa) muestra el valor guardado, no el nombre."
+          },
+          {
+            "id": "c",
+            "texto": "Nada",
+            "porque": "La segunda línea tiene print, así que sí se muestra algo."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Qué valor se guardó con el nombre arepa?",
+        "explicacion": "arepa guarda 1200 y print(arepa) muestra ese valor: 1200."
+      },
+      {
+        "id": "pl-u1-l1-valor-58a2a0fb",
+        "version": 1,
+        "familia": "py.valor.mostrar",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l1-valor",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "fruta = 3800\nprint(fruta)",
+        "salida": "3800",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "3800",
+            "porque": "Correcto: el programa muestra 3800."
+          },
+          {
+            "id": "b",
+            "texto": "fruta",
+            "porque": "Sin comillas, print(fruta) muestra el valor guardado, no el nombre."
+          },
+          {
+            "id": "c",
+            "texto": "Nada",
+            "porque": "La segunda línea tiene print, así que sí se muestra algo."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Qué valor se guardó con el nombre fruta?",
+        "explicacion": "fruta guarda 3800 y print(fruta) muestra ese valor: 3800."
+      },
+      {
+        "id": "pl-u1-l1-valor-695fb0ba",
+        "version": 1,
+        "familia": "py.valor.mostrar",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l1-valor",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "fruta = 1200\nprint(fruta)",
+        "salida": "1200",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "1200",
+            "porque": "Correcto: el programa muestra 1200."
+          },
+          {
+            "id": "b",
+            "texto": "fruta",
+            "porque": "Sin comillas, print(fruta) muestra el valor guardado, no el nombre."
+          },
+          {
+            "id": "c",
+            "texto": "Nada",
+            "porque": "La segunda línea tiene print, así que sí se muestra algo."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Qué valor se guardó con el nombre fruta?",
+        "explicacion": "fruta guarda 1200 y print(fruta) muestra ese valor: 1200."
+      },
+      {
+        "id": "pl-u1-l1-valor-e0038b5d",
+        "version": 1,
+        "familia": "py.valor.mostrar",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l1-valor",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "arepa = 3800\nprint(arepa)",
+        "salida": "3800",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "3800",
+            "porque": "Correcto: el programa muestra 3800."
+          },
+          {
+            "id": "b",
+            "texto": "arepa",
+            "porque": "Sin comillas, print(arepa) muestra el valor guardado, no el nombre."
+          },
+          {
+            "id": "c",
+            "texto": "Nada",
+            "porque": "La segunda línea tiene print, así que sí se muestra algo."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Qué valor se guardó con el nombre arepa?",
+        "explicacion": "arepa guarda 3800 y print(arepa) muestra ese valor: 3800."
+      },
+      {
+        "id": "pl-u1-l1-valor-a9b98304",
+        "version": 1,
+        "familia": "py.valor.mostrar",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l1-valor",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "arepa = 2500\nprint(arepa)",
+        "salida": "2500",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "2500",
+            "porque": "Correcto: el programa muestra 2500."
+          },
+          {
+            "id": "b",
+            "texto": "arepa",
+            "porque": "Sin comillas, print(arepa) muestra el valor guardado, no el nombre."
+          },
+          {
+            "id": "c",
+            "texto": "Nada",
+            "porque": "La segunda línea tiene print, así que sí se muestra algo."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Qué valor se guardó con el nombre arepa?",
+        "explicacion": "arepa guarda 2500 y print(arepa) muestra ese valor: 2500."
+      }
+    ],
+    "u1-l2": [
+      {
+        "id": "pl-u1-l2-suma-ec060c39",
+        "version": 1,
+        "familia": "py.asignacion.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l2-suma",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "goles = 7\ngoles = goles + 5\nprint(goles)",
+        "salida": "12",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "12",
+            "porque": "Correcto: el programa muestra 12."
+          },
+          {
+            "id": "b",
+            "texto": "7",
+            "porque": "La segunda línea reemplaza el valor inicial por uno nuevo."
+          },
+          {
+            "id": "c",
+            "texto": "5",
+            "porque": "Se suma 5 al valor anterior; no se guarda solo el 5."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Sustituye goles en la segunda línea por el valor que tenía.",
+        "explicacion": "goles empieza en 7; la segunda línea calcula 7 + 5 y guarda 12."
+      },
+      {
+        "id": "pl-u1-l2-suma-5d23f207",
+        "version": 1,
+        "familia": "py.asignacion.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l2-suma",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "goles = 4\ngoles = goles + 5\nprint(goles)",
+        "salida": "9",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "9",
+            "porque": "Correcto: el programa muestra 9."
+          },
+          {
+            "id": "b",
+            "texto": "4",
+            "porque": "La segunda línea reemplaza el valor inicial por uno nuevo."
+          },
+          {
+            "id": "c",
+            "texto": "5",
+            "porque": "Se suma 5 al valor anterior; no se guarda solo el 5."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Sustituye goles en la segunda línea por el valor que tenía.",
+        "explicacion": "goles empieza en 4; la segunda línea calcula 4 + 5 y guarda 9."
+      },
+      {
+        "id": "pl-u1-l2-suma-7c6c6b1c",
+        "version": 1,
+        "familia": "py.asignacion.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l2-suma",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "puntos = 7\npuntos = puntos + 5\nprint(puntos)",
+        "salida": "12",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "12",
+            "porque": "Correcto: el programa muestra 12."
+          },
+          {
+            "id": "b",
+            "texto": "7",
+            "porque": "La segunda línea reemplaza el valor inicial por uno nuevo."
+          },
+          {
+            "id": "c",
+            "texto": "5",
+            "porque": "Se suma 5 al valor anterior; no se guarda solo el 5."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Sustituye puntos en la segunda línea por el valor que tenía.",
+        "explicacion": "puntos empieza en 7; la segunda línea calcula 7 + 5 y guarda 12."
+      },
+      {
+        "id": "pl-u1-l2-suma-b6f216dd",
+        "version": 1,
+        "familia": "py.asignacion.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l2-suma",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "puntos = 4\npuntos = puntos + 3\nprint(puntos)",
+        "salida": "7",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "7",
+            "porque": "Correcto: el programa muestra 7."
+          },
+          {
+            "id": "b",
+            "texto": "4",
+            "porque": "La segunda línea reemplaza el valor inicial por uno nuevo."
+          },
+          {
+            "id": "c",
+            "texto": "3",
+            "porque": "Se suma 3 al valor anterior; no se guarda solo el 3."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Sustituye puntos en la segunda línea por el valor que tenía.",
+        "explicacion": "puntos empieza en 4; la segunda línea calcula 4 + 3 y guarda 7."
+      },
+      {
+        "id": "pl-u1-l2-suma-ba3327b9",
+        "version": 1,
+        "familia": "py.asignacion.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l2-suma",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "puntos = 2\npuntos = puntos + 5\nprint(puntos)",
+        "salida": "7",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "7",
+            "porque": "Correcto: el programa muestra 7."
+          },
+          {
+            "id": "b",
+            "texto": "2",
+            "porque": "La segunda línea reemplaza el valor inicial por uno nuevo."
+          },
+          {
+            "id": "c",
+            "texto": "5",
+            "porque": "Se suma 5 al valor anterior; no se guarda solo el 5."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Sustituye puntos en la segunda línea por el valor que tenía.",
+        "explicacion": "puntos empieza en 2; la segunda línea calcula 2 + 5 y guarda 7."
+      },
+      {
+        "id": "pl-u1-l2-suma-5e6a8c41",
+        "version": 1,
+        "familia": "py.asignacion.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l2-suma",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "saldo = 4\nsaldo = saldo + 3\nprint(saldo)",
+        "salida": "7",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "7",
+            "porque": "Correcto: el programa muestra 7."
+          },
+          {
+            "id": "b",
+            "texto": "4",
+            "porque": "La segunda línea reemplaza el valor inicial por uno nuevo."
+          },
+          {
+            "id": "c",
+            "texto": "3",
+            "porque": "Se suma 3 al valor anterior; no se guarda solo el 3."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Sustituye saldo en la segunda línea por el valor que tenía.",
+        "explicacion": "saldo empieza en 4; la segunda línea calcula 4 + 3 y guarda 7."
+      },
+      {
+        "id": "pl-u1-l2-resta-81aaaa10",
+        "version": 1,
+        "familia": "py.asignacion.seguir",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l2-resta",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "turnos = 20\nturnos = turnos - 3\nturnos = turnos - 3\nprint(turnos)",
+        "salida": "14",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "14",
+            "porque": "Correcto: el programa muestra 14."
+          },
+          {
+            "id": "b",
+            "texto": "17",
+            "porque": "La resta se aplica dos veces, una por cada línea."
+          },
+          {
+            "id": "c",
+            "texto": "20",
+            "porque": "Las dos últimas asignaciones cambian el valor inicial."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Anota el valor de turnos después de cada línea.",
+        "explicacion": "turnos pasa de 20 a 20 - 3 y después vuelve a restar 3: queda 14."
+      },
+      {
+        "id": "pl-u1-l2-resta-78b2d728",
+        "version": 1,
+        "familia": "py.asignacion.seguir",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l2-resta",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "dinero = 20\ndinero = dinero - 3\ndinero = dinero - 3\nprint(dinero)",
+        "salida": "14",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "14",
+            "porque": "Correcto: el programa muestra 14."
+          },
+          {
+            "id": "b",
+            "texto": "17",
+            "porque": "La resta se aplica dos veces, una por cada línea."
+          },
+          {
+            "id": "c",
+            "texto": "20",
+            "porque": "Las dos últimas asignaciones cambian el valor inicial."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Anota el valor de dinero después de cada línea.",
+        "explicacion": "dinero pasa de 20 a 20 - 3 y después vuelve a restar 3: queda 14."
+      },
+      {
+        "id": "pl-u1-l2-resta-aba091fd",
+        "version": 1,
+        "familia": "py.asignacion.seguir",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l2-resta",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "turnos = 10\nturnos = turnos - 3\nturnos = turnos - 3\nprint(turnos)",
+        "salida": "4",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "4",
+            "porque": "Correcto: el programa muestra 4."
+          },
+          {
+            "id": "b",
+            "texto": "7",
+            "porque": "La resta se aplica dos veces, una por cada línea."
+          },
+          {
+            "id": "c",
+            "texto": "10",
+            "porque": "Las dos últimas asignaciones cambian el valor inicial."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Anota el valor de turnos después de cada línea.",
+        "explicacion": "turnos pasa de 10 a 10 - 3 y después vuelve a restar 3: queda 4."
+      },
+      {
+        "id": "pl-u1-l2-resta-a00cafda",
+        "version": 1,
+        "familia": "py.asignacion.seguir",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l2-resta",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "vasos = 10\nvasos = vasos - 2\nvasos = vasos - 2\nprint(vasos)",
+        "salida": "6",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "6",
+            "porque": "Correcto: el programa muestra 6."
+          },
+          {
+            "id": "b",
+            "texto": "8",
+            "porque": "La resta se aplica dos veces, una por cada línea."
+          },
+          {
+            "id": "c",
+            "texto": "10",
+            "porque": "Las dos últimas asignaciones cambian el valor inicial."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Anota el valor de vasos después de cada línea.",
+        "explicacion": "vasos pasa de 10 a 10 - 2 y después vuelve a restar 2: queda 6."
+      },
+      {
+        "id": "pl-u1-l2-resta-3c4d9511",
+        "version": 1,
+        "familia": "py.asignacion.seguir",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l2-resta",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "dinero = 20\ndinero = dinero - 2\ndinero = dinero - 2\nprint(dinero)",
+        "salida": "16",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "16",
+            "porque": "Correcto: el programa muestra 16."
+          },
+          {
+            "id": "b",
+            "texto": "18",
+            "porque": "La resta se aplica dos veces, una por cada línea."
+          },
+          {
+            "id": "c",
+            "texto": "20",
+            "porque": "Las dos últimas asignaciones cambian el valor inicial."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Anota el valor de dinero después de cada línea.",
+        "explicacion": "dinero pasa de 20 a 20 - 2 y después vuelve a restar 2: queda 16."
+      },
+      {
+        "id": "pl-u1-l2-resta-956bb67a",
+        "version": 1,
+        "familia": "py.asignacion.seguir",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l2-resta",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "vasos = 10\nvasos = vasos - 3\nvasos = vasos - 3\nprint(vasos)",
+        "salida": "4",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "4",
+            "porque": "Correcto: el programa muestra 4."
+          },
+          {
+            "id": "b",
+            "texto": "7",
+            "porque": "La resta se aplica dos veces, una por cada línea."
+          },
+          {
+            "id": "c",
+            "texto": "10",
+            "porque": "Las dos últimas asignaciones cambian el valor inicial."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Anota el valor de vasos después de cada línea.",
+        "explicacion": "vasos pasa de 10 a 10 - 3 y después vuelve a restar 3: queda 4."
+      }
+    ],
+    "u1-l3": [
+      {
+        "id": "pl-u1-l3-orden-eeb3fb3c",
+        "version": 1,
+        "familia": "py.operacion.orden",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l3-orden",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "print(2 + 3 * 2)",
+        "salida": "8",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "8",
+            "porque": "Correcto: el programa muestra 8."
+          },
+          {
+            "id": "b",
+            "texto": "10",
+            "porque": "Ese sería el resultado con paréntesis; sin ellos la multiplicación va primero."
+          },
+          {
+            "id": "c",
+            "texto": "5",
+            "porque": "La multiplicación por 2 también cuenta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Qué operación hace Python primero?",
+        "explicacion": "Primero 3 * 2 y después se suma 2: 8."
+      },
+      {
+        "id": "pl-u1-l3-orden-2f8bbfad",
+        "version": 1,
+        "familia": "py.operacion.orden",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l3-orden",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "print(5 + 4 * 2)",
+        "salida": "13",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "13",
+            "porque": "Correcto: el programa muestra 13."
+          },
+          {
+            "id": "b",
+            "texto": "18",
+            "porque": "Ese sería el resultado con paréntesis; sin ellos la multiplicación va primero."
+          },
+          {
+            "id": "c",
+            "texto": "9",
+            "porque": "La multiplicación por 2 también cuenta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Qué operación hace Python primero?",
+        "explicacion": "Primero 4 * 2 y después se suma 5: 13."
+      },
+      {
+        "id": "pl-u1-l3-orden-08b688d6",
+        "version": 1,
+        "familia": "py.operacion.orden",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l3-orden",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "print(1 + 3 * 10)",
+        "salida": "31",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "31",
+            "porque": "Correcto: el programa muestra 31."
+          },
+          {
+            "id": "b",
+            "texto": "40",
+            "porque": "Ese sería el resultado con paréntesis; sin ellos la multiplicación va primero."
+          },
+          {
+            "id": "c",
+            "texto": "4",
+            "porque": "La multiplicación por 10 también cuenta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Qué operación hace Python primero?",
+        "explicacion": "Primero 3 * 10 y después se suma 1: 31."
+      },
+      {
+        "id": "pl-u1-l3-orden-951197e7",
+        "version": 1,
+        "familia": "py.operacion.orden",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l3-orden",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "print(2 + 4 * 2)",
+        "salida": "10",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "10",
+            "porque": "Correcto: el programa muestra 10."
+          },
+          {
+            "id": "b",
+            "texto": "12",
+            "porque": "Ese sería el resultado con paréntesis; sin ellos la multiplicación va primero."
+          },
+          {
+            "id": "c",
+            "texto": "6",
+            "porque": "La multiplicación por 2 también cuenta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Qué operación hace Python primero?",
+        "explicacion": "Primero 4 * 2 y después se suma 2: 10."
+      },
+      {
+        "id": "pl-u1-l3-orden-2f3078f4",
+        "version": 1,
+        "familia": "py.operacion.orden",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l3-orden",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "print(5 + 4 * 10)",
+        "salida": "45",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "45",
+            "porque": "Correcto: el programa muestra 45."
+          },
+          {
+            "id": "b",
+            "texto": "90",
+            "porque": "Ese sería el resultado con paréntesis; sin ellos la multiplicación va primero."
+          },
+          {
+            "id": "c",
+            "texto": "9",
+            "porque": "La multiplicación por 10 también cuenta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Qué operación hace Python primero?",
+        "explicacion": "Primero 4 * 10 y después se suma 5: 45."
+      },
+      {
+        "id": "pl-u1-l3-orden-5ee1add2",
+        "version": 1,
+        "familia": "py.operacion.orden",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l3-orden",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "print(1 + 4 * 2)",
+        "salida": "9",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "9",
+            "porque": "Correcto: el programa muestra 9."
+          },
+          {
+            "id": "b",
+            "texto": "10",
+            "porque": "Ese sería el resultado con paréntesis; sin ellos la multiplicación va primero."
+          },
+          {
+            "id": "c",
+            "texto": "5",
+            "porque": "La multiplicación por 2 también cuenta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Qué operación hace Python primero?",
+        "explicacion": "Primero 4 * 2 y después se suma 1: 9."
+      },
+      {
+        "id": "pl-u1-l3-compra-b0d96713",
+        "version": 1,
+        "familia": "py.operacion.elegir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l3-compra",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "precio = 1500\ncantidad = 3\nprint(precio * cantidad)",
+        "salida": "4500",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "4500",
+            "porque": "Correcto: el programa muestra 4500."
+          },
+          {
+            "id": "b",
+            "texto": "1503",
+            "porque": "Se multiplica el precio por la cantidad, no se suma."
+          },
+          {
+            "id": "c",
+            "texto": "1500",
+            "porque": "Ese es el precio de una unidad; se compran 3."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Cuánto cuestan 3 unidades del mismo precio?",
+        "explicacion": "3 unidades de 1500 cuestan 1500 * 3 = 4500."
+      },
+      {
+        "id": "pl-u1-l3-compra-b0c5cfc4",
+        "version": 1,
+        "familia": "py.operacion.elegir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l3-compra",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "precio = 2000\ncantidad = 2\nprint(precio * cantidad)",
+        "salida": "4000",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "4000",
+            "porque": "Correcto: el programa muestra 4000."
+          },
+          {
+            "id": "b",
+            "texto": "2002",
+            "porque": "Se multiplica el precio por la cantidad, no se suma."
+          },
+          {
+            "id": "c",
+            "texto": "2000",
+            "porque": "Ese es el precio de una unidad; se compran 2."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Cuánto cuestan 2 unidades del mismo precio?",
+        "explicacion": "2 unidades de 2000 cuestan 2000 * 2 = 4000."
+      },
+      {
+        "id": "pl-u1-l3-compra-7330c05a",
+        "version": 1,
+        "familia": "py.operacion.elegir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l3-compra",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "precio = 2000\ncantidad = 3\nprint(precio * cantidad)",
+        "salida": "6000",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "6000",
+            "porque": "Correcto: el programa muestra 6000."
+          },
+          {
+            "id": "b",
+            "texto": "2003",
+            "porque": "Se multiplica el precio por la cantidad, no se suma."
+          },
+          {
+            "id": "c",
+            "texto": "2000",
+            "porque": "Ese es el precio de una unidad; se compran 3."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Cuánto cuestan 3 unidades del mismo precio?",
+        "explicacion": "3 unidades de 2000 cuestan 2000 * 3 = 6000."
+      },
+      {
+        "id": "pl-u1-l3-compra-acc1eab1",
+        "version": 1,
+        "familia": "py.operacion.elegir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l3-compra",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "precio = 1500\ncantidad = 2\nprint(precio * cantidad)",
+        "salida": "3000",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "3000",
+            "porque": "Correcto: el programa muestra 3000."
+          },
+          {
+            "id": "b",
+            "texto": "1502",
+            "porque": "Se multiplica el precio por la cantidad, no se suma."
+          },
+          {
+            "id": "c",
+            "texto": "1500",
+            "porque": "Ese es el precio de una unidad; se compran 2."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Cuánto cuestan 2 unidades del mismo precio?",
+        "explicacion": "2 unidades de 1500 cuestan 1500 * 2 = 3000."
+      },
+      {
+        "id": "pl-u1-l3-compra-d68a8e22",
+        "version": 1,
+        "familia": "py.operacion.elegir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l3-compra",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "precio = 2000\ncantidad = 4\nprint(precio * cantidad)",
+        "salida": "8000",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "8000",
+            "porque": "Correcto: el programa muestra 8000."
+          },
+          {
+            "id": "b",
+            "texto": "2004",
+            "porque": "Se multiplica el precio por la cantidad, no se suma."
+          },
+          {
+            "id": "c",
+            "texto": "2000",
+            "porque": "Ese es el precio de una unidad; se compran 4."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Cuánto cuestan 4 unidades del mismo precio?",
+        "explicacion": "4 unidades de 2000 cuestan 2000 * 4 = 8000."
+      },
+      {
+        "id": "pl-u1-l3-compra-95dd6a16",
+        "version": 1,
+        "familia": "py.operacion.elegir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u1-l3-compra",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "precio = 3000\ncantidad = 3\nprint(precio * cantidad)",
+        "salida": "9000",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "9000",
+            "porque": "Correcto: el programa muestra 9000."
+          },
+          {
+            "id": "b",
+            "texto": "3003",
+            "porque": "Se multiplica el precio por la cantidad, no se suma."
+          },
+          {
+            "id": "c",
+            "texto": "3000",
+            "porque": "Ese es el precio de una unidad; se compran 3."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Cuánto cuestan 3 unidades del mismo precio?",
+        "explicacion": "3 unidades de 3000 cuestan 3000 * 3 = 9000."
+      }
+    ],
+    "u2-l1": [
+      {
+        "id": "pl-u2-l1-comparar-025bbe50",
+        "version": 1,
+        "familia": "py.comparacion.resultado",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l1-comparar",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "print(5 >= 6)",
+        "salida": "False",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "False",
+            "porque": "Correcto: el programa muestra False."
+          },
+          {
+            "id": "b",
+            "texto": "True",
+            "porque": "Revisa qué pregunta exactamente >= con estos dos valores."
+          },
+          {
+            "id": "c",
+            "texto": "5",
+            "porque": "print muestra el resultado de la comparación, no un número."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Lee la comparación en voz alta con los dos números.",
+        "explicacion": "¿5 >= 6? La respuesta es False."
+      },
+      {
+        "id": "pl-u2-l1-comparar-9314d07c",
+        "version": 1,
+        "familia": "py.comparacion.resultado",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l1-comparar",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "print(8 >= 6)",
+        "salida": "True",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "True",
+            "porque": "Correcto: el programa muestra True."
+          },
+          {
+            "id": "b",
+            "texto": "False",
+            "porque": "Revisa qué pregunta exactamente >= con estos dos valores."
+          },
+          {
+            "id": "c",
+            "texto": "8",
+            "porque": "print muestra el resultado de la comparación, no un número."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Lee la comparación en voz alta con los dos números.",
+        "explicacion": "¿8 >= 6? La respuesta es True."
+      },
+      {
+        "id": "pl-u2-l1-comparar-725557f5",
+        "version": 1,
+        "familia": "py.comparacion.resultado",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l1-comparar",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "print(8 < 6)",
+        "salida": "False",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "False",
+            "porque": "Correcto: el programa muestra False."
+          },
+          {
+            "id": "b",
+            "texto": "True",
+            "porque": "Revisa qué pregunta exactamente < con estos dos valores."
+          },
+          {
+            "id": "c",
+            "texto": "8",
+            "porque": "print muestra el resultado de la comparación, no un número."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Lee la comparación en voz alta con los dos números.",
+        "explicacion": "¿8 < 6? La respuesta es False."
+      },
+      {
+        "id": "pl-u2-l1-comparar-7708a3e3",
+        "version": 1,
+        "familia": "py.comparacion.resultado",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l1-comparar",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "print(5 < 6)",
+        "salida": "True",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "True",
+            "porque": "Correcto: el programa muestra True."
+          },
+          {
+            "id": "b",
+            "texto": "False",
+            "porque": "Revisa qué pregunta exactamente < con estos dos valores."
+          },
+          {
+            "id": "c",
+            "texto": "5",
+            "porque": "print muestra el resultado de la comparación, no un número."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Lee la comparación en voz alta con los dos números.",
+        "explicacion": "¿5 < 6? La respuesta es True."
+      },
+      {
+        "id": "pl-u2-l1-comparar-30c6c1c2",
+        "version": 1,
+        "familia": "py.comparacion.resultado",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l1-comparar",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "print(8 > 5)",
+        "salida": "True",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "True",
+            "porque": "Correcto: el programa muestra True."
+          },
+          {
+            "id": "b",
+            "texto": "False",
+            "porque": "Revisa qué pregunta exactamente > con estos dos valores."
+          },
+          {
+            "id": "c",
+            "texto": "8",
+            "porque": "print muestra el resultado de la comparación, no un número."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Lee la comparación en voz alta con los dos números.",
+        "explicacion": "¿8 > 5? La respuesta es True."
+      },
+      {
+        "id": "pl-u2-l1-comparar-29451e15",
+        "version": 1,
+        "familia": "py.comparacion.resultado",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l1-comparar",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "print(5 > 6)",
+        "salida": "False",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "False",
+            "porque": "Correcto: el programa muestra False."
+          },
+          {
+            "id": "b",
+            "texto": "True",
+            "porque": "Revisa qué pregunta exactamente > con estos dos valores."
+          },
+          {
+            "id": "c",
+            "texto": "5",
+            "porque": "print muestra el resultado de la comparación, no un número."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Lee la comparación en voz alta con los dos números.",
+        "explicacion": "¿5 > 6? La respuesta es False."
+      }
+    ],
+    "u2-l2": [
+      {
+        "id": "pl-u2-l2-camino-1d6b57f4",
+        "version": 1,
+        "familia": "py.rama.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l2-camino",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "x = 12\nif x > 5:\n    print(\"Grande\")\nelse:\n    print(\"Pequeño\")",
+        "salida": "Grande",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "Grande",
+            "porque": "Correcto: el programa muestra Grande."
+          },
+          {
+            "id": "b",
+            "texto": "Pequeño",
+            "porque": "Evalúa 12 > 5 antes de elegir el camino."
+          },
+          {
+            "id": "c",
+            "texto": "Grande y después Pequeño",
+            "porque": "En cada ejecución corre solo uno de los dos caminos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿12 > 5 es True o False?",
+        "explicacion": "12 > 5 decide el camino; solo se muestra Grande."
+      },
+      {
+        "id": "pl-u2-l2-camino-0677c317",
+        "version": 1,
+        "familia": "py.rama.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l2-camino",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "x = 3\nif x > 5:\n    print(\"Grande\")\nelse:\n    print(\"Pequeño\")",
+        "salida": "Pequeño",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "Pequeño",
+            "porque": "Correcto: el programa muestra Pequeño."
+          },
+          {
+            "id": "b",
+            "texto": "Grande",
+            "porque": "Evalúa 3 > 5 antes de elegir el camino."
+          },
+          {
+            "id": "c",
+            "texto": "Grande y después Pequeño",
+            "porque": "En cada ejecución corre solo uno de los dos caminos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿3 > 5 es True o False?",
+        "explicacion": "3 > 5 decide el camino; solo se muestra Pequeño."
+      },
+      {
+        "id": "pl-u2-l2-camino-4ed0cb13",
+        "version": 1,
+        "familia": "py.rama.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l2-camino",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "x = 9\nif x > 5:\n    print(\"Grande\")\nelse:\n    print(\"Pequeño\")",
+        "salida": "Grande",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "Grande",
+            "porque": "Correcto: el programa muestra Grande."
+          },
+          {
+            "id": "b",
+            "texto": "Pequeño",
+            "porque": "Evalúa 9 > 5 antes de elegir el camino."
+          },
+          {
+            "id": "c",
+            "texto": "Grande y después Pequeño",
+            "porque": "En cada ejecución corre solo uno de los dos caminos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿9 > 5 es True o False?",
+        "explicacion": "9 > 5 decide el camino; solo se muestra Grande."
+      },
+      {
+        "id": "pl-u2-l2-camino-a1392c6f",
+        "version": 1,
+        "familia": "py.rama.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l2-camino",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "x = 12\nif x > 10:\n    print(\"Grande\")\nelse:\n    print(\"Pequeño\")",
+        "salida": "Grande",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "Grande",
+            "porque": "Correcto: el programa muestra Grande."
+          },
+          {
+            "id": "b",
+            "texto": "Pequeño",
+            "porque": "Evalúa 12 > 10 antes de elegir el camino."
+          },
+          {
+            "id": "c",
+            "texto": "Grande y después Pequeño",
+            "porque": "En cada ejecución corre solo uno de los dos caminos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿12 > 10 es True o False?",
+        "explicacion": "12 > 10 decide el camino; solo se muestra Grande."
+      },
+      {
+        "id": "pl-u2-l2-camino-8f2db231",
+        "version": 1,
+        "familia": "py.rama.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l2-camino",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "x = 9\nif x > 10:\n    print(\"Grande\")\nelse:\n    print(\"Pequeño\")",
+        "salida": "Pequeño",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "Pequeño",
+            "porque": "Correcto: el programa muestra Pequeño."
+          },
+          {
+            "id": "b",
+            "texto": "Grande",
+            "porque": "Evalúa 9 > 10 antes de elegir el camino."
+          },
+          {
+            "id": "c",
+            "texto": "Grande y después Pequeño",
+            "porque": "En cada ejecución corre solo uno de los dos caminos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿9 > 10 es True o False?",
+        "explicacion": "9 > 10 decide el camino; solo se muestra Pequeño."
+      },
+      {
+        "id": "pl-u2-l2-camino-22ca8a85",
+        "version": 1,
+        "familia": "py.rama.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l2-camino",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "x = 3\nif x > 10:\n    print(\"Grande\")\nelse:\n    print(\"Pequeño\")",
+        "salida": "Pequeño",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "Pequeño",
+            "porque": "Correcto: el programa muestra Pequeño."
+          },
+          {
+            "id": "b",
+            "texto": "Grande",
+            "porque": "Evalúa 3 > 10 antes de elegir el camino."
+          },
+          {
+            "id": "c",
+            "texto": "Grande y después Pequeño",
+            "porque": "En cada ejecución corre solo uno de los dos caminos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿3 > 10 es True o False?",
+        "explicacion": "3 > 10 decide el camino; solo se muestra Pequeño."
+      }
+    ],
+    "u2-l3": [
+      {
+        "id": "pl-u2-l3-limite-d1d946f1",
+        "version": 1,
+        "familia": "py.limite.incluir",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l3-limite",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "n = 10\nif n < 10:\n    print(\"Sí\")\nelse:\n    print(\"No\")",
+        "salida": "No",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "No",
+            "porque": "Correcto: el programa muestra No."
+          },
+          {
+            "id": "b",
+            "texto": "Sí",
+            "porque": "En el valor límite, < da un resultado concreto: compruébalo."
+          },
+          {
+            "id": "c",
+            "texto": "Sí y después No",
+            "porque": "Solo corre uno de los dos caminos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "n vale exactamente el límite. ¿< incluye la igualdad?",
+        "explicacion": "Con n = 10, la condición n < 10 decide: se muestra No."
+      },
+      {
+        "id": "pl-u2-l3-limite-ea7023dc",
+        "version": 1,
+        "familia": "py.limite.incluir",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l3-limite",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "n = 4\nif n <= 4:\n    print(\"Sí\")\nelse:\n    print(\"No\")",
+        "salida": "Sí",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "Sí",
+            "porque": "Correcto: el programa muestra Sí."
+          },
+          {
+            "id": "b",
+            "texto": "No",
+            "porque": "En el valor límite, <= da un resultado concreto: compruébalo."
+          },
+          {
+            "id": "c",
+            "texto": "Sí y después No",
+            "porque": "Solo corre uno de los dos caminos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "n vale exactamente el límite. ¿<= incluye la igualdad?",
+        "explicacion": "Con n = 4, la condición n <= 4 decide: se muestra Sí."
+      },
+      {
+        "id": "pl-u2-l3-limite-f08e6fcc",
+        "version": 1,
+        "familia": "py.limite.incluir",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l3-limite",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "n = 10\nif n > 10:\n    print(\"Sí\")\nelse:\n    print(\"No\")",
+        "salida": "No",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "No",
+            "porque": "Correcto: el programa muestra No."
+          },
+          {
+            "id": "b",
+            "texto": "Sí",
+            "porque": "En el valor límite, > da un resultado concreto: compruébalo."
+          },
+          {
+            "id": "c",
+            "texto": "Sí y después No",
+            "porque": "Solo corre uno de los dos caminos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "n vale exactamente el límite. ¿> incluye la igualdad?",
+        "explicacion": "Con n = 10, la condición n > 10 decide: se muestra No."
+      },
+      {
+        "id": "pl-u2-l3-limite-84b320df",
+        "version": 1,
+        "familia": "py.limite.incluir",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l3-limite",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "n = 50\nif n <= 50:\n    print(\"Sí\")\nelse:\n    print(\"No\")",
+        "salida": "Sí",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "Sí",
+            "porque": "Correcto: el programa muestra Sí."
+          },
+          {
+            "id": "b",
+            "texto": "No",
+            "porque": "En el valor límite, <= da un resultado concreto: compruébalo."
+          },
+          {
+            "id": "c",
+            "texto": "Sí y después No",
+            "porque": "Solo corre uno de los dos caminos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "n vale exactamente el límite. ¿<= incluye la igualdad?",
+        "explicacion": "Con n = 50, la condición n <= 50 decide: se muestra Sí."
+      },
+      {
+        "id": "pl-u2-l3-limite-07029a92",
+        "version": 1,
+        "familia": "py.limite.incluir",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l3-limite",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "n = 50\nif n >= 50:\n    print(\"Sí\")\nelse:\n    print(\"No\")",
+        "salida": "Sí",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "Sí",
+            "porque": "Correcto: el programa muestra Sí."
+          },
+          {
+            "id": "b",
+            "texto": "No",
+            "porque": "En el valor límite, >= da un resultado concreto: compruébalo."
+          },
+          {
+            "id": "c",
+            "texto": "Sí y después No",
+            "porque": "Solo corre uno de los dos caminos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "n vale exactamente el límite. ¿>= incluye la igualdad?",
+        "explicacion": "Con n = 50, la condición n >= 50 decide: se muestra Sí."
+      },
+      {
+        "id": "pl-u2-l3-limite-2e4028cc",
+        "version": 1,
+        "familia": "py.limite.incluir",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u2-l3-limite",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "n = 10\nif n <= 10:\n    print(\"Sí\")\nelse:\n    print(\"No\")",
+        "salida": "Sí",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "Sí",
+            "porque": "Correcto: el programa muestra Sí."
+          },
+          {
+            "id": "b",
+            "texto": "No",
+            "porque": "En el valor límite, <= da un resultado concreto: compruébalo."
+          },
+          {
+            "id": "c",
+            "texto": "Sí y después No",
+            "porque": "Solo corre uno de los dos caminos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "n vale exactamente el límite. ¿<= incluye la igualdad?",
+        "explicacion": "Con n = 10, la condición n <= 10 decide: se muestra Sí."
+      }
+    ],
+    "u3-l1": [
+      {
+        "id": "pl-u3-l1-indice-d0d19c0e",
+        "version": 1,
+        "familia": "py.lista.indice",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l1-indice",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "lista = [7, 3, 30]\nprint(lista[0])",
+        "salida": "7",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "7",
+            "porque": "Correcto: el programa muestra 7."
+          },
+          {
+            "id": "b",
+            "texto": "30",
+            "porque": "Los índices empiezan en 0: cuenta desde la primera posición."
+          },
+          {
+            "id": "c",
+            "texto": "0",
+            "porque": "print muestra el elemento, no el índice."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Cuenta las posiciones empezando por 0.",
+        "explicacion": "lista[0] es el elemento en la posición 0: 7."
+      },
+      {
+        "id": "pl-u3-l1-indice-cec49d60",
+        "version": 1,
+        "familia": "py.lista.indice",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l1-indice",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "lista = [10, 20, 9]\nprint(lista[1])",
+        "salida": "20",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "20",
+            "porque": "Correcto: el programa muestra 20."
+          },
+          {
+            "id": "b",
+            "texto": "10",
+            "porque": "Los índices empiezan en 0: cuenta desde la primera posición."
+          },
+          {
+            "id": "c",
+            "texto": "1",
+            "porque": "print muestra el elemento, no el índice."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Cuenta las posiciones empezando por 0.",
+        "explicacion": "lista[1] es el elemento en la posición 1: 20."
+      },
+      {
+        "id": "pl-u3-l1-indice-b5ba8356",
+        "version": 1,
+        "familia": "py.lista.indice",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l1-indice",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "lista = [10, 20, 9]\nprint(lista[2])",
+        "salida": "9",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "9",
+            "porque": "Correcto: el programa muestra 9."
+          },
+          {
+            "id": "b",
+            "texto": "20",
+            "porque": "Los índices empiezan en 0: cuenta desde la primera posición."
+          },
+          {
+            "id": "c",
+            "texto": "2",
+            "porque": "print muestra el elemento, no el índice."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Cuenta las posiciones empezando por 0.",
+        "explicacion": "lista[2] es el elemento en la posición 2: 9."
+      },
+      {
+        "id": "pl-u3-l1-indice-1bda97ef",
+        "version": 1,
+        "familia": "py.lista.indice",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l1-indice",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "lista = [7, 20, 9]\nprint(lista[2])",
+        "salida": "9",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "9",
+            "porque": "Correcto: el programa muestra 9."
+          },
+          {
+            "id": "b",
+            "texto": "20",
+            "porque": "Los índices empiezan en 0: cuenta desde la primera posición."
+          },
+          {
+            "id": "c",
+            "texto": "2",
+            "porque": "print muestra el elemento, no el índice."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Cuenta las posiciones empezando por 0.",
+        "explicacion": "lista[2] es el elemento en la posición 2: 9."
+      },
+      {
+        "id": "pl-u3-l1-indice-9ca38994",
+        "version": 1,
+        "familia": "py.lista.indice",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l1-indice",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "lista = [7, 3, 30]\nprint(lista[1])",
+        "salida": "3",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "3",
+            "porque": "Correcto: el programa muestra 3."
+          },
+          {
+            "id": "b",
+            "texto": "7",
+            "porque": "Los índices empiezan en 0: cuenta desde la primera posición."
+          },
+          {
+            "id": "c",
+            "texto": "1",
+            "porque": "print muestra el elemento, no el índice."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Cuenta las posiciones empezando por 0.",
+        "explicacion": "lista[1] es el elemento en la posición 1: 3."
+      },
+      {
+        "id": "pl-u3-l1-indice-5f70ee44",
+        "version": 1,
+        "familia": "py.lista.indice",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l1-indice",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "lista = [7, 20, 9]\nprint(lista[1])",
+        "salida": "20",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "20",
+            "porque": "Correcto: el programa muestra 20."
+          },
+          {
+            "id": "b",
+            "texto": "7",
+            "porque": "Los índices empiezan en 0: cuenta desde la primera posición."
+          },
+          {
+            "id": "c",
+            "texto": "1",
+            "porque": "print muestra el elemento, no el índice."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Cuenta las posiciones empezando por 0.",
+        "explicacion": "lista[1] es el elemento en la posición 1: 20."
+      },
+      {
+        "id": "pl-u3-l1-len-ea4a28cb",
+        "version": 1,
+        "familia": "py.lista.len",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l1-len",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "lista = [2, 9]\nprint(len(lista))",
+        "salida": "2",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "2",
+            "porque": "Correcto: el programa muestra 2."
+          },
+          {
+            "id": "b",
+            "texto": "1",
+            "porque": "Ese es el último índice; len cuenta los elementos."
+          },
+          {
+            "id": "c",
+            "texto": "9",
+            "porque": "Ese es el último valor, no la cantidad de elementos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "len cuenta elementos, no posiciones.",
+        "explicacion": "La lista tiene 2 elementos."
+      },
+      {
+        "id": "pl-u3-l1-len-025aeb8e",
+        "version": 1,
+        "familia": "py.lista.len",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l1-len",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "lista = [4, 8, 15, 16]\nprint(len(lista))",
+        "salida": "4",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "4",
+            "porque": "Correcto: el programa muestra 4."
+          },
+          {
+            "id": "b",
+            "texto": "3",
+            "porque": "Ese es el último índice; len cuenta los elementos."
+          },
+          {
+            "id": "c",
+            "texto": "16",
+            "porque": "Ese es el último valor, no la cantidad de elementos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "len cuenta elementos, no posiciones.",
+        "explicacion": "La lista tiene 4 elementos."
+      },
+      {
+        "id": "pl-u3-l1-len-32f6caf9",
+        "version": 1,
+        "familia": "py.lista.len",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l1-len",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "lista = [5, 1, 7, 3, 6]\nprint(len(lista))",
+        "salida": "5",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "5",
+            "porque": "Correcto: el programa muestra 5."
+          },
+          {
+            "id": "b",
+            "texto": "4",
+            "porque": "Ese es el último índice; len cuenta los elementos."
+          },
+          {
+            "id": "c",
+            "texto": "6",
+            "porque": "Ese es el último valor, no la cantidad de elementos."
+          }
+        ],
+        "correcta": "a",
+        "pista": "len cuenta elementos, no posiciones.",
+        "explicacion": "La lista tiene 5 elementos."
+      }
+    ],
+    "u3-l2": [
+      {
+        "id": "pl-u3-l2-vueltas-4730299a",
+        "version": 1,
+        "familia": "py.recorrido.valores",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l2-vueltas",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "for n in [1, 3]:\n    print(n * 10)",
+        "salida": "10\n30",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "10 y después 30",
+            "porque": "Correcto: el programa muestra 10 y después 30."
+          },
+          {
+            "id": "b",
+            "texto": "40",
+            "porque": "Nada se suma: cada vuelta muestra su propio resultado."
+          },
+          {
+            "id": "c",
+            "texto": "30",
+            "porque": "print está dentro del bucle: corre en cada vuelta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Escribe el valor de n en cada vuelta.",
+        "explicacion": "Hay dos vueltas, con n = 1 y n = 3: se muestra 10 y después 30."
+      },
+      {
+        "id": "pl-u3-l2-vueltas-797ce02a",
+        "version": 1,
+        "familia": "py.recorrido.valores",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l2-vueltas",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "for n in [1, 3]:\n    print(n * 2)",
+        "salida": "2\n6",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "2 y después 6",
+            "porque": "Correcto: el programa muestra 2 y después 6."
+          },
+          {
+            "id": "b",
+            "texto": "8",
+            "porque": "Nada se suma: cada vuelta muestra su propio resultado."
+          },
+          {
+            "id": "c",
+            "texto": "6",
+            "porque": "print está dentro del bucle: corre en cada vuelta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Escribe el valor de n en cada vuelta.",
+        "explicacion": "Hay dos vueltas, con n = 1 y n = 3: se muestra 2 y después 6."
+      },
+      {
+        "id": "pl-u3-l2-vueltas-67586240",
+        "version": 1,
+        "familia": "py.recorrido.valores",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l2-vueltas",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "for n in [1, 5]:\n    print(n * 10)",
+        "salida": "10\n50",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "10 y después 50",
+            "porque": "Correcto: el programa muestra 10 y después 50."
+          },
+          {
+            "id": "b",
+            "texto": "60",
+            "porque": "Nada se suma: cada vuelta muestra su propio resultado."
+          },
+          {
+            "id": "c",
+            "texto": "50",
+            "porque": "print está dentro del bucle: corre en cada vuelta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Escribe el valor de n en cada vuelta.",
+        "explicacion": "Hay dos vueltas, con n = 1 y n = 5: se muestra 10 y después 50."
+      },
+      {
+        "id": "pl-u3-l2-vueltas-64f9f786",
+        "version": 1,
+        "familia": "py.recorrido.valores",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l2-vueltas",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "for n in [1, 5]:\n    print(n * 2)",
+        "salida": "2\n10",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "2 y después 10",
+            "porque": "Correcto: el programa muestra 2 y después 10."
+          },
+          {
+            "id": "b",
+            "texto": "12",
+            "porque": "Nada se suma: cada vuelta muestra su propio resultado."
+          },
+          {
+            "id": "c",
+            "texto": "10",
+            "porque": "print está dentro del bucle: corre en cada vuelta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Escribe el valor de n en cada vuelta.",
+        "explicacion": "Hay dos vueltas, con n = 1 y n = 5: se muestra 2 y después 10."
+      },
+      {
+        "id": "pl-u3-l2-vueltas-e7403ef6",
+        "version": 1,
+        "familia": "py.recorrido.valores",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l2-vueltas",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "for n in [2, 5]:\n    print(n * 2)",
+        "salida": "4\n10",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "4 y después 10",
+            "porque": "Correcto: el programa muestra 4 y después 10."
+          },
+          {
+            "id": "b",
+            "texto": "14",
+            "porque": "Nada se suma: cada vuelta muestra su propio resultado."
+          },
+          {
+            "id": "c",
+            "texto": "10",
+            "porque": "print está dentro del bucle: corre en cada vuelta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Escribe el valor de n en cada vuelta.",
+        "explicacion": "Hay dos vueltas, con n = 2 y n = 5: se muestra 4 y después 10."
+      },
+      {
+        "id": "pl-u3-l2-vueltas-9fda2446",
+        "version": 1,
+        "familia": "py.recorrido.valores",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l2-vueltas",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "for n in [2, 3]:\n    print(n * 2)",
+        "salida": "4\n6",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "4 y después 6",
+            "porque": "Correcto: el programa muestra 4 y después 6."
+          },
+          {
+            "id": "b",
+            "texto": "10",
+            "porque": "Nada se suma: cada vuelta muestra su propio resultado."
+          },
+          {
+            "id": "c",
+            "texto": "6",
+            "porque": "print está dentro del bucle: corre en cada vuelta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Escribe el valor de n en cada vuelta.",
+        "explicacion": "Hay dos vueltas, con n = 2 y n = 3: se muestra 4 y después 6."
+      },
+      {
+        "id": "pl-u3-l2-contar-1d02928b",
+        "version": 1,
+        "familia": "py.recorrido.condicion",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l2-contar",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "veces = 0\nfor x in [2, 7, 4, 10, 1]:\n    if x > 4:\n        veces = veces + 1\nprint(veces)",
+        "salida": "2",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "2",
+            "porque": "Correcto: el programa muestra 2."
+          },
+          {
+            "id": "b",
+            "texto": "5",
+            "porque": "No todos los elementos cumplen la condición."
+          },
+          {
+            "id": "c",
+            "texto": "3",
+            "porque": "> excluye los valores iguales a 4."
+          }
+        ],
+        "correcta": "a",
+        "pista": "En cada vuelta decide si x > 4.",
+        "explicacion": "Solo cuentan los elementos mayores que 4: 2."
+      }
+    ],
+    "u3-l3": [
+      {
+        "id": "pl-u3-l3-sumar-1e55e67e",
+        "version": 1,
+        "familia": "py.acumulador.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l3-sumar",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "total = 0\nfor x in [1000, 2500]:\n    total = total + x\nprint(total)",
+        "salida": "3500",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "3500",
+            "porque": "Correcto: el programa muestra 3500."
+          },
+          {
+            "id": "b",
+            "texto": "2500",
+            "porque": "total acumula todos los elementos, no solo el último."
+          },
+          {
+            "id": "c",
+            "texto": "2",
+            "porque": "Se suman los valores, no se cuentan."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Sigue total vuelta por vuelta.",
+        "explicacion": "total acumula cada elemento: termina en 3500."
+      },
+      {
+        "id": "pl-u3-l3-sumar-eb6bd397",
+        "version": 1,
+        "familia": "py.acumulador.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l3-sumar",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "total = 0\nfor x in [2, 3, 4]:\n    total = total + x\nprint(total)",
+        "salida": "9",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "9",
+            "porque": "Correcto: el programa muestra 9."
+          },
+          {
+            "id": "b",
+            "texto": "4",
+            "porque": "total acumula todos los elementos, no solo el último."
+          },
+          {
+            "id": "c",
+            "texto": "3",
+            "porque": "Se suman los valores, no se cuentan."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Sigue total vuelta por vuelta.",
+        "explicacion": "total acumula cada elemento: termina en 9."
+      },
+      {
+        "id": "pl-u3-l3-sumar-9d32684f",
+        "version": 1,
+        "familia": "py.acumulador.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l3-sumar",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "total = 0\nfor x in [5, 5, 5, 5]:\n    total = total + x\nprint(total)",
+        "salida": "20",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "20",
+            "porque": "Correcto: el programa muestra 20."
+          },
+          {
+            "id": "b",
+            "texto": "5",
+            "porque": "total acumula todos los elementos, no solo el último."
+          },
+          {
+            "id": "c",
+            "texto": "4",
+            "porque": "Se suman los valores, no se cuentan."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Sigue total vuelta por vuelta.",
+        "explicacion": "total acumula cada elemento: termina en 20."
+      },
+      {
+        "id": "pl-u3-l3-sumar-005ddae8",
+        "version": 1,
+        "familia": "py.acumulador.seguir",
+        "uso": "practica",
+        "nivel": "basico",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l3-sumar",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "total = 0\nfor x in [10, 20, 30]:\n    total = total + x\nprint(total)",
+        "salida": "60",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "60",
+            "porque": "Correcto: el programa muestra 60."
+          },
+          {
+            "id": "b",
+            "texto": "30",
+            "porque": "total acumula todos los elementos, no solo el último."
+          },
+          {
+            "id": "c",
+            "texto": "3",
+            "porque": "Se suman los valores, no se cuentan."
+          }
+        ],
+        "correcta": "a",
+        "pista": "Sigue total vuelta por vuelta.",
+        "explicacion": "total acumula cada elemento: termina en 60."
+      },
+      {
+        "id": "pl-u3-l3-reinicio-005ddae8",
+        "version": 1,
+        "familia": "py.acumulador.reinicio",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l3-reinicio",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "for x in [10, 20, 30]:\n    total = 0\n    total = total + x\nprint(total)",
+        "salida": "30",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "30",
+            "porque": "Correcto: el programa muestra 30."
+          },
+          {
+            "id": "b",
+            "texto": "60",
+            "porque": "total = 0 está dentro del bucle y borra la suma en cada vuelta."
+          },
+          {
+            "id": "c",
+            "texto": "0",
+            "porque": "Después de reiniciar se suma el elemento de esa vuelta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Cuántas veces se ejecuta total = 0?",
+        "explicacion": "En cada vuelta total vuelve a 0 y solo suma ese elemento: al final queda el último, 30."
+      },
+      {
+        "id": "pl-u3-l3-reinicio-eb6bd397",
+        "version": 1,
+        "familia": "py.acumulador.reinicio",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l3-reinicio",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "for x in [2, 3, 4]:\n    total = 0\n    total = total + x\nprint(total)",
+        "salida": "4",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "4",
+            "porque": "Correcto: el programa muestra 4."
+          },
+          {
+            "id": "b",
+            "texto": "9",
+            "porque": "total = 0 está dentro del bucle y borra la suma en cada vuelta."
+          },
+          {
+            "id": "c",
+            "texto": "0",
+            "porque": "Después de reiniciar se suma el elemento de esa vuelta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Cuántas veces se ejecuta total = 0?",
+        "explicacion": "En cada vuelta total vuelve a 0 y solo suma ese elemento: al final queda el último, 4."
+      },
+      {
+        "id": "pl-u3-l3-reinicio-1e55e67e",
+        "version": 1,
+        "familia": "py.acumulador.reinicio",
+        "uso": "practica",
+        "nivel": "moderado",
+        "formato": "seleccion",
+        "generada": true,
+        "plantilla": "pl-u3-l3-reinicio",
+        "consigna": "¿Qué muestra este programa?",
+        "codigo": "for x in [1000, 2500]:\n    total = 0\n    total = total + x\nprint(total)",
+        "salida": "2500",
+        "opciones": [
+          {
+            "id": "a",
+            "texto": "2500",
+            "porque": "Correcto: el programa muestra 2500."
+          },
+          {
+            "id": "b",
+            "texto": "3500",
+            "porque": "total = 0 está dentro del bucle y borra la suma en cada vuelta."
+          },
+          {
+            "id": "c",
+            "texto": "0",
+            "porque": "Después de reiniciar se suma el elemento de esa vuelta."
+          }
+        ],
+        "correcta": "a",
+        "pista": "¿Cuántas veces se ejecuta total = 0?",
+        "explicacion": "En cada vuelta total vuelve a 0 y solo suma ese elemento: al final queda el último, 2500."
+      }
+    ]
+  }
+}
