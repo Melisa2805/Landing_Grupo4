@@ -124,7 +124,7 @@ test('fragmentación conserva decimales, atributos y todo el texto con un máxim
 test('la identidad del cuerpo se ignora: otra cuenta no lee, actúa ni acusa sobre una práctica ajena', async () => {
   const e = await preparar(); const s = await e.abrir(codigo)
   await e.consentir('user_prueba_b')
-  for (const body of [{ accion: 'recuperar', sesion: s.sesion, usuario: 'user_prueba_a', userId: 'user_prueba_a' }, { accion: 'confianza', sesion: s.sesion, revision: s.revision, valor: 3 }, { accion: 'acuse', sesion: s.sesion, tipo: 'pregunta_mostrada', instancia: 'p1' }]) {
+  for (const body of [{ accion: 'recuperar', sesion: s.sesion, usuario: 'user_prueba_a', userId: 'user_prueba_a' }, { accion: 'aclarar', sesion: s.sesion, revision: s.revision }, { accion: 'acuse', sesion: s.sesion, tipo: 'pregunta_mostrada', instancia: 'p1' }]) {
     await assert.rejects(e.sustentar(body, 'user_prueba_b'), { code: 'SESION_INVALIDA' })
   }
   const { POST } = await e.importar('app/api/sustentacion/route.js'); e.comoUsuario('user_prueba_b')
@@ -208,10 +208,10 @@ test('salida real de Groq: los defectos que afectan al juicio siguen rechazándo
 
 test('arrendamiento abandonado por un proceso detenido se retoma; uno vigente sigue protegiendo el paso', async () => {
   const e = await preparar(); const s = await e.iniciar(codigo)
-  await e.db.query("INSERT INTO operaciones (sesion_id, revision, accion, digest, estado, arrendamiento, arrendada_hasta, creada_en) VALUES ($1, $2, 'confianza', 'otro', 'pendiente', 'muerto', now() + interval '1 minute', now())", [s.sesion, s.revision])
-  await assert.rejects(e.paso(s, 'confianza', { valor: 4 }), { code: 'SESION_OCUPADA' })
+  await e.db.query("INSERT INTO operaciones (sesion_id, revision, accion, digest, estado, arrendamiento, arrendada_hasta, creada_en) VALUES ($1, $2, 'aclarar', 'otro', 'pendiente', 'muerto', now() + interval '1 minute', now())", [s.sesion, s.revision])
+  await assert.rejects(e.paso(s, 'aclarar'), { code: 'SESION_OCUPADA' })
   await e.db.query("UPDATE operaciones SET arrendada_hasta = now() - interval '1 second'")
-  assert.equal((await e.paso(s, 'confianza', { valor: 4 })).fase, 'pregunta')
+  assert.equal((await e.paso(s, 'aclarar')).fase, 'pregunta')
   assert.deepEqual((await e.db.query("SELECT estado FROM operaciones")).rows.map((r) => r.estado), ['completada'])
 })
 
@@ -346,7 +346,6 @@ test('recorrido completo del promedio: correcta, parcial, fallo recuperable y fa
   const e = await preparar(); let s = await e.iniciar(codigo, { temas: 'ciclos_listas' })
   const vistas = new Set()
   async function responder(r, nivel, veredicto, concepto) {
-    if (s.fase === 'confianza') s = await e.paso(s, 'confianza', { valor: 4 })
     vistas.add(s.pregunta); e.responder(tutor({ nivel, veredicto, concepto, cita: r.split(' ').slice(0, 3).join(' ') }))
     s = await e.paso(s, 'responder', { respuesta: r }); assert.equal(s.fase, 'feedback')
     return s.historial.at(-1)
@@ -355,10 +354,9 @@ test('recorrido completo del promedio: correcta, parcial, fallo recuperable y fa
   assert.equal((await responder('Calcula el promedio de las notas de una lista sumándolas y dividiendo entre su cantidad.', 2, 'correcta', 'proposito')).feedback.estado, 'Tu explicación coincide con lo pedido'); await continuar()
   assert.equal((await responder('Suma las notas de la lista.', 1, null)).feedback.estado, 'Explicación parcial'); await continuar()
   const falsa = 'Divide la suma entre dos para obtener el promedio.'
-  s = await e.paso(s, 'confianza', { valor: 5 })
   e.responder({ clasificacion: 'evaluable' }); await assert.rejects(e.paso(s, 'responder', { respuesta: falsa }), { code: 'MODELO_INVALIDO' })
   assert.equal((await e.sustentar({ accion: 'recuperar', sesion: s.sesion })).historial.length, 2)
-  const h3 = await responder(falsa, 2, 'falsa', 'promedio'); assert.equal(h3.clasificacion, 'error_conceptual'); assert.equal(h3.confianza, 5)
+  const h3 = await responder(falsa, 2, 'falsa', 'promedio'); assert.equal(h3.clasificacion, 'error_conceptual'); assert.equal(h3.confianza, null)
   assert.equal(s.siguiente, 'cierre')
   assert.equal(s.resumen, null); assert.ok(s.ofertaRefuerzo)
   s = await e.paso(s, 'refuerzo'); assert.equal(s.refuerzo.nombre, 'promedio_lecturas')

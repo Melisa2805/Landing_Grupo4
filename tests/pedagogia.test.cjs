@@ -134,7 +134,7 @@ test('aclarar mantiene la pregunta; omitir consume cupo; tres omisiones cierran 
     assert.equal(s.fase, 'feedback'); assert.equal(s.historial.at(-1).omitida, true); assert.equal(s.historial.at(-1).respuesta, null)
     assert.equal(s.puedeReparar, false)
     s = await e.paso(s, 'continuar')
-    if (s.fase === 'confianza') assert.equal(s.confianza, null)
+    if (s.fase === 'pregunta') assert.equal(s.confianza, null)
   }
   assert.equal(s.fase, 'cierre'); assert.equal(s.historial.length, 3); assert.equal(s.resumen.motivo, 'limite')
   assert.equal(s.resumen.evidencia, null)
@@ -160,9 +160,8 @@ test('«No he visto este tema» retira sin evidencia negativa y reemplaza una so
   s = await e.paso(s, 'continuar')
   const primera = s.tema.nombre
   s = await e.paso(s, 'saltar', { motivo: 'tema_no_cursado' })
-  assert.equal(s.fase, 'confianza'); assert.equal(s.tema.reemplazo, true); assert.notEqual(s.tema.nombre, primera)
+  assert.equal(s.fase, 'pregunta'); assert.equal(s.tema.reemplazo, true); assert.notEqual(s.tema.nombre, primera)
   assert.equal(s.historial.length, 1); assert.equal(s.puedeReemplazar, false)
-  s = await e.paso(s, 'confianza', { valor: 2 })
   s = await e.paso(s, 'saltar', { motivo: 'tema_no_cursado' })
   assert.equal(s.fase, 'feedback'); assert.equal(s.historial.length, 2)
   assert.equal(s.historial[1].motivoOmision, 'tema_no_cursado'); assert.match(s.historial[1].feedback.aviso, /no cuenta en tu contra/)

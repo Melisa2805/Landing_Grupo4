@@ -30,9 +30,8 @@ const { entorno } = require('../tests/entorno.cjs')
     const { participar } = await e.importar('lib/participacion.js')
     const usuario = { usuario: 'comprobacion-proveedor' }
     await participar({ accion: 'consentir', version: 'consentimiento-v1' }, usuario)
-    let s = await sustentar({ accion: 'iniciar', codigo: 'def calcular_promedio(notas):\n    total = sum(notas)\n    return total / len(notas) if notas else 0',
+    const s = await sustentar({ accion: 'iniciar', codigo: 'def calcular_promedio(notas):\n    total = sum(notas)\n    return total / len(notas) if notas else 0',
       temas: 'ciclos_listas', tarea: { proposito: 'Calcular el promedio de notas', entradasSalida: 'Lista de notas; devuelve su promedio' }, idSolicitud: randomUUID() }, usuario)
-    s = await sustentar({ accion: 'confianza', sesion: s.sesion, revision: s.revision, valor: 3 }, usuario)
     const r = await sustentar({ accion: 'responder', sesion: s.sesion, revision: s.revision,
       respuesta: 'Mi función calcula el promedio de una lista de notas numéricas. Suma las notas y divide el total entre la cantidad de notas. Devuelve cero si la lista está vacía.' }, usuario)
     if (r.fase !== 'feedback') throw Object.assign(new Error(), { code: 'NO_EVALUADA' })

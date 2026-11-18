@@ -25,10 +25,9 @@ async function laboratorio(id = 'piloto') {
     await x.registrarParticipante(e.db, { experimentoId: id, clerkId: usuario, icp: true, entrega: '2026-11-08', tareas: ['Laboratorio de promedios'], ...opciones })
     tareas[usuario] = (await e.participar({ accion: 'estado' }, usuario)).tareas[0].id
   }
-  // A valid session: confidence, a substantive explanation and its feedback seen on closing.
+  // A valid session: a substantive explanation and its feedback seen on closing.
   e.sesionValida = async (usuario, { codigo = promedio, tarea } = {}) => {
     let s = await e.iniciar(codigo, { tarea: tarea || { id: tareas[usuario] } }, usuario)
-    s = await e.paso(s, 'confianza', { valor: 3 }, usuario)
     s = await e.paso(s, 'responder', { respuesta: explicacion }, usuario)
     return e.paso(s, 'cerrar', {}, usuario)
   }
@@ -46,27 +45,54 @@ test('actividad sustantiva: política versionada, independiente del acierto', as
   for (const r of ['no sé', 'No sé qué hacer', 'paso', 'ni idea', '1 2 3', 'ok', '¿Puedes aclarar la pregunta?', 'No tengo ni idea']) assert.equal(sustantiva(r), false, r)
 })
 
-test('confianza antes de revelar; nula explícita; la aclaración la conserva; el reemplazo pide una nueva', async () => {
+test('respuesta directa, aclaración y reemplazo sin autovaloraciones imputadas', async () => {
   const e = await practica()
-  const codigo = 'def f(xs):\n    t = 0\n    for x in xs:\n        if x > 0:\n            t += x\n    return t'
-  let s = await e.iniciar(codigo)
-  assert.equal(typeof s.pregunta, 'string')
-  await assert.rejects(e.paso(s, 'responder', { respuesta: explicacion }), { code: 'PASO_INVALIDO' })
-  for (const valor of [0, 6, 2.5, '3']) await assert.rejects(e.paso(s, 'confianza', { valor }), { code: 'ENTRADA_INVALIDA' })
-  s = await e.paso(s, 'confianza', { valor: null })
+  let s = await e.iniciar(otroPrograma)
+  assert.equal(s.fase, 'pregunta')
+  await assert.rejects(e.paso(s, 'confianza', { valor: 3 }), { code: 'PASO_INVALIDO' })
   s = await e.paso(s, 'aclarar')
   assert.equal(s.confianza, null)
   s = await e.contestar(s, explicacion, tutor())
   assert.equal(s.historial[0].confianza, null)
+  assert.equal(JSON.parse(e.llamadas[0].messages[1].content).pregunta.confianza, null)
   s = await e.paso(s, 'continuar')
-  s = await e.paso(s, 'confianza', { valor: 5 })
   s = await e.paso(s, 'saltar', { motivo: 'tema_no_cursado' })
-  assert.equal(s.fase, 'confianza'); assert.equal(s.tema.reemplazo, true)
-  s = await e.paso(s, 'confianza', { valor: 1 })
-  const confianzas = await e.eventos('confidence_recorded')
-  assert.deepEqual(confianzas.map((c) => [c.instancia, c.datos.valor]), [['p1', null], ['p2', 5], ['p3', 1]])
-  assert.equal(confianzas[0].datos.faltante, 'prefiere_no_responder')
+  assert.equal(s.fase, 'pregunta')
+  assert.equal(s.tema.reemplazo, true)
+  s = await e.paso(s, 'saltar', { motivo: 'prefiero_pasar' })
+  assert.equal(s.historial.at(-1).omitida, true)
+  assert.equal(s.historial.at(-1).motivoOmision, 'prefiero_pasar')
+  const fin = await e.paso(s, 'cerrar')
+  assert.doesNotMatch(JSON.stringify(fin.resumen), /confianza/i)
+  assert.equal((await e.eventos('confidence_recorded')).length, 0)
   assert.equal((await e.eventos('clarification_requested')).length, 1)
+})
+
+test('borrador v4 en la antigua escala conserva historial y permite contestar en la misma revisión', async () => {
+  const e = await practica()
+  const { cifrar, descifrar } = await e.importar('lib/almacen.js')
+  const primera = await e.contestar(await e.iniciar(promedio), explicacion, tutor())
+  const segunda = await e.paso(primera, 'continuar')
+  const id = segunda.sesion
+  const fila = (await e.db.query('SELECT cifrado FROM contenidos_sesion WHERE sesion_id = $1', [id])).rows[0]
+  const anterior = descifrar(id, fila.cifrado)
+  anterior.fase = 'confianza'
+  anterior.historia[0].confianza = 5
+  const cifrado = cifrar(id, anterior)
+  await e.db.transaccion(async (tx) => {
+    await tx.query("UPDATE sesiones SET fase = 'confianza' WHERE id = $1", [id])
+    await tx.query('UPDATE contenidos_sesion SET cifrado = $2 WHERE sesion_id = $1', [id, cifrado])
+  })
+  const rec = await e.sustentar({ accion: 'recuperar', sesion: id })
+  assert.equal(rec.revision, segunda.revision)
+  assert.equal(rec.fase, 'pregunta')
+  assert.equal(rec.pregunta, segunda.pregunta)
+  assert.equal(rec.confianza, null)
+  assert.equal(rec.historial[0].confianza, 5)
+  assert.equal((await e.db.query('SELECT cifrado FROM contenidos_sesion WHERE sesion_id = $1', [id])).rows[0].cifrado, cifrado)
+  const f = await e.contestar(rec, explicacion, tutor())
+  assert.deepEqual(Array.from(f.historial, (h) => h.confianza), [5, null])
+  assert.equal((await e.eventos('confidence_recorded')).length, 0)
 })
 
 test('sesión válida: pregunta mostrada, explicación sustantiva y feedback visto; una sola vez', async () => {
@@ -123,8 +149,8 @@ test('manifiesto distinto bloquea iniciar y avanzar, no la lectura de lo ya hech
   const s = await e.iniciar(promedio, { tarea: nueva(9) }, 'user_p1')
   await e.db.query("UPDATE experimentos SET manifest_hash = 'otro-tratamiento'")
   await assert.rejects(e.iniciar(promedio, { tarea: nueva(8) }, 'user_p1'), { code: 'MANIFIESTO_DISTINTO' })
-  await assert.rejects(e.paso(s, 'confianza', { valor: 3 }, 'user_p1'), { code: 'MANIFIESTO_DISTINTO' })
-  assert.equal((await e.sustentar({ accion: 'recuperar', sesion: s.sesion }, 'user_p1')).fase, 'confianza')
+  await assert.rejects(e.paso(s, 'aclarar', {}, 'user_p1'), { code: 'MANIFIESTO_DISTINTO' })
+  assert.equal((await e.sustentar({ accion: 'recuperar', sesion: s.sesion }, 'user_p1')).fase, 'pregunta')
 })
 
 test('huellas: espacios, comentarios, docstrings y nombres no hacen código nuevo; la misma tarea es repetida', async () => {
@@ -208,7 +234,7 @@ test('exportación: ventanas exactas, visita de 30 min, adjudicación por dos re
   assert.equal(informe.filas.length, 5); assert.ok(!JSON.stringify(informe).includes('user_'))
   const d = resultado('user_p1').diagnosticos
   assert.equal(d.sesiones, 2); assert.equal(d.validas, 2); assert.equal(d.cierres.voluntario, 2); assert.equal(d.proveedor.llamadas, 2)
-  assert.deepEqual(d.confianza.map((c) => [c.concepto, c.valor, c.resultado]), [['proposito', 3, 'evaluable'], ['proposito', 3, 'evaluable']])
+  assert.equal(d.confianza.length, 0)
   assert.ok(!JSON.stringify(informe).includes(explicacion))
   assert.match(informe.hash, /^[a-f0-9]{64}$/)
   assert.equal((await x.exportar(e.db, id, reloj.ahora)).hash, informe.hash)

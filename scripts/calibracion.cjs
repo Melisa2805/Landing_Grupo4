@@ -28,7 +28,7 @@ const previstas = casos.length * repeticiones
     const r = { id: c.id, categorias: [], ejecucion: [], errores: 0 }
     for (let i = 0; i < repeticiones; i++) {
       try {
-        const v = await e.paso(await e.paso(await e.iniciar(corpus.programas[c.programa]), 'confianza', { valor: 3 }), 'responder', { respuesta: c.respuesta })
+        const v = await e.paso(await e.iniciar(corpus.programas[c.programa]), 'responder', { respuesta: c.respuesta })
         r.categorias.push(categoriaDe(v)); r.ejecucion.push(afirmaEjecucion(v))
       } catch (error) { r.errores += 1; console.error(c.id, error.code || 'ERROR') }
     }

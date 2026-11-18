@@ -42,7 +42,7 @@ const percentil = (xs, p) => xs.length ? [...xs].sort((a, b) => a - b)[Math.min(
       const usuario = `capacidad-${randomUUID()}`
       try {
         await e.consentir(usuario)
-        const v = await e.paso(await e.paso(await e.iniciar(codigo, {}, usuario), 'confianza', { valor: 3 }, usuario), 'responder', { respuesta }, usuario)
+        const v = await e.paso(await e.iniciar(codigo, {}, usuario), 'responder', { respuesta }, usuario)
         if (v.fase === 'feedback') medidas.completadas++; else medidas.perdidas++
       } catch (error) { medidas.errores[error.code || 'ERROR'] = (medidas.errores[error.code || 'ERROR'] || 0) + 1; if (error.code !== 'LLM_LIMITE') medidas.perdidas++ }
     })())

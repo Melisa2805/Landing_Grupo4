@@ -43,9 +43,9 @@ test('PostgreSQL: migración concurrente única, inicio idempotente y una sola t
   assert.equal(new Set(inicios.map((s) => s.sesion)).size, 1)
   assert.equal((await a.db.query('SELECT count(*)::int AS n FROM sesiones')).rows[0].n, 1)
   const s = inicios[0]
-  const pasos = await Promise.allSettled([a, b, c].map((e) => e.paso(s, 'confianza', { valor: 4 })))
+  const pasos = await Promise.allSettled([a, b, c].map((e) => e.paso(s, 'aclarar')))
   assert.ok(pasos.every((r) => r.status === 'fulfilled' ? r.value.revision === 1 : r.reason.code === 'SESION_OCUPADA'))
-  assert.equal((await a.eventos('confidence_recorded')).length, 1)
+  assert.equal((await a.eventos('clarification_requested')).length, 1)
   assert.equal((await a.db.query('SELECT revision FROM sesiones')).rows[0].revision, 1)
 })
 

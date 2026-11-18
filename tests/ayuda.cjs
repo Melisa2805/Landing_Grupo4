@@ -14,11 +14,9 @@ async function practica(opciones = {}) {
   if (opciones.consentir !== false) await e.consentir()
   e.iniciar = (codigo, extra = {}, usuario) => e.sustentar({ accion: 'iniciar', codigo, temas: 'ciclos_listas', tarea: TAREA, idSolicitud: randomUUID(), ...extra }, usuario)
   e.paso = (s, accion, extra = {}, usuario) => e.sustentar({ accion, sesion: s.sesion, revision: s.revision, ...extra }, usuario)
-  // Confidence first, then the question is revealed.
-  e.abrir = async (codigo, extra, usuario) => e.paso(await e.iniciar(codigo, extra, usuario), 'confianza', { valor: 3 }, usuario)
+  e.abrir = e.iniciar
   e.contestar = async (s, respuesta, tutor, usuario) => {
     if (tutor) e.responder(tutor)
-    if (s.fase === 'confianza') s = await e.paso(s, 'confianza', { valor: 3 }, usuario)
     return e.paso(s, 'responder', { respuesta }, usuario)
   }
   e.ultimaRetroalimentacion = async (s, usuario) => {

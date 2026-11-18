@@ -11,7 +11,7 @@ const sinNumeros = (v) => !/"(?:puntaje|promedio|dominio|estimacion|puntajeOrien
 
 async function hastaOferta(e, codigo = doble, nivel = 2, extra) {
   let s = await e.iniciar(codigo, extra)
-  while (['confianza', 'pregunta'].includes(s.fase)) {
+  while (s.fase === 'pregunta') {
     s = await e.contestar(s, respuesta, tutor({ nivel }))
     assert.equal(s.fase, 'feedback')
     assert.equal(s.resumen, null)
@@ -48,17 +48,14 @@ test('AST: prueba estructural del ejemplo, sin inferir por nombre; no ejecuta ef
   assert.equal((await analizarPython('['.repeat(4000))).estado, 'invalida')
 })
 
-test('consigna visible antes de la confianza y sin cambios al responderla; sintaxis inválida no crea práctica; máximo fijo de tres', async () => {
+test('pregunta inicial lista para responder; sintaxis inválida no crea práctica; máximo fijo de tres', async () => {
   const e = await practica()
   for (const codigo of [factorial, doble, 'for i in range(3):\n    print(i)', 'datos=[1,2]\nprint(datos[0])', 'x="hola"\nprint(x.upper())']) {
-    const c = await e.iniciar(codigo, { maxPreguntas: 5 })
-    assert.equal(c.fase, 'confianza')
-    // Contract since fae9b14: the student reads the question, then states confidence.
-    assert.match(c.pregunta, /^Explica con tus palabras/)
-    assert.equal(c.tema.nombre, 'Propósito de la solución')
-    assert.equal(c.limite, 3)
-    const s = await e.paso(c, 'confianza', { valor: 4 })
-    assert.equal(s.pregunta, c.pregunta)
+    const s = await e.iniciar(codigo, { maxPreguntas: 5 })
+    assert.equal(s.fase, 'pregunta')
+    assert.match(s.pregunta, /^Explica con tus palabras/)
+    assert.equal(s.tema.nombre, 'Propósito de la solución')
+    assert.equal(s.limite, 3)
     assert.ok(!s.pregunta.includes('devuelve 1'))
     assert.ok(!JSON.stringify(s.analisis).includes('retorno_constante'))
     assert.ok(s.objetivos.length >= 2)
@@ -69,7 +66,7 @@ test('consigna visible antes de la confianza y sin cambios al responderla; sinta
   await assert.rejects(e.iniciar('x'.repeat(12001)), { code: 'ENTRADA_INVALIDA' })
   for (const temas of ['avanzado', 3]) await assert.rejects(e.iniciar(doble, { temas }), { code: 'ENTRADA_INVALIDA' })
   for (const tarea of [{ proposito: 'x'.repeat(161), entradasSalida: 'y' }, { id: 'no-es-uuid' }, 'texto']) await assert.rejects(e.iniciar(doble, { tarea }), { code: 'ENTRADA_INVALIDA' })
-  assert.equal((await e.iniciar(doble, { temas: undefined, tarea: undefined })).fase, 'confianza')
+  assert.equal((await e.iniciar(doble, { temas: undefined, tarea: undefined })).fase, 'pregunta')
 })
 
 test('crédito verificado corrige ceros injustos con evidencia literal, sin nota', async () => {
@@ -226,7 +223,7 @@ test('duplicados, respuestas divergentes, recuperación y otra instancia con el 
   const rec = await otra.sustentar({ accion: 'recuperar', sesion: s.sesion })
   assert.equal(rec.revision, a.revision)
   const q = await otra.paso(rec, 'continuar')
-  assert.equal(q.fase, 'confianza')
+  assert.equal(q.fase, 'pregunta')
   assert.equal(q.historial[0].respuesta, respuesta)
   // Replaying a completed step returns the current state without a new call.
   assert.equal((await otra.sustentar(envio)).revision, q.revision)
@@ -379,7 +376,7 @@ test('contenido caducado y práctica vencida se rechazan; cuerpo vacío es entra
   const e = await practica({ reloj: () => ahora })
   const s = await e.iniciar(doble)
   ahora += 2 * 3600_000 + 1
-  await assert.rejects(e.paso(s, 'confianza', { valor: 2 }), { code: 'SESION_CADUCADA' })
+  await assert.rejects(e.paso(s, 'aclarar'), { code: 'SESION_CADUCADA' })
   assert.equal((await e.sustentar({ accion: 'recuperar', sesion: s.sesion })).vigente, false)
   await e.db.query("UPDATE contenidos_sesion SET expira_en = now() - interval '1 second'")
   await assert.rejects(e.sustentar({ accion: 'recuperar', sesion: s.sesion }), { code: 'SESION_CADUCADA' })

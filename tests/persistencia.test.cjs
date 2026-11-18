@@ -73,19 +73,19 @@ test('secretos: la clave del proveedor nunca sirve de clave; sin secreto se gene
   }
   // The same value for both secrets is accepted: keys are derived per purpose.
   const iguales = await practica({ env: { ...base, PYDEFENSE_SESSION_SECRET: 'mismo-secreto-para-ambos', PYDEFENSE_HUELLA_SECRET: 'mismo-secreto-para-ambos' } })
-  assert.equal((await iguales.iniciar(codigo)).fase, 'confianza')
+  assert.equal((await iguales.iniciar(codigo)).fase, 'pregunta')
   const a = await practica({ env: { ...base, PYDEFENSE_SESSION_SECRET: '', PYDEFENSE_HUELLA_SECRET: '' } })
   const s = await a.iniciar(codigo)
   assert.equal((await a.db.query('SELECT count(*)::int AS n FROM secretos')).rows[0].n, 1)
   const b = await practica({ env: { ...base, PYDEFENSE_SESSION_SECRET: '', PYDEFENSE_HUELLA_SECRET: '' }, db: a.db, consentir: false })
-  assert.equal((await b.sustentar({ accion: 'recuperar', sesion: s.sesion })).fase, 'confianza')
+  assert.equal((await b.sustentar({ accion: 'recuperar', sesion: s.sesion })).fase, 'pregunta')
 })
 
 test('la tarea y los temas son opcionales; el ejemplo precargado se puede practicar', async () => {
   const e = await practica()
   const { CODIGO_EJEMPLO } = await e.importar('lib/ejemplo.js')
   const s = await e.sustentar({ accion: 'iniciar', codigo: CODIGO_EJEMPLO, idSolicitud: randomUUID() })
-  assert.equal(s.fase, 'confianza'); assert.equal(s.temas, 'sin_indicar'); assert.equal(s.tarea, 'Tarea sin describir')
+  assert.equal(s.fase, 'pregunta'); assert.equal(s.temas, 'sin_indicar'); assert.equal(s.tarea, 'Tarea sin describir')
   const f = await e.contestar(s, respuesta, tutor())
   assert.equal(f.fase, 'feedback')
   assert.equal((await e.db.query('SELECT ejemplo FROM sesiones')).rows[0].ejemplo, true)
@@ -111,14 +111,14 @@ test('concurrencia entre instancias: una sola transición y un solo evento por p
   const a = await practica()
   const b = await practica({ db: a.db, consentir: false })
   const s = await a.iniciar(codigo)
-  const resultados = await Promise.allSettled([a.paso(s, 'confianza', { valor: 2 }), b.paso(s, 'confianza', { valor: 2 })])
+  const resultados = await Promise.allSettled([a.paso(s, 'aclarar'), b.paso(s, 'aclarar')])
   const ok = resultados.filter((r) => r.status === 'fulfilled').map((r) => r.value)
   assert.ok(ok.length >= 1)
   assert.ok(resultados.every((r) => r.status === 'fulfilled' || r.reason.code === 'SESION_OCUPADA'))
   assert.ok(ok.every((v) => v.revision === 1 && v.fase === 'pregunta'))
-  assert.equal((await a.eventos('confidence_recorded')).length, 1)
+  assert.equal((await a.eventos('clarification_requested')).length, 1)
   assert.equal((await a.db.query('SELECT revision FROM sesiones')).rows[0].revision, 1)
-  await assert.rejects(b.paso(s, 'confianza', { valor: 5 }), { code: 'PASO_INVALIDO' })
+  await assert.rejects(b.paso(s, 'saltar', { motivo: 'no_se' }), { code: 'PASO_INVALIDO' })
 })
 
 test('acuses validados contra el estado y deduplicados; no cambian la práctica', async () => {
