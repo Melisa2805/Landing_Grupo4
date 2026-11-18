@@ -5,7 +5,9 @@ import Editor from '@monaco-editor/react'
 import { useAuth, SignInButton } from '@clerk/nextjs'
 import { Retroalimentacion, Resumen, EvaluacionRefuerzo } from './components'
 import { Progreso, CodigoResaltado, Procesando, GuardarResumen } from './ux'
-import Compartir from './compartir'
+import Compartir from '../components/compartir'
+import AvisoNavegador from '../components/aviso-navegador'
+import { CLAVE_ORIGEN, leerOrigen, origenVigente } from '../../lib/origen'
 import { PUNTOS_CONSENTIMIENTO, VERSION_CONSENTIMIENTO } from '../../lib/consentimiento'
 import { CODIGO_EJEMPLO, esEjemplo } from '../../lib/ejemplo'
 import { leerArchivoPython } from '../../lib/archivo-python'
@@ -66,7 +68,8 @@ const boton = 'w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-whi
 const secundario = 'border border-slate-500 px-4 py-2 rounded-lg disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white'
 
 function leerReferido() {
-  try { return sessionStorage.getItem('pydefense-ref') || undefined } catch { return undefined }
+  // First valid invitation of the last seven days, kept only in this browser.
+  try { return origenVigente(leerOrigen(localStorage.getItem(CLAVE_ORIGEN)), Date.now()) || sessionStorage.getItem('pydefense-ref') || undefined } catch { return undefined }
 }
 
 async function publicar(ruta, body, signal) {
@@ -308,6 +311,7 @@ export default function SimuladorPage() {
       {[[Code2, 'Pega tu código', 'O usa el ejemplo para conocer la práctica.'], [MessageSquare, 'Explica con tus palabras', 'Hasta tres preguntas; puedes cerrar cuando quieras.'], [Lightbulb, 'Descubre qué repasar', 'Lo que explicaste, lo que falta y un siguiente paso.']].map(([Icono, titulo, detalle]) =>
         <li key={titulo} className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 space-y-2"><Icono aria-hidden="true" className="h-6 w-6 text-blue-400" /><p className="font-semibold">{titulo}</p><p className="text-slate-400">{detalle}</p></li>)}
     </ol>
+    <AvisoNavegador />
     <SignInButton mode="modal"><button className={boton}>Iniciar sesión para practicar</button></SignInButton>
     <p className="text-xs text-slate-400 flex items-center gap-2"><Lock aria-hidden="true" className="h-4 w-4" />Tu práctica queda en tu cuenta para que puedas recuperarla si se interrumpe. No hay nota.</p>
   </main>

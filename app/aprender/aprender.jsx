@@ -9,6 +9,7 @@ import { iniciarLeccion, empezarActividades, responder, pedirPista, verSolucion,
 import { progresoInicial, registrarCierre, estadoLecciones, siguienteLeccion, habilidades, unidadCompleta } from '../../lib/aprender/progreso'
 import { crearAlmacen, CLAVE } from '../../lib/aprender/almacen-local'
 import { Actividad, Codigo, Texto, primario, secundario } from './actividad'
+import Compartir from '../components/compartir'
 
 const CATALOGO = u1
 const HUELLA = huella(CATALOGO)
@@ -225,5 +226,7 @@ function Resumen({ sesion, progreso, onSiguiente }) {
       <button type="button" className={siguiente ? secundario : primario} onClick={() => onSiguiente(null)}>{completa ? 'Ver la unidad completa' : 'Volver a las lecciones'}</button>
       <Link href="/simulador" className={secundario}>Explicar mi propio código en Sustentar</Link>
     </div>
+    {/* General campaign link: no personal code and nothing about the lesson. */}
+    <Compartir modo="general" destino="/aprender" campana="aprender" texto="Estoy aprendiendo Python con lecciones cortas en PyDefense. ¡Pruébalo!" invitacion="¿Conoces a alguien que esté empezando con Python? Invítalo a probar la lección." />
   </section>
 }

@@ -5,7 +5,7 @@
 const { spawnSync } = require('node:child_process')
 const path = require('node:path')
 
-const SUITES = ['rag', 'adaptativo', 'pedagogia', 'interfaz', 'estabilidad', 'persistencia', 'medicion', 'aprender']
+const SUITES = ['rag', 'adaptativo', 'pedagogia', 'interfaz', 'estabilidad', 'persistencia', 'medicion', 'aprender', 'referidos']
 const raiz = path.resolve(__dirname, '..')
 const pedidas = process.argv.slice(2)
 const elegidas = pedidas.length ? SUITES.filter((s) => pedidas.includes(s)) : SUITES

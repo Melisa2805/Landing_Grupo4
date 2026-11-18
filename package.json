@@ -17,7 +17,8 @@
     "test:persistencia": "node --experimental-vm-modules tests/persistencia.test.cjs",
     "test:medicion": "node --experimental-vm-modules tests/medicion.test.cjs",
     "experimento": "node --experimental-vm-modules scripts/experimento.cjs",
-    "test:postgres": "node --experimental-vm-modules tests/postgres.test.cjs"
+    "test:postgres": "node --experimental-vm-modules tests/postgres.test.cjs",
+    "reporte-expo": "node --experimental-vm-modules scripts/reporte-expo.cjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.22",
@@ -27,6 +28,7 @@
     "lucide-react": "^1.64.0",
     "next": "16.4.3",
     "pg": "^8.23.1",
+    "qrcode-generator": "2.0.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
