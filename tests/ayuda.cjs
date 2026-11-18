@@ -21,6 +21,13 @@ async function practica(opciones = {}) {
     if (s.fase === 'confianza') s = await e.paso(s, 'confianza', { valor: 3 }, usuario)
     return e.paso(s, 'responder', { respuesta }, usuario)
   }
+  e.ultimaRetroalimentacion = async (s, usuario) => {
+    while (s.fase === 'feedback' && s.siguiente === 'pregunta') {
+      s = await e.paso(s, 'continuar', {}, usuario)
+      s = await e.paso(s, 'saltar', { motivo: 'prefiero_pasar' }, usuario)
+    }
+    return s
+  }
   e.eventos = async (tipo) => (await e.db.query(`SELECT tipo, instancia, datos, sesion_id FROM eventos${tipo ? ' WHERE tipo = $1' : ''} ORDER BY secuencia`, tipo ? [tipo] : [])).rows
   return e
 }

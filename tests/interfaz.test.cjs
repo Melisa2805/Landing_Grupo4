@@ -56,6 +56,8 @@ test('render: una evidencia, un vacío y un siguiente paso; detalle, corrección
     versiones: [{ version: 1, feedback: { estado: 'Hay una afirmación por revisar', aciertos: [], pendientes: ['X'] } }] }
   const html = renderToStaticMarkup(React.createElement(Retroalimentacion, { registro }))
   for (const texto of ['Identificaste la suma.', 'Falta relacionar la suma con la cantidad.', 'Siguiente paso', 'Corregimos esta afirmación del tutor', 'Punto sin verificar.', 'Ver detalle de la observación', 'No verificado · Justificar.', 'Parcial · Relacionar', 'versión anterior']) assert.ok(html.includes(texto), texto)
+  const visible = html.split('<details')[0]
+  for (const texto of ['Identificaste la suma.', 'Otro acierto.', 'Falta relacionar la suma', 'Compara [2, 4]']) assert.ok(visible.includes(texto), texto)
   assert.ok(sinCifras(html))
 })
 
@@ -69,6 +71,9 @@ test('render: el cierre describe evidencia, duda, siguiente paso y límites, sin
   const html = renderToStaticMarkup(React.createElement(Resumen, { resumen }))
   for (const texto of ['En esta práctica explicaste:', 'Conviene repasar:', 'Siguiente paso', 'Por repasar', 'Sin evidencia suficiente todavía', 'No certifica dominio.']) assert.ok(html.includes(texto), texto)
   assert.ok(sinCifras(html))
+  const avance = renderToStaticMarkup(React.createElement(Resumen, { resumen: { ...resumen, practica: { titulo: 'Qué mejoró', texto: 'Aplicaste el divisor en otra lista.' }, duda: null } })).split('<details')[0]
+  assert.ok(avance.includes('Qué mejoró') && avance.includes('Aplicaste el divisor'))
+  assert.ok(!avance.includes('Conviene repasar'))
   const vacio = renderToStaticMarkup(React.createElement(Resumen, { resumen: { ...resumen, evidencia: null, duda: null } }))
   assert.ok(vacio.includes('no significa que no sepas'))
 })

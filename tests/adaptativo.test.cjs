@@ -9,15 +9,16 @@ const doble = 'def doble(x):\n    return x * 2'
 const respuesta = 'La entrada se transforma y se devuelve el resultado. Explico las operaciones paso a paso.'
 const sinNumeros = (v) => !/"(?:puntaje|promedio|dominio|estimacion|puntajeOrientativo|nivel)"/.test(JSON.stringify(v))
 
-async function hastaCierre(e, codigo = doble, nivel = 2, extra) {
+async function hastaOferta(e, codigo = doble, nivel = 2, extra) {
   let s = await e.iniciar(codigo, extra)
   while (['confianza', 'pregunta'].includes(s.fase)) {
     s = await e.contestar(s, respuesta, tutor({ nivel }))
     assert.equal(s.fase, 'feedback')
     assert.equal(s.resumen, null)
+    if (s.siguiente === 'cierre') break
     s = await e.paso(s, 'continuar')
   }
-  assert.equal(s.fase, 'cierre')
+  assert.equal(s.fase, 'feedback')
   return s
 }
 
@@ -97,7 +98,7 @@ test('contradicción conocida se rechaza sin guardar ni consumir el paso', async
 test('como máximo tres preguntas de la plataforma, habilidades distintas y cierre por límite', async () => {
   for (const codigo of [factorial, doble, 'for i in range(3):\n    print(i)', 'if edad >= 18:\n    print("entrada")', 'notas=[3,5]\nprint(notas[0])']) {
     const e = await practica()
-    const fin = await hastaCierre(e, codigo, 1)
+    const fin = await e.paso(await hastaOferta(e, codigo, 1), 'continuar')
     assert.ok(fin.historial.length <= 3)
     assert.equal(new Set(fin.historial.map((h) => h.pregunta.replace(/\d+/g, '#'))).size, fin.historial.length)
     assert.ok(fin.historial.every((h) => !/recursión infinita|complejidad|Big O|invariante|produce un error|devuelve 1/.test(h.pregunta)))
@@ -138,6 +139,8 @@ test('cierre solo tras feedback; respuestas completas sin pista y sin cifras', a
   let s = await e.iniciar(doble)
   await assert.rejects(e.paso(s, 'cerrar'), { code: 'PASO_INVALIDO' })
   s = await e.contestar(s, respuesta, tutor())
+  assert.equal(s.ofertaRefuerzo, null)
+  await assert.rejects(e.paso(s, 'refuerzo'), { code: 'PASO_INVALIDO' })
   assert.equal(s.historial[0].feedback.pista, null)
   assert.equal(s.historial[0].feedback.pendientes.length, 0)
   assert.equal(s.historial[0].feedback.estado, 'Tu explicación coincide con lo pedido')
@@ -157,8 +160,8 @@ test('refuerzo opcional: mismo concepto, temas declarados, una entrega idempoten
   assert.equal(new Set(nombres).size, 4)
   assert.equal(elegirRefuerzo({ conceptos: [{ concepto: 'memoizacion', nombre: 'memo', estado: 'pendiente', evidencia: [{}] }] }, politica), null)
   assert.equal(elegirRefuerzo({ conceptos: [{ concepto: 'condiciones', nombre: 'c', estado: 'pendiente', evidencia: [{}] }] }, { permitidos: ['proposito', 'entradas', 'operaciones'] }), null)
-  let s = await hastaCierre(e, doble, 2, { temas: 'basico' })
-  assert.equal(s.resumen.refuerzoDisponible, true)
+  let s = await hastaOferta(e, doble, 2, { temas: 'basico' })
+  assert.ok(s.ofertaRefuerzo); assert.equal(s.resumen, null)
   s = await e.paso(s, 'refuerzo')
   assert.equal(s.refuerzo.nombre, 'total_compra')
   assert.ok(!JSON.stringify(s).includes('casosParaRevisionEstatica'))
@@ -174,12 +177,32 @@ test('refuerzo opcional: mismo concepto, temas declarados, una entrega idempoten
   const t0 = (await e.db.query('SELECT completada_en FROM sesiones WHERE id = $1', [s.sesion])).rows[0].completada_en
   assert.equal((await e.sustentar(envio)).revision, a.revision)
   for (const accion of ['continuar', 'responder', 'entregar', 'refuerzo']) await assert.rejects(e.paso(a, accion, { respuesta, codigo }), { code: 'PASO_INVALIDO' })
-  assert.equal((await e.db.query('SELECT completada_en FROM sesiones WHERE id = $1', [s.sesion])).rows[0].completada_en.getTime(), t0.getTime())
+  assert.equal(t0, null)
+  const fin = await e.paso(a, 'cerrar')
+  assert.equal(fin.fase, 'cierre'); assert.ok(fin.resumen.practica)
+  const repetido = await e.paso(a, 'cerrar')
+  assert.equal(repetido.revision, fin.revision)
+  assert.deepEqual(repetido.resumen, fin.resumen)
+  assert.ok((await e.db.query('SELECT completada_en FROM sesiones WHERE id = $1', [s.sesion])).rows[0].completada_en)
+  assert.equal((await e.eventos('session_completed')).length, 1)
+})
+
+test('tres explicaciones correctas permiten omitir el ejercicio o abandonarlo con el mismo resumen', async () => {
+  const e = await practica()
+  const oferta = await hastaOferta(e, doble)
+  assert.equal(oferta.completadas, 3)
+  const directo = await e.paso(oferta, 'cerrar')
+  assert.ok(directo.resumen.evidencia)
+  assert.equal(directo.resumen.duda, null)
+  assert.equal(directo.resumen.practica, null)
+  const ejercicio = await e.paso(await hastaOferta(e, doble), 'refuerzo')
+  const abandono = await e.paso(ejercicio, 'cerrar')
+  assert.deepEqual(abandono.resumen, directo.resumen)
 })
 
 test('refuerzo con sintaxis inválida se diagnostica sin inventar pruebas ni llamar IA', async () => {
   const e = await practica()
-  const s = await e.paso(await hastaCierre(e, doble, 2, { temas: 'basico' }), 'refuerzo')
+  const s = await e.paso(await hastaOferta(e, doble, 2, { temas: 'basico' }), 'refuerzo')
   const llamadas = e.llamadas.length
   const f = await e.paso(s, 'entregar', { codigo: 'def total_compra(' })
   assert.equal(f.evaluacionRefuerzo.controles[0].estado, 'no_cumple')
@@ -310,7 +333,7 @@ test('inicio idempotente recupera una respuesta perdida y rechaza reutilizarlo p
 
 test('sin Python disponible declara sintaxis no verificada, usa huella léxica y nunca inventa resultados', async () => {
   const e = await practica({ pythonDisponible: false })
-  const s = await hastaCierre(e, doble, 2, { temas: 'basico' })
+  const s = await hastaOferta(e, doble, 2, { temas: 'basico' })
   assert.equal(s.analisis.estado, 'no_disponible')
   assert.equal((await e.db.query('SELECT metodo FROM artefactos')).rows[0].metodo, 'lex-v1')
   const r = await e.paso(s, 'refuerzo')
@@ -323,7 +346,7 @@ test('sin Python disponible declara sintaxis no verificada, usa huella léxica y
 test('refuerzo acepta parámetros alternativos y lambda; casos adicionales no se revelan antes del envío', async () => {
   for (const codigo of ['def total_compra(a, b):\n    return a * b', 'total_compra = lambda a, b: a * b']) {
     const e = await practica()
-    const s = await e.paso(await hastaCierre(e, doble, 2, { temas: 'basico' }), 'refuerzo')
+    const s = await e.paso(await hastaOferta(e, doble, 2, { temas: 'basico' }), 'refuerzo')
     assert.ok(!JSON.stringify(s).includes('casosParaRevisionEstatica'))
     e.responder(revisor({ cita: 'a * b' }))
     const f = await e.paso(s, 'entregar', { codigo })
@@ -340,13 +363,15 @@ test('refuerzo acepta parámetros alternativos y lambda; casos adicionales no se
 
 test('fallo de IA en el refuerzo permite reintento sin perder el cierre', async () => {
   const e = await practica()
-  const s = await e.paso(await hastaCierre(e, doble, 2, { temas: 'basico' }), 'refuerzo')
+  const s = await e.paso(await hastaOferta(e, doble, 2, { temas: 'basico' }), 'refuerzo')
   e.responder({})
   await assert.rejects(e.paso(s, 'entregar', { codigo: 'def total_compra(a, b):\n    return a*b' }), { code: 'MODELO_INVALIDO' })
   const rec = await e.sustentar({ accion: 'recuperar', sesion: s.sesion })
   assert.equal(rec.fase, 'refuerzo')
   assert.deepEqual(rec.resumen, s.resumen)
   assert.equal(rec.evaluacionRefuerzo, null)
+  const fin = await e.paso(rec, 'cerrar')
+  assert.equal(fin.resumen.practica, null)
 })
 
 test('contenido caducado y práctica vencida se rechazan; cuerpo vacío es entrada inválida', async () => {
@@ -384,7 +409,7 @@ test('una modificación puede cambiar el resultado sin ser contradicción del c�
 test('refuerzo: casos incompletos se rechazan; diferencias o incertidumbre impiden declararlo sin diferencias', async () => {
   for (const conclusion of ['difiere', 'no_verificable']) {
     const e = await practica()
-    const s = await e.paso(await hastaCierre(e, doble, 2, { temas: 'basico' }), 'refuerzo')
+    const s = await e.paso(await hastaOferta(e, doble, 2, { temas: 'basico' }), 'refuerzo')
     const codigo = 'def total_compra(a, b):\n    return a + b'
     e.responder((req) => { const d = revisor({ cita: 'a + b', conclusion: (i) => i === 4 ? conclusion : 'coincide' })(req); return { ...d, casos: d.casos.slice(0, 2) } })
     await assert.rejects(e.paso(s, 'entregar', { codigo }), { code: 'MODELO_INVALIDO' })

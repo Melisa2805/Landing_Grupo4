@@ -1,5 +1,6 @@
 const ESTADO_CRITERIO = { cumplido: 'Explicado', parcial: 'Parcial', no_cumplido: 'No observado en tu respuesta' }
 const ESTADO_CONCEPTO = {
+  aplicada: ['Aplicaste la idea en el ejercicio', 'text-emerald-300'],
   fortaleza: ['Lo explicaste con evidencia', 'text-emerald-300'],
   superada: ['Corregiste una duda y lo confirmaste', 'text-emerald-300'],
   pendiente: ['Por repasar', 'text-amber-200'],
@@ -14,16 +15,14 @@ export function Retroalimentacion({ registro }) {
     {!!f.correcciones?.length && <div className="rounded-lg border border-amber-600 p-3 text-amber-100 space-y-1">{f.correcciones.map((c, i) => <p key={i}>{c}</p>)}</div>}
     {!!f.sostenidas?.length && <div className="rounded-lg border border-slate-600 p-3 text-slate-200 space-y-1">{f.sostenidas.map((c, i) => <p key={i}>{c}</p>)}</div>}
     {!!registro.rectificaciones?.length && <div className="rounded-lg border border-amber-700 p-3 text-amber-100">{registro.rectificaciones.map((r, i) => <p key={i}>{r}</p>)}</div>}
-    {!!f.aciertos.length && <div className="border-l-4 border-emerald-500 pl-3"><h4 className="font-semibold text-emerald-300">Lo que explicaste</h4><p>{f.aciertos[0]}</p></div>}
-    {!!f.pendientes.length && <div className="border-l-4 border-amber-500 pl-3"><h4 className="font-semibold text-amber-200">Lo que falta o conviene revisar</h4><p>{f.pendientes[0]}</p></div>}
+    {!!f.aciertos.length && <div className="border-l-4 border-emerald-500 pl-3"><h4 className="font-semibold text-emerald-300">Lo que explicaste</h4>{(f.pendientes.length ? f.aciertos : f.aciertos.slice(0, 1)).map((a) => <p key={a}>{a}</p>)}</div>}
+    {!!f.pendientes.length && <div className="border-l-4 border-amber-500 pl-3"><h4 className="font-semibold text-amber-200">Lo que falta o conviene revisar</h4>{f.pendientes.map((p) => <p key={p}>{p}</p>)}</div>}
     {f.pista && <p className="rounded-lg bg-blue-950 p-3"><strong>Siguiente paso:</strong> {f.pista}</p>}
     {f.reformulacion && <p className="rounded-lg border border-blue-700 p-3"><strong>Dicho de otra forma:</strong> {f.reformulacion}</p>}
     {!registro.omitida && registro.clasificacion !== 'sin_evidencia' && <p className="text-xs text-slate-400">Revisión por IA de tu respuesta. Tu programa no se ejecuta.</p>}
     {!!f.noVerificado?.length && <div className="text-sm text-slate-300 space-y-1">{f.noVerificado.map((n, i) => <p key={i}>{n}</p>)}</div>}
-    {(f.aciertos.length > 1 || f.pendientes.length > 1 || !!registro.criterios?.length) && <details><summary className="cursor-pointer text-sm text-slate-300">Ver detalle de la observación</summary>
+    {(!!registro.criterios?.length) && <details><summary className="cursor-pointer text-sm text-slate-300">Ver detalle de la observación</summary>
       <div className="space-y-3 mt-2 text-sm">
-        {f.aciertos.length > 1 && <ul className="list-disc pl-5">{f.aciertos.slice(1).map((a, i) => <li key={i}>{a}</li>)}</ul>}
-        {f.pendientes.length > 1 && <ul className="list-disc pl-5 text-amber-100">{f.pendientes.slice(1).map((p, i) => <li key={i}>{p}</li>)}</ul>}
         <ul className="space-y-3">{(registro.criterios || []).map((c) => <li key={c.id}><strong>{c.noVerificable ? 'No verificado' : ESTADO_CRITERIO[c.estado]} · {c.descripcion}</strong><p>{c.razon}</p>{c.cita && <q className="text-slate-300">{c.cita}</q>}</li>)}</ul>
       </div>
     </details>}
@@ -38,13 +37,14 @@ export function Resumen({ resumen }) {
   return <div className="space-y-4">
     {resumen.evidencia ? <p className="text-lg"><span className="text-emerald-300 font-semibold">En esta práctica explicaste:</span> {resumen.evidencia.texto} <span className="text-sm text-slate-400">(pregunta {resumen.evidencia.pregunta})</span></p>
       : <p className="text-lg">En esta práctica todavía no quedó una explicación que podamos confirmar. Eso no significa que no sepas: solo que no hay evidencia en estas respuestas.</p>}
+    {resumen.practica && <div className="space-y-1"><h4 className="font-semibold text-blue-200">{resumen.practica.titulo}</h4><p>{resumen.practica.texto}</p></div>}
     {resumen.duda && <p><span className="text-amber-200 font-semibold">Conviene repasar:</span> {resumen.duda.texto} <span className="text-sm text-slate-400">(pregunta {resumen.duda.pregunta})</span></p>}
     <p className="rounded-lg bg-blue-950 p-3"><strong>Siguiente paso:</strong> {resumen.siguientePaso}</p>
-    <details className="text-sm"><summary className="cursor-pointer">Qué observamos por tema</summary>
+    <details className="text-sm"><summary className="cursor-pointer">Detalle por concepto</summary>
       <ul className="mt-2 space-y-1">{resumen.conceptos.map((c) => <li key={c.concepto}>{c.nombre}: <span className={ESTADO_CONCEPTO[c.estado][1]}>{ESTADO_CONCEPTO[c.estado][0]}</span>{c.preguntas.length ? <span className="text-slate-400"> · pregunta {c.preguntas.join(', ')}</span> : null}{c.progreso && <span className="block text-slate-300">{c.progreso}</span>}</li>)}</ul>
       <p className="mt-2 text-slate-400">{resumen.metodo}</p>
+      <ul className="text-sm text-slate-300 list-disc pl-5 space-y-1">{resumen.limites.map((l) => <li key={l}>{l}</li>)}</ul>
     </details>
-    <ul className="text-sm text-slate-300 list-disc pl-5 space-y-1">{resumen.limites.map((l) => <li key={l}>{l}</li>)}</ul>
   </div>
 }
 
@@ -73,6 +73,7 @@ export function EvaluacionRefuerzo({ evaluacion }) {
   const fallidos = evaluacion.controles.filter((c) => c.estado === 'no_cumple')
   const d = evaluacion.dimensiones
   const metodo = evaluacion.verificacionEstatica ? 'Verificado con un análisis estático acotado a las entradas válidas del enunciado.'
+    : !evaluacion.interpretacion ? 'Python detectó un problema de sintaxis antes de la revisión del ejercicio.'
     : `Revisión estimada por IA.${evaluacion.metodo === 'aproximado' ? ' Reconocimiento aproximado: la sintaxis no se verificó con Python.' : ''}`
   return <div className="space-y-4">
     <div>
@@ -80,6 +81,7 @@ export function EvaluacionRefuerzo({ evaluacion }) {
       <p className="text-sm text-slate-300">{metodo}</p>
     </div>
     {!!fallidos.length && <ul className="rounded-lg border border-amber-600 p-3 space-y-1">{fallidos.map((c) => <li key={c.nombre}><strong className="text-amber-200">Por corregir: {c.nombre}</strong><p className="text-sm text-slate-300">{c.detalle}</p></li>)}</ul>}
+    {evaluacion.interpretacion?.criterios.filter((c) => c.id === 'concepto' && !c.noVerificable).map((c) => <p key={c.id}><strong>Idea que practicaste:</strong> {c.descripcion} {c.razon}</p>)}
     {d && <ul aria-label="Resumen de la revisión" className="space-y-3 rounded-xl border border-slate-700 p-4">
       {['conceptual', 'funcional', 'comprension'].map((k) => {
         const [icono, color, titulo] = DIMENSION[k][d[k].estado]

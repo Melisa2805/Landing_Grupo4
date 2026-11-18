@@ -29,7 +29,9 @@ test('evaluación equivalente: orden de IDs y vacíos opcionales no invalidan el
 test('explicación parcial no depende de una pista extra: conserva el pendiente validado', async () => {
   const e = await preparar(); const s = await e.abrir(codigo); e.responder(evaluar(pregunta, e.fragmentar, 1))
   const h = (await e.paso(s, 'responder', { respuesta })).historial[0]
-  assert.equal(h.feedback.estado, 'Explicación parcial'); assert.equal(h.feedback.pista, h.feedback.pendientes[0])
+  assert.equal(h.feedback.estado, 'Explicación parcial')
+  assert.ok(h.feedback.pendientes.length)
+  assert.ok(h.feedback.pista && !h.feedback.pendientes.includes(h.feedback.pista))
   assert.ok(h.criterios.every((c) => c.estado === 'parcial'))
 })
 
@@ -283,7 +285,7 @@ test('envío en curso: otra cuenta con la misma sesión, revisión y carga no re
 test('refuerzo: la cita de código tolera indentación distinta; una conclusión sin cita real queda sin verificar', async () => {
   const e = await preparar()
   let s = await e.contestar(await e.iniciar('def contar(estados):\n    n = 0\n    for e in estados:\n        n += 1\n    return n'), 'Recorre la lista y cuenta cuántos estados hay, devolviendo ese número.', tutor({ concepto: 'recorridos' }))
-  s = await e.paso(await e.paso(s, 'cerrar'), 'refuerzo')
+  s = await e.paso(await e.ultimaRetroalimentacion(s), 'refuerzo')
   assert.equal(s.refuerzo.nombre, 'contar_pendientes')
   const solucion = 'def contar_pendientes(estados):\n    pendientes = 0\n    for estado in estados:\n        if estado == 0:\n            pendientes += 1\n    return pendientes'
   e.responder((req) => { const d = revisor({ cita: 'pendientes +=   1' })(req); d.casos[0].cita = 'return inventado'; return d })
@@ -305,7 +307,7 @@ test('refuerzo: prácticas consecutivas rotan variantes de la misma idea; agotad
   const contar = 'def contar(estados):\n    n = 0\n    for e in estados:\n        n += 1\n    return n'
   async function abrirRefuerzo(usuario) {
     let s = await e.contestar(await e.iniciar(contar, {}, usuario), 'Recorre la lista y cuenta cuántos estados hay, devolviendo ese número.', tutor({ concepto: 'recorridos' }), usuario)
-    s = await e.paso(await e.paso(s, 'cerrar', {}, usuario), 'refuerzo', {}, usuario)
+    s = await e.paso(await e.ultimaRetroalimentacion(s, usuario), 'refuerzo', {}, usuario)
     return s
   }
   const vistas = []
@@ -325,26 +327,19 @@ test('refuerzo: prácticas consecutivas rotan variantes de la misma idea; agotad
   assert.equal(elegirRefuerzo(forzado, politica, ['costo_taxi']).nombre, 'total_compra')
 })
 
-test('refuerzo: una corrección versionada conserva la primera revisión, muestra qué cambió y no reabre el cierre', async () => {
+test('refuerzo: una entrega con diferencias permite cerrar sin otro ciclo', async () => {
   const e = await preparar()
   let s = await e.contestar(await e.iniciar('def contar(estados):\n    n = 0\n    for e in estados:\n        n += 1\n    return n'), 'Recorre la lista y cuenta cuántos estados hay, devolviendo ese número.', tutor({ concepto: 'recorridos' }))
-  s = await e.paso(await e.paso(s, 'cerrar'), 'refuerzo')
-  const cierre = s.resumen
+  s = await e.paso(await e.ultimaRetroalimentacion(s), 'refuerzo')
   e.responder(revisor({ conclusion: 'difiere', nivel: 1, cita: 'return 0' }))
   s = await e.paso(s, 'entregar', { codigo: 'def contar_pendientes(estados):\n    return 0' })
-  assert.equal(s.puedeCorregir, true); assert.equal(s.versionesRefuerzo.length, 0); assert.equal(s.cambiosRefuerzo, null)
-  s = await e.paso(s, 'corregir')
-  assert.equal(s.fase, 'refuerzo'); assert.equal(s.versionesRefuerzo.length, 1); assert.equal(s.puedeCorregir, false)
-  const antes = e.llamadas.length
-  const solucion = 'def contar_pendientes(estados):\n    pendientes = 0\n    for estado in estados:\n        if estado == 0:\n            pendientes += 1\n    return pendientes'
-  e.responder(revisor({ cita: 'pendientes += 1' }))
-  s = await e.paso(s, 'entregar', { codigo: solucion })
-  assert.equal(e.llamadas.length, antes + 1)
-  assert.equal(s.fase, 'refuerzo_revisado'); assert.equal(s.versionesRefuerzo[0].estado, 'La revisión señala aspectos por revisar')
-  assert.ok(s.cambiosRefuerzo.some((c) => c.antes !== c.ahora && c.ahora === 'Explicado'))
-  assert.equal(JSON.stringify(s.resumen), JSON.stringify(cierre), 'el cierre no se reabre')
+  assert.equal(s.puedeCorregir, false)
+  assert.equal(s.resumen, null)
   await assert.rejects(e.paso(s, 'corregir'), { code: 'PASO_INVALIDO' })
-  assert.ok((await e.eventos('reinforcement_correction_started')).length === 1)
+  const fin = await e.paso(s, 'cerrar')
+  assert.equal(fin.fase, 'cierre')
+  assert.match(fin.resumen.practica.texto, /revisar/)
+  assert.equal((await e.eventos('session_completed')).length, 1)
 })
 
 test('recorrido completo del promedio: correcta, parcial, fallo recuperable y falsa hasta el cierre y el refuerzo', async () => {
@@ -365,14 +360,17 @@ test('recorrido completo del promedio: correcta, parcial, fallo recuperable y fa
   assert.equal((await e.sustentar({ accion: 'recuperar', sesion: s.sesion })).historial.length, 2)
   const h3 = await responder(falsa, 2, 'falsa', 'promedio'); assert.equal(h3.clasificacion, 'error_conceptual'); assert.equal(h3.confianza, 5)
   assert.equal(s.siguiente, 'cierre')
-  s = await e.paso(s, 'continuar'); assert.equal(s.fase, 'cierre'); assert.equal(s.resumen.motivo, 'limite')
-  assert.equal(s.resumen.duda.pregunta, 3)
-  assert.ok(s.resumen.conceptos.some((c) => c.concepto === 'promedio' && c.estado === 'pendiente'))
+  assert.equal(s.resumen, null); assert.ok(s.ofertaRefuerzo)
   s = await e.paso(s, 'refuerzo'); assert.equal(s.refuerzo.nombre, 'promedio_lecturas')
   e.responder(revisor())
   s = await e.paso(s, 'entregar', { codigo: 'def promedio_lecturas(lecturas):\n    return sum(lecturas) / len(lecturas)' })
   assert.equal(s.fase, 'refuerzo_revisado'); assert.equal(s.evaluacionRefuerzo.pruebasEjecutadas, false)
   await assert.rejects(e.paso(s, 'entregar', { codigo: 'x' }), { code: 'PASO_INVALIDO' })
+  s = await e.paso(s, 'cerrar')
+  assert.equal(s.resumen.practica.titulo, 'Qué mejoró')
+  assert.equal(s.resumen.conceptos.find((c) => c.concepto === 'promedio').estado, 'aplicada')
+  assert.notEqual(s.resumen.duda?.texto, h3.feedback.pendientes[0])
+  assert.equal(s.resumen.motivo, 'limite')
 })
 
 test('calibración: categorías de dos ejes, métricas y puertas del plan sobre el corpus, sin llamadas reales', async () => {
@@ -425,7 +423,7 @@ test('400 json_validate_failed de Groq: un reintento automático; si persiste, s
 test('refuerzo correcto sin ejecución: no es «insuficiente», el siguiente paso no pide lo no solicitado y propone comprobarlo', async () => {
   const e = await preparar()
   let s = await e.contestar(await e.iniciar('def contar(estados):\n    n = 0\n    for e in estados:\n        n += 1\n    return n'), 'Recorre la lista y cuenta cuántos estados hay, devolviendo ese número.', tutor({ concepto: 'recorridos' }))
-  s = await e.paso(await e.paso(s, 'cerrar'), 'refuerzo')
+  s = await e.paso(await e.ultimaRetroalimentacion(s), 'refuerzo')
   e.responder((req) => ({ ...revisor({ cita: 'pendientes += 1' })(req), sugerencia: 'El código satisface la especificación; podrías añadir comentarios o validaciones de tipo para mayor claridad.' }))
   const f = await e.paso(s, 'entregar', { codigo: 'def contar_pendientes(estados):\n    pendientes = 0\n    for estado in estados:\n        if estado == 0:\n            pendientes += 1\n    return pendientes' })
   const r = f.evaluacionRefuerzo

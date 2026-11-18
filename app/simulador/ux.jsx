@@ -6,7 +6,7 @@ import { Check, Copy, Download, Minus } from 'lucide-react'
 // Up to three questions and the closing. Omitted questions are marked as
 // skipped, never as wrong: the bar shows progress, not performance.
 export function Progreso({ sesion }) {
-  const cerrada = ['cierre', 'refuerzo', 'refuerzo_revisado'].includes(sesion.fase)
+  const cerrada = sesion.fase === 'cierre'
   const pasos = Array.from({ length: sesion.limite }, (_, i) => {
     const h = sesion.historial[i]
     if (h) return h.omitida ? 'omitida' : 'hecha'
@@ -48,6 +48,7 @@ export function Procesando({ accion }) {
 export function textoResumen(resumen, historial) {
   return ['PyDefense · Resumen de la práctica', '',
     resumen.evidencia ? `Lo que explicaste: ${resumen.evidencia.texto}` : 'Todavía no quedó una explicación que se pueda confirmar.',
+    resumen.practica ? `${resumen.practica.titulo}: ${resumen.practica.texto}` : null,
     resumen.duda ? `Lo que conviene repasar: ${resumen.duda.texto}` : null,
     `Siguiente paso: ${resumen.siguientePaso}`, '',
     ...historial.flatMap((h, i) => [`${i + 1}. ${h.pregunta}`, h.respuesta ? `   Tu respuesta: ${h.respuesta}` : '   (omitida)', `   ${h.feedback.estado}`]), '',
