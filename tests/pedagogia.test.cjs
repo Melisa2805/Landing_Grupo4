@@ -228,9 +228,10 @@ test('recorrido entre instancias frías: inicio, respuesta, reintento, cierre y 
   s = await fria.ultimaRetroalimentacion(s)
   assert.equal(s.resumen, null)
   s = await fria.paso(s, 'refuerzo')
-  // Only the purpose was observed: the transfer task relates inputs and result.
-  assert.equal(s.refuerzo.nombre, 'total_compra')
-  const codigo = 'def total_compra(precio, cantidad):\n    return precio * cantidad'
+  // Only the purpose was observed: the transfer task keeps the program's own
+  // idea (an average), not elementary arithmetic.
+  assert.equal(s.refuerzo.nombre, 'promedio_lecturas')
+  const codigo = 'def promedio_lecturas(lecturas):\n    return sum(lecturas) / len(lecturas)'
   fria.responder(revisor())
   s = await fria.paso(s, 'entregar', { codigo })
   assert.equal(s.fase, 'refuerzo_revisado'); assert.equal(s.evaluacionRefuerzo.pruebasEjecutadas, false)

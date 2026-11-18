@@ -13,6 +13,8 @@
     "test:adaptativo": "node --experimental-vm-modules tests/adaptativo.test.cjs",
     "test:estabilidad": "node --experimental-vm-modules tests/estabilidad.test.cjs",
     "test:proveedores": "node --experimental-vm-modules tests/proveedores.test.cjs",
+    "test:refuerzo": "node --experimental-vm-modules tests/refuerzo.test.cjs",
+    "test:preguntas": "node --experimental-vm-modules tests/preguntas.test.cjs",
     "test:proveedor": "node --experimental-vm-modules scripts/comprobar-proveedor.cjs",
     "test:recorrido": "node tests/recorrido.cjs",
     "test:persistencia": "node --experimental-vm-modules tests/persistencia.test.cjs",
@@ -22,7 +24,8 @@
     "reporte-expo": "node --experimental-vm-modules scripts/reporte-expo.cjs",
     "calibracion": "node --experimental-vm-modules scripts/calibracion.cjs",
     "capacidad": "node --experimental-vm-modules scripts/capacidad.cjs",
-    "comparar": "node --experimental-vm-modules scripts/comparar-proveedores.cjs"
+    "comparar": "node --experimental-vm-modules scripts/comparar-proveedores.cjs",
+    "evaluar-generacion": "node --experimental-vm-modules scripts/evaluar-generacion.cjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.22",

@@ -1,0 +1,613 @@
+{
+  "generado": "2026-11-18T19:31:09.411Z",
+  "resumen": {
+    "sesiones": 16,
+    "erroresSesion": 0,
+    "preguntas": 48,
+    "preguntasGeneradas": 46,
+    "motivosPlantilla": {
+      "plantilla:pregunta": 1,
+      "plantilla:LLM_TIMEOUT": 1
+    },
+    "tiposDistintosPorSesion": 3,
+    "refuerzosGenerados": 12,
+    "refuerzosPrimerIntento": 10,
+    "refuerzosNoDisponibles": 4,
+    "rechazosPrevios": [
+      "casos.aridad",
+      "casos.repetidos",
+      "verificacion.relacion",
+      "estructura.lista",
+      "revela_solucion",
+      "estructura.lista"
+    ],
+    "medianaMsRefuerzo": 11761,
+    "costoTotalUSD": 0.114696
+  },
+  "resultados": [
+    {
+      "programa": "busqueda_binaria",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve «busqueda_binaria»? Explica qué representan «lista» y «objetivo», qué significa el resultado y cómo la función busca el objetivo en la lista.",
+        "Si en «while inicio <= fin:» se cambiara <= por <, ¿qué caso válido podría verse afectado y por qué? Justifica con una llamada concreta a «busqueda_binaria([5], 5)».",
+        "Cuando se cumple «lista[medio] < objetivo», ¿qué papel cumple «inicio = medio + 1»? Justifica tu explicación siguiendo qué ocurre al buscar 8 en «busqueda_binaria([2, 4, 6, 8, 10], 8)»."
+      ],
+      "estados": [
+        "Tu explicación coincide con lo pedido",
+        "Explicación parcial",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 16807,
+        "intento": 2,
+        "rechazoPrevio": "casos.aridad",
+        "modeloAlternativo": "gpt-6.2-sol",
+        "nombre": "primera_aparicion",
+        "motivo": "Opcional: Tu búsqueda binaria ya distingue los tres resultados de la comparación; aquí puedes practicar cómo cambia el caso de igualdad y seguir los límites con un ejemplo hasta que quede una sola posición.",
+        "enunciado": "Escribe una función que use búsqueda binaria para encontrar el primer índice de objetivo en una lista ordenada que puede contener valores repetidos. Si el valor central coincide con objetivo, no des por terminada la búsqueda: podría haber otra aparición a su izquierda. Distingue qué hacer cuando el valor central es menor, igual o mayor que objetivo, y asegúrate de revisar el intervalo aunque quede una sola posición.",
+        "casos": [
+          {
+            "entrada": "primera_aparicion([1, 3, 3, 3, 7], 3)",
+            "esperado": "1"
+          },
+          {
+            "entrada": "primera_aparicion([2, 4, 6, 8], 5)",
+            "esperado": "-1"
+          }
+        ]
+      },
+      "tipos": [
+        "justificar",
+        "modificar",
+        "explicar_linea"
+      ],
+      "llamadas": 9,
+      "costoUSD": 0.018648
+    },
+    {
+      "programa": "busqueda_binaria",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué problema resuelve «busqueda_binaria»? Explica qué representan la lista y el objetivo que recibe, qué significa el valor que devuelve y cuál es la estrategia general que sigue para encontrarlo.",
+        "¿Por qué, cuando se cumple «lista[medio] < objetivo», el programa cambia «inicio» a «medio + 1»? Justifica esa decisión con un ejemplo de lista ordenada y explica qué parte de la lista deja de revisar.",
+        "En «if lista[medio] == objetivo:», ¿qué dato de la lista se compara con «objetivo» y cómo puedes justificarlo con un ejemplo concreto?"
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 11178,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloAlternativo": null,
+        "nombre": "contar_mayores_que_objetivo",
+        "motivo": "Opcional: Como en tu búsqueda binaria, trabajarás con una lista y compararás sus valores con un objetivo; aquí practicarás recorrer los elementos y distinguir cada valor de su índice.",
+        "enunciado": "Escribe una función que reciba una lista de números enteros en cualquier orden y un número entero objetivo. Debe devolver cuántos elementos de la lista son mayores que el objetivo. Recorre la lista y cuenta cada elemento que cumple la condición.",
+        "casos": [
+          {
+            "entrada": "contar_mayores_que_objetivo([3, 8, 2, 8], 3)",
+            "esperado": "2"
+          },
+          {
+            "entrada": "contar_mayores_que_objetivo([1, 4, 6], 4)",
+            "esperado": "1"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "explicar_linea"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.002912
+    },
+    {
+      "programa": "palindromo",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve «es_palindromo(texto)», qué representa la información que recibe y qué significa el resultado? Explica también, en general, cómo decide qué resultado entregar.",
+        "En la comparación «limpio[izquierda]» y «limpio[derecha]», ¿qué carácter representa cada expresión dentro del texto preparado? Justifica tu explicación con un ejemplo válido de entrada.",
+        "¿Qué resultado entregarías para «es_palindromo(' ')»? Justifica tu predicción explicando qué información recibe la función y qué ocurre con ella antes de comparar caracteres."
+      ],
+      "estados": [
+        "Tu explicación coincide con lo pedido",
+        "Explicación parcial",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 17212,
+        "error": "REFUERZO_NO_DISPONIBLE",
+        "detalle": "casos.repetidos"
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "predecir"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.012625
+    },
+    {
+      "programa": "palindromo",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué problema resuelve es_palindromo, qué tipo de texto recibe, qué significa que devuelva True o False y cuál es la idea general que sigue para decidirlo?",
+        "¿Por qué «len(limpio) - 1» sirve para elegir el valor inicial de «derecha»? Justifica tu explicación con un ejemplo de texto que la función pueda recibir.",
+        "¿Qué valores iniciales necesita esta solución y qué representa cada uno en el problema?"
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 23569,
+        "intento": 2,
+        "rechazoPrevio": "verificacion.relacion",
+        "modeloAlternativo": "gpt-6.2-sol",
+        "nombre": "coinciden_extremos",
+        "motivo": "Opcional: Como en tu programa de palíndromos, primero quitas los espacios y usas la longitud del texto limpio menos uno para localizar el extremo derecho, pero aquí basta una comparación para decidir qué booleano devolver.",
+        "enunciado": "Escribe una función que convierta el texto a minúsculas y elimine todos los espacios simples. Si no quedan caracteres, devuelve True. Si queda al menos uno, compara solo el primer carácter y el último del texto limpio: devuelve True si coinciden y False si son distintos. No compares los caracteres del medio.",
+        "casos": [
+          {
+            "entrada": "coinciden_extremos(' A b c a ')",
+            "esperado": "True"
+          },
+          {
+            "entrada": "coinciden_extremos(' A b c ')",
+            "esperado": "False"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "plantilla:pregunta"
+      ],
+      "llamadas": 12,
+      "costoUSD": 0.015465
+    },
+    {
+      "programa": "burbuja",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve «ordenar_burbuja»? Explica qué representa la lista que recibe, qué significa la lista que devuelve y cuál es la idea general para obtenerla.",
+        "Al razonar sobre «ordenar_burbuja([2, 2])», ¿qué ocurre cuando la condición compara los dos valores iguales y cómo lo sabes por el programa?",
+        "En «ordenar_burbuja([4, 1])», ¿qué representan esos números para la función y qué parte del código apoya tu explicación?"
+      ],
+      "estados": [
+        "Explicación parcial",
+        "Explicación parcial",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 12521,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloAlternativo": null,
+        "nombre": "contar_negativos_lista",
+        "motivo": "Opcional: Como en tu programa, la entrada es una lista de valores que se recorren; aquí conviene explicar qué representan esos valores y qué expresa el resultado, en vez de ordenarlos.",
+        "enunciado": "Escribe una función que reciba una lista de números enteros y devuelva cuántos de ellos son menores que cero. La lista contiene los valores que se quieren revisar; el resultado es un número que indica cuántos son negativos. No modifiques la lista recibida.",
+        "casos": [
+          {
+            "entrada": "contar_negativos_lista([4, -1, 0, -3])",
+            "esperado": "2"
+          },
+          {
+            "entrada": "contar_negativos_lista([2, 5, 1])",
+            "esperado": "0"
+          }
+        ]
+      },
+      "tipos": [
+        "explicar_linea",
+        "predecir",
+        "justificar"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.003354
+    },
+    {
+      "programa": "burbuja",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué representa la lista que recibe «ordenar_burbuja», qué problema resuelve la función y qué significa la lista que devuelve? Describe la idea general de cómo llega a ese resultado.",
+        "En «for j in range(n - 1 - i):», ¿cómo cambia el recorrido de j al avanzar el ciclo exterior? Justifícalo con una lista de cuatro elementos, indicando qué valores toma j en las dos primeras vueltas.",
+        "¿Por qué la función empieza con «datos = numeros[:]» en vez de ordenar directamente «numeros»? Apóyate en lo que ocurre con ambas listas durante los intercambios."
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 8676,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloAlternativo": null,
+        "nombre": "contar_mayores_que_anterior",
+        "motivo": "Opcional: Como en ordenar_burbuja, recorrerás una lista y compararás elementos vecinos; practica identificar qué posiciones hacen falta recorrer, sin modificar la lista recibida.",
+        "enunciado": "Escribe una función que reciba una lista de números y devuelva cuántas veces un número es mayor que el que aparece justo antes. La lista debe recorrerse sin modificarla. Si tiene menos de dos elementos, devuelve 0.",
+        "casos": [
+          {
+            "entrada": "contar_mayores_que_anterior([1, 3, 2, 5])",
+            "esperado": "2"
+          },
+          {
+            "entrada": "contar_mayores_que_anterior([4, 4, 2, 1])",
+            "esperado": "0"
+          }
+        ]
+      },
+      "tipos": [
+        "justificar",
+        "explicar_linea",
+        "justificar"
+      ],
+      "llamadas": 9,
+      "costoUSD": 0.003132
+    },
+    {
+      "programa": "fibonacci",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve «fibonacci», qué representa el valor que recibe y qué significa el número que entrega? Describe la idea general que sigue para obtenerlo.",
+        "¿Por qué el ciclo repite según «range(n)» y no una cantidad fija? Justifica cómo esa decisión permite que «n» determine qué término se obtiene.",
+        "Si cambiaras «for _ in range(n):» para que repitiera una vez menos, ¿qué devolvería la función para n igual a 4? Justifica tu respuesta siguiendo cómo cambian a y b."
+      ],
+      "estados": [
+        "Tu explicación coincide con lo pedido",
+        "Tu explicación coincide con lo pedido",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 13004,
+        "error": "REFUERZO_NO_DISPONIBLE",
+        "detalle": "estructura.lista"
+      },
+      "tipos": [
+        "explicar_linea",
+        "justificar",
+        "modificar"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.012825
+    },
+    {
+      "programa": "fibonacci",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué problema resuelve «fibonacci»? Explica qué representa el valor de entrada y qué significa el resultado, y describe en general cómo lo obtiene el programa.",
+        "En «for _ in range(n):», ¿qué papel cumple n? Justifica tu explicación con «fibonacci(4)» y explica cómo se relaciona esa entrada con el resultado que devuelve la función.",
+        "Al razonar sobre «fibonacci(4)», ¿qué valor único devuelve la función? Justifica tu respuesta explicando cuántas veces se repite el ciclo y cómo cambian «a» y «b»."
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 10772,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloAlternativo": null,
+        "nombre": "sumar_elementos",
+        "motivo": "Opcional: Como en tu programa, un ciclo recorre los datos; practica distinguir entre recorrer una lista y acumular un único valor que la función devuelve.",
+        "enunciado": "Escribe una función que reciba una lista de números y devuelva la suma de todos sus elementos. Si la lista está vacía, debe devolver 0.",
+        "casos": [
+          {
+            "entrada": "sumar_elementos([3, 1, 4])",
+            "esperado": "8"
+          },
+          {
+            "entrada": "sumar_elementos([5, -2])",
+            "esperado": "3"
+          }
+        ]
+      },
+      "tipos": [
+        "justificar",
+        "explicar_linea",
+        "predecir"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.00293
+    },
+    {
+      "programa": "maximo",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve «maximo»? Explica qué representa «numeros» como entrada y qué significa el resultado que devuelve; describe la estrategia general que sigue.",
+        "En «maximo([4, 9, 2])», ¿qué representa cada número de la lista en el problema real y qué representa el valor que la función devuelve?",
+        "¿Por qué «if x > mayor:» actualiza «mayor» solo cuando se cumple la condición? Justifica qué representa ese cambio al buscar el mayor de la lista."
+      ],
+      "estados": [
+        "Tu explicación coincide con lo pedido",
+        "Explicación parcial",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 8294,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloAlternativo": null,
+        "nombre": "contar_mayores_que",
+        "motivo": "Opcional: Como en tu programa, recorrerás una lista y usarás una comparación para decidir qué hacer con cada valor; aquí practicarás especialmente por qué los valores iguales o menores que el límite no se cuentan.",
+        "enunciado": "Escribe una función que reciba una lista no vacía de números y un número límite. Debe devolver cuántos valores de la lista son estrictamente mayores que el límite. Recorre la lista y cuenta solo los valores que cumplen esa condición. Si un valor es igual o menor que el límite, no se cuenta.",
+        "casos": [
+          {
+            "entrada": "contar_mayores_que([4, 9, 2], 4)",
+            "esperado": "1"
+          },
+          {
+            "entrada": "contar_mayores_que([3, 5, 5, 8], 5)",
+            "esperado": "1"
+          }
+        ]
+      },
+      "tipos": [
+        "justificar",
+        "relacionar_problema",
+        "justificar"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.003133
+    },
+    {
+      "programa": "maximo",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué problema resuelve «maximo», qué representa la lista que recibe y qué significa el valor que devuelve? Describe la idea general que sigue para obtenerlo.",
+        "En «mayor = numeros[0]», ¿qué representa «numeros[0]» y por qué se usa para iniciar «mayor»? Justifica tu explicación con una lista de ejemplo válida.",
+        "¿Qué valor devuelve «maximo([4, 1, 7])» y qué representa ese valor respecto a la lista? Justifica tu respuesta relacionándola con lo que hace la función."
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 14428,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloAlternativo": null,
+        "nombre": "primer_valor_superior",
+        "motivo": "Opcional: Como en tu programa, recorrerás una lista, pero aquí devolverás directamente un valor que cumple una condición; practica no confundir ese valor con su posición.",
+        "enunciado": "Escribe una función que reciba una lista de números enteros y un número entero límite. Debe devolver el primer valor de la lista que sea mayor que el límite. Si varios valores cumplen la condición, devuelve el que aparece antes en la lista.",
+        "casos": [
+          {
+            "entrada": "primer_valor_superior([4, 8, 3], 5)",
+            "esperado": "8"
+          },
+          {
+            "entrada": "primer_valor_superior([7, 10, 12], 6)",
+            "esperado": "7"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "predecir"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.002925
+    },
+    {
+      "programa": "tabla",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve «tabla_multiplicar»? Explica qué representa el valor que recibe, qué información muestra la tabla que devuelve y, a grandes rasgos, cómo la construye.",
+        "¿Por qué «range(1, n + 1)» empieza en 1 y usa «n + 1»? Justifica cómo ese límite influye en los valores de la tabla, apoyándote en un ejemplo válido.",
+        "Compara «tabla_multiplicar(2)» y «tabla_multiplicar(3)»: ¿cuántas filas y cuántos valores por fila esperas en cada resultado? Justifica la diferencia con los recorridos del programa."
+      ],
+      "estados": [
+        "Tu explicación coincide con lo pedido",
+        "Explicación parcial",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 14409,
+        "error": "REFUERZO_NO_DISPONIBLE",
+        "detalle": "revela_solucion"
+      },
+      "tipos": [
+        "explicar_linea",
+        "justificar",
+        "comparar"
+      ],
+      "llamadas": 9,
+      "costoUSD": 0.013085
+    },
+    {
+      "programa": "tabla",
+      "perfil": "error",
+      "preguntas": [
+        "Explica con tus palabras qué problema aborda tu programa, qué información recibe y qué significa el resultado que entrega. Describe la idea general de la solución, sin explicar el código línea por línea.",
+        "En «tabla = []», ¿por qué se empieza con una lista vacía y cómo se relaciona con las filas que luego agrega el programa? Apóyate en una parte concreta del código.",
+        "¿Qué representa en la tabla cada valor calculado en «i * j» y cómo se relaciona con los números que recorren los ciclos? Justifica tu explicación señalando qué aportan i y j en el código."
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 11761,
+        "error": "REFUERZO_NO_DISPONIBLE",
+        "detalle": "estructura.lista"
+      },
+      "tipos": [
+        "plantilla:LLM_TIMEOUT",
+        "justificar",
+        "relacionar_problema"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.011958
+    },
+    {
+      "programa": "promedios_dict",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve «promedios»? Explica qué información representa «notas_por_estudiante», qué significa cada valor de «resultado» y cuál es la estrategia general para obtenerlo.",
+        "¿Por qué crees que el programa usa «if notas:» antes de calcular el promedio? Justifica tu explicación con un ejemplo de una lista de notas válida.",
+        "Compara «promedios({\"Ana\": [6]})» con «promedios({\"Ana\": [6], \"Luis\": [8]})». ¿Qué papel tiene el recorrido en la diferencia entre los resultados? Justifica tu explicación con el código."
+      ],
+      "estados": [
+        "Tu explicación coincide con lo pedido",
+        "Explicación parcial",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 8690,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloAlternativo": null,
+        "nombre": "resumen_notas_por_estudiante",
+        "motivo": "Opcional: Este ejercicio conserva el diccionario y el recorrido de tu programa; practica especialmente distinguir los dos casos de cada lista y aplicar esa decisión a cada estudiante.",
+        "enunciado": "Escribe una función que reciba un diccionario donde cada clave es el nombre de un estudiante y cada valor es una lista de notas. Devuelve un nuevo diccionario con una etiqueta para cada estudiante: usa \"sin_notas\" si su lista está vacía y \"con_notas\" si contiene una o más notas. Incluye en el resultado a todos los estudiantes de la entrada.",
+        "casos": [
+          {
+            "entrada": "resumen_notas_por_estudiante({'Ana': [6, 8], 'Luis': []})",
+            "esperado": "{'Ana': 'con_notas', 'Luis': 'sin_notas'}"
+          },
+          {
+            "entrada": "resumen_notas_por_estudiante({'Marta': [10]})",
+            "esperado": "{'Marta': 'con_notas'}"
+          }
+        ]
+      },
+      "tipos": [
+        "explicar_linea",
+        "justificar",
+        "comparar"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.003054
+    },
+    {
+      "programa": "promedios_dict",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué problema resuelve «promedios»? Explica qué representa la información que recibe y qué significa el diccionario que entrega, además de la idea general que sigue para obtenerlo.",
+        "Si la entrada es {'Ana': [8, 10], 'Luis': [6]}, ¿por qué el programa guarda cada promedio en «resultado[nombre]»? Explica qué representa esa parte y apóyate en el ejemplo.",
+        "¿Qué diccionario devolvería «promedios({'Marta': [7, 9], 'Tomás': [4, 8]})»? Explica cómo «sum(notas) / len(notas)» contribuye al valor de cada estudiante."
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 9850,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloAlternativo": null,
+        "nombre": "contar_aprobados_por_estudiante",
+        "motivo": "Opcional: Como en «promedios», recorrerás un diccionario con listas de notas y construirás otro diccionario, practicando que cada resultado corresponda al estudiante de esa vuelta, en lugar de combinar los datos de todos.",
+        "enunciado": "Escribe una función que reciba un diccionario donde cada clave es el nombre de un estudiante y cada valor es una lista de sus notas. Devuelve un diccionario con los mismos nombres; para cada estudiante, el valor debe ser cuántas de sus notas son mayores o iguales a 6. Si un estudiante tiene una lista vacía, su resultado es 0.",
+        "casos": [
+          {
+            "entrada": "contar_aprobados_por_estudiante({'Ana': [8, 10], 'Luis': [6]})",
+            "esperado": "{'Ana': 2, 'Luis': 1}"
+          },
+          {
+            "entrada": "contar_aprobados_por_estudiante({'Marta': [7, 5, 9], 'Tomás': [4, 8]})",
+            "esperado": "{'Marta': 2, 'Tomás': 1}"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "predecir"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.002812
+    },
+    {
+      "programa": "palabras_largas",
+      "perfil": "correcta",
+      "preguntas": [
+        "¿Qué problema resuelve «palabras_largas», qué información recibe en «texto» y «minimo», y qué representa el número que devuelve? Describe también la idea general que sigue para obtenerlo.",
+        "¿Por qué «minimo» se recibe como entrada en vez de fijarse dentro de la función? Justifica qué permite cambiar al comparar «palabras_largas(\"sol luna\", 3)» y «palabras_largas(\"sol luna\", 4)».",
+        "Compara «palabras_largas(\"sol luna\", 3)» y «palabras_largas(\"sol luna\", 4)»: ¿qué palabra cambia si se cuenta y cómo afecta eso al número devuelto? Justifica tu explicación con la condición del programa."
+      ],
+      "estados": [
+        "Tu explicación coincide con lo pedido",
+        "Explicación parcial",
+        "Explicación parcial"
+      ],
+      "refuerzo": {
+        "ms": 7338,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloAlternativo": null,
+        "nombre": "contar_palabras_minimo",
+        "motivo": "Opcional: Como en tu programa, recorrerás una lista y contarás los elementos que cumplen un mínimo; practica cómo cambiar ese valor de entrada puede cambiar el resultado.",
+        "enunciado": "Escribe una función que reciba una lista de palabras y un número entero minimo. Debe devolver cuántas palabras tienen una longitud mayor o igual que minimo. La lista puede estar vacía.",
+        "casos": [
+          {
+            "entrada": "contar_palabras_minimo(['sol', 'luna'], 3)",
+            "esperado": "2"
+          },
+          {
+            "entrada": "contar_palabras_minimo(['sol', 'luna'], 4)",
+            "esperado": "1"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "comparar"
+      ],
+      "llamadas": 8,
+      "costoUSD": 0.002916
+    },
+    {
+      "programa": "palabras_largas",
+      "perfil": "error",
+      "preguntas": [
+        "¿Qué problema resuelve «palabras_largas»? Explica qué información recibe, qué representa el número que devuelve y, en general, cómo obtiene ese resultado.",
+        "¿Por qué «if len(palabra) >= minimo:» decide si se ejecuta «cuenta += 1»? Justifica tu explicación con una palabra y un valor de «minimo» que cumplan esa condición.",
+        "Sin ejecutar «palabras_largas(\"sol luna\", 4)», ¿qué valor devolvería? Explica cómo influye cada palabra en ese valor y qué papel tiene la longitud 4."
+      ],
+      "estados": [
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar",
+        "Hay una afirmación por revisar"
+      ],
+      "refuerzo": {
+        "ms": 13728,
+        "intento": 1,
+        "rechazoPrevio": null,
+        "modeloAlternativo": null,
+        "nombre": "contar_palabras_por_longitud",
+        "motivo": "Opcional: Como en tu programa, recorrerás una lista, comprobarás la longitud de cada palabra y contarás las que cumplen la condición; practicarás especialmente qué palabras se cuentan, incluida la que tiene exactamente la longitud mínima.",
+        "enunciado": "Escribe una función que reciba una lista de palabras y un número minimo, y devuelva cuántas palabras tienen una longitud mayor o igual que minimo.",
+        "casos": [
+          {
+            "entrada": "contar_palabras_por_longitud(['sol', 'luna', 'mar'], 3)",
+            "esperado": "3"
+          },
+          {
+            "entrada": "contar_palabras_por_longitud(['a', 'casa', 'pez'], 4)",
+            "esperado": "1"
+          }
+        ]
+      },
+      "tipos": [
+        "relacionar_problema",
+        "justificar",
+        "predecir"
+      ],
+      "llamadas": 9,
+      "costoUSD": 0.002922
+    }
+  ]
+}

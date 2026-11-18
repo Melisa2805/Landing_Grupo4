@@ -501,6 +501,7 @@ export default function SimuladorPage() {
           <h3 ref={foco} tabIndex={-1} className="text-xl font-bold">Refuerzo opcional</h3>
           {fase === 'refuerzo' ? <div className="border border-blue-700 rounded-xl p-4 space-y-3">
             <p className="text-sm text-blue-200">{sesion.refuerzo.motivo}</p>
+            {sesion.refuerzo.generado && <p className="text-xs text-slate-400">Ejercicio creado por IA a partir de tu programa y tus respuestas. Una segunda revisión comprobó los resultados de los ejemplos; no se ejecutó código.</p>}
             <p><strong>Objetivo:</strong> {sesion.refuerzo.objetivo}</p><EnunciadoEjercicio texto={sesion.refuerzo.enunciado} />
             <p><strong>Entradas:</strong> {sesion.refuerzo.entradas}</p><p><strong>Salida:</strong> {sesion.refuerzo.salidas}</p>
             <ul className="list-disc pl-5">{sesion.refuerzo.restricciones.map((r) => <li key={r}>{r}</li>)}</ul>
