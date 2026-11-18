@@ -1,0 +1,1036 @@
+{
+  "formato": 1,
+  "ruta": "python-fundamentos",
+  "unidad": "u1",
+  "version": "2026-11-17.1",
+  "estado": "borrador_pendiente_revision_docente",
+  "titulo": "La merienda",
+  "subtitulo": "Unidad 1 · Valores, variables y operaciones",
+  "proyecto": "Al terminar la unidad podrás leer y explicar un programa que calcula cuánto cuesta una merienda.",
+  "habilidades": {
+    "py.valor": {
+      "nombre": "Valores y salida",
+      "observable": "Distingue un valor guardado, el nombre de una variable y lo que print muestra."
+    },
+    "py.asignacion": {
+      "nombre": "Cambios de valor",
+      "observable": "Sigue el valor de una variable cuando una asignación lo reemplaza."
+    },
+    "py.operacion": {
+      "nombre": "Operaciones y su significado",
+      "observable": "Calcula el resultado de una expresión y explica qué representa."
+    }
+  },
+  "lecciones": [
+    {
+      "id": "u1-l1",
+      "habilidad": "py.valor",
+      "titulo": "Guardar y mostrar valores",
+      "objetivo": "Al terminar podrás decir qué muestra un programa sencillo y por qué.",
+      "explicacion": [
+        "Una variable es un nombre que guarda un valor. Con `precio = 3000`, Python guarda el número 3000 con el nombre precio.",
+        "El signo = no compara: asigna, es decir, guarda el valor de la derecha en el nombre de la izquierda.",
+        "Para ver algo en la pantalla se usa `print(...)`. `print(precio)` muestra 3000, el valor guardado. `print(\"precio\")` muestra la palabra precio, porque las comillas crean un texto."
+      ],
+      "ampliada": [
+        "Python lee el programa de arriba hacia abajo, una línea a la vez.",
+        "Los textos van entre comillas, como `\"empanada\"`. Los números van sin comillas, como 3000.",
+        "Guardar un valor no lo muestra. Solo las líneas con print producen algo en la pantalla.",
+        "Python distingue mayúsculas y minúsculas: precio y Precio son nombres distintos."
+      ],
+      "ejemplo": {
+        "codigo": "producto = \"empanada\"\nprecio = 3000\nprint(producto)\nprint(precio)",
+        "pasos": [
+          "Línea 1: guarda el texto `\"empanada\"` con el nombre producto. No se muestra nada.",
+          "Línea 2: guarda el número 3000 con el nombre precio. Tampoco se muestra nada.",
+          "Línea 3: `print(producto)` muestra el valor guardado en producto: empanada.",
+          "Línea 4: `print(precio)` muestra 3000."
+        ],
+        "salida": "empanada\n3000"
+      },
+      "cierre": "Ya puedes explicar la diferencia entre guardar un valor y mostrarlo, y entre un nombre y un texto entre comillas.",
+      "proyecto": "Ya sabes guardar el precio de cada cosa de la merienda.",
+      "secuencia": [
+        "u1-l1-a01",
+        "u1-l1-a02",
+        "u1-l1-a03"
+      ],
+      "actividades": [
+        {
+          "id": "u1-l1-a01",
+          "version": 1,
+          "familia": "py.valor.mostrar",
+          "uso": "guiada",
+          "nivel": "basico",
+          "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?",
+          "codigo": "jugo = 2500\nprint(jugo)",
+          "ayuda": "print muestra el valor guardado en la variable, no su nombre.",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "2500",
+              "porque": "Correcto: jugo guarda 2500 y print(jugo) muestra ese valor."
+            },
+            {
+              "id": "b",
+              "texto": "jugo",
+              "porque": "Para mostrar la palabra jugo habría que escribirla entre comillas: print(\"jugo\")."
+            },
+            {
+              "id": "c",
+              "texto": "Nada",
+              "porque": "La segunda línea tiene print, así que sí se muestra algo."
+            }
+          ],
+          "correcta": "a",
+          "pista": "Fíjate en qué valor se guardó con el nombre jugo en la primera línea.",
+          "explicacion": "La primera línea guarda 2500 en jugo. print(jugo) busca ese nombre y muestra su valor: 2500.",
+          "salida": "2500"
+        },
+        {
+          "id": "u1-l1-a02",
+          "version": 1,
+          "familia": "py.valor.comillas",
+          "uso": "aplicacion",
+          "nivel": "basico",
+          "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?",
+          "codigo": "bebida = \"agua\"\nprint(\"bebida\")",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "bebida",
+              "porque": "Correcto: \"bebida\" entre comillas es un texto, así que print muestra esa palabra tal cual."
+            },
+            {
+              "id": "b",
+              "texto": "agua",
+              "porque": "Se mostraría agua con print(bebida), sin comillas. Con comillas no se usa la variable."
+            },
+            {
+              "id": "c",
+              "texto": "Un error",
+              "porque": "No hay error: mostrar un texto entre comillas es válido."
+            }
+          ],
+          "correcta": "a",
+          "pista": "Mira si dentro de print hay comillas o no.",
+          "explicacion": "Con comillas, \"bebida\" es un texto y print lo muestra literalmente. La variable bebida existe, pero esta línea no la usa.",
+          "salida": "bebida"
+        },
+        {
+          "id": "u1-l1-a03",
+          "version": 1,
+          "familia": "py.valor.explicar",
+          "uso": "aplicacion",
+          "nivel": "moderado",
+          "formato": "seleccion",
+          "consigna": "¿Cuál explicación describe mejor lo que hace este programa?",
+          "codigo": "precio = 3000\ncantidad = 2",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "Guarda dos valores con nombre y no muestra nada en la pantalla.",
+              "porque": "Correcto: hay dos asignaciones y ninguna línea con print."
+            },
+            {
+              "id": "b",
+              "texto": "Muestra 3000 y 2 en la pantalla.",
+              "porque": "Guardar un valor no lo muestra; para eso haría falta print."
+            },
+            {
+              "id": "c",
+              "texto": "Comprueba si precio es igual a 3000.",
+              "porque": "El signo = asigna, no compara. Guarda 3000 en precio."
+            }
+          ],
+          "correcta": "a",
+          "pista": "Busca si alguna línea usa print.",
+          "explicacion": "Ambas líneas son asignaciones: guardan valores para usarlos después. Sin print, el programa no muestra nada."
+        },
+        {
+          "id": "u1-l1-p01",
+          "version": 1,
+          "familia": "py.valor.mostrar",
+          "uso": "practica",
+          "nivel": "basico",
+          "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?",
+          "codigo": "galleta = 1200\nprint(galleta)",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "1200",
+              "porque": "Correcto: print(galleta) muestra el valor guardado."
+            },
+            {
+              "id": "b",
+              "texto": "galleta",
+              "porque": "Sin comillas, galleta es el nombre de la variable y print muestra su valor."
+            },
+            {
+              "id": "c",
+              "texto": "galleta = 1200",
+              "porque": "print no muestra la línea de código, solo el valor que recibe."
+            }
+          ],
+          "correcta": "a",
+          "pista": "¿Qué valor tiene galleta después de la primera línea?",
+          "explicacion": "galleta guarda 1200 y print(galleta) muestra ese valor.",
+          "salida": "1200"
+        },
+        {
+          "id": "u1-l1-p02",
+          "version": 1,
+          "familia": "py.valor.nombre",
+          "uso": "practica",
+          "nivel": "basico",
+          "formato": "fichas",
+          "consigna": "Completa el programa para que muestre el valor guardado en la variable.",
+          "codigo": "precio = 3000\nprint(___)",
+          "fichas": [
+            {
+              "id": "a",
+              "texto": "precio",
+              "porque": "Correcto: sin comillas se usa la variable y se muestra 3000."
+            },
+            {
+              "id": "b",
+              "texto": "\"precio\"",
+              "porque": "Con comillas se mostraría la palabra precio, no el valor guardado."
+            },
+            {
+              "id": "c",
+              "texto": "Precio",
+              "porque": "Python distingue mayúsculas: Precio no existe y produciría un error."
+            }
+          ],
+          "correcta": "a",
+          "pista": "El nombre debe escribirse exactamente igual que en la primera línea y sin comillas.",
+          "explicacion": "print(precio) usa la variable creada en la primera línea, escrita igual, y muestra 3000.",
+          "salida": "3000"
+        },
+        {
+          "id": "u1-l1-p03",
+          "version": 1,
+          "familia": "py.valor.comillas",
+          "uso": "practica",
+          "nivel": "moderado",
+          "formato": "linea",
+          "consigna": "El programa debería mostrar el producto guardado (empanada), pero muestra otra cosa. Elige la línea que causa el problema.",
+          "lineas": [
+            "producto = \"empanada\"",
+            "precio = 3000",
+            "print(\"producto\")"
+          ],
+          "correctas": [
+            3
+          ],
+          "porque": {
+            "1": "Esta línea guarda correctamente el texto empanada en producto.",
+            "2": "Guardar el precio no afecta lo que se muestra.",
+            "3": "Correcto: con comillas se muestra la palabra producto en vez del valor guardado."
+          },
+          "pista": "Compara lo que debería mostrarse con lo que hay dentro de print.",
+          "explicacion": "print(\"producto\") muestra la palabra producto. Para mostrar empanada hay que usar la variable sin comillas: print(producto).",
+          "salida": "producto"
+        },
+        {
+          "id": "u1-l1-p04",
+          "version": 1,
+          "familia": "py.valor.explicar",
+          "uso": "practica",
+          "nivel": "moderado",
+          "formato": "seleccion",
+          "consigna": "Una compañera explica este programa así: «Muestra Ana». ¿Qué le falta a su explicación?",
+          "codigo": "nombre = \"Ana\"\nprint(nombre)",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "Decir que primero guarda el texto Ana en la variable nombre y luego muestra ese valor.",
+              "porque": "Correcto: la explicación omite el paso de guardar el valor."
+            },
+            {
+              "id": "b",
+              "texto": "Decir que compara nombre con Ana.",
+              "porque": "El programa no compara: = guarda el valor."
+            },
+            {
+              "id": "c",
+              "texto": "Decir que muestra la palabra nombre.",
+              "porque": "Sin comillas, print(nombre) muestra el valor Ana, no la palabra nombre."
+            }
+          ],
+          "correcta": "a",
+          "pista": "¿Qué ocurre en la primera línea, antes de mostrar?",
+          "explicacion": "Una explicación completa cubre las dos líneas: guarda Ana en nombre y después muestra el valor de nombre."
+        },
+        {
+          "id": "u1-l1-p05",
+          "version": 1,
+          "familia": "py.valor.mostrar",
+          "uso": "practica",
+          "nivel": "moderado",
+          "formato": "seleccion",
+          "consigna": "Si ejecutas este programa como archivo .py, ¿qué se muestra?",
+          "codigo": "x = 5\nx\nprint(\"listo\")",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "Solo listo",
+              "porque": "Correcto: en un archivo, escribir x sola no muestra nada; solo print muestra."
+            },
+            {
+              "id": "b",
+              "texto": "5 y luego listo",
+              "porque": "En la consola interactiva x mostraría 5, pero en un archivo hace falta print(x)."
+            },
+            {
+              "id": "c",
+              "texto": "Un error",
+              "porque": "Escribir el nombre de una variable que existe no produce error."
+            }
+          ],
+          "correcta": "a",
+          "pista": "¿Cuántas líneas del programa usan print?",
+          "explicacion": "La segunda línea evalúa x pero no la muestra. Solo print(\"listo\") produce salida.",
+          "salida": "listo"
+        },
+        {
+          "id": "u1-l1-t01",
+          "version": 1,
+          "familia": "py.valor.comillas",
+          "uso": "transferencia",
+          "nivel": "moderado",
+          "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?",
+          "codigo": "mensaje = \"Hola\"\nprint(mensaje)\nprint(\"mensaje\")",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "Hola y después mensaje",
+              "porque": "Correcto: la primera print usa la variable; la segunda, un texto."
+            },
+            {
+              "id": "b",
+              "texto": "Hola dos veces",
+              "porque": "La segunda print tiene comillas: muestra la palabra mensaje."
+            },
+            {
+              "id": "c",
+              "texto": "mensaje dos veces",
+              "porque": "La primera print no tiene comillas: muestra el valor Hola."
+            }
+          ],
+          "correcta": "a",
+          "pista": "Analiza cada print por separado: ¿tiene comillas?",
+          "explicacion": "print(mensaje) muestra el valor Hola. print(\"mensaje\") muestra el texto mensaje.",
+          "salida": "Hola\nmensaje"
+        },
+        {
+          "id": "u1-l1-t02",
+          "version": 1,
+          "familia": "py.valor.explicar",
+          "uso": "transferencia",
+          "nivel": "moderado",
+          "formato": "seleccion",
+          "consigna": "¿Cuál explicación describe mejor la segunda línea?",
+          "codigo": "total = 7000\nprint(\"El total es\", total)",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "Muestra el texto El total es seguido del valor guardado en total: 7000.",
+              "porque": "Correcto: print puede mostrar varios valores separados por coma."
+            },
+            {
+              "id": "b",
+              "texto": "Muestra El total es total.",
+              "porque": "total va sin comillas, así que se muestra su valor, 7000."
+            },
+            {
+              "id": "c",
+              "texto": "Cambia el valor de total por el texto El total es.",
+              "porque": "print no cambia variables; solo muestra."
+            }
+          ],
+          "correcta": "a",
+          "pista": "Separa lo que está entre comillas de lo que no lo está.",
+          "explicacion": "print muestra \"El total es\" tal cual y después el valor de total: El total es 7000."
+        }
+      ]
+    },
+    {
+      "id": "u1-l2",
+      "habilidad": "py.asignacion",
+      "titulo": "Seguir un cambio de valor",
+      "objetivo": "Al terminar podrás seguir el valor de una variable cuando cambia.",
+      "explicacion": [
+        "Una variable puede cambiar de valor. La nueva asignación reemplaza el valor anterior.",
+        "`saldo = saldo + 2` se resuelve en dos pasos: primero Python calcula `saldo + 2` con el valor que saldo tenía; después guarda el resultado otra vez en saldo.",
+        "Para seguir un programa, anota qué valor tiene cada variable después de cada línea."
+      ],
+      "ampliada": [
+        "En matemáticas, `x = x + 1` no tendría solución. En Python no es una ecuación: significa «calcula `x + 1` y guárdalo en x».",
+        "Si una línea calcula algo pero no lo asigna, por ejemplo `saldo + 2` sola, el resultado se pierde y saldo no cambia.",
+        "Copiar un número a otra variable (`b = a`) guarda ese valor en b. Si después cambias a, b conserva el valor que recibió."
+      ],
+      "ejemplo": {
+        "codigo": "saldo = 4\nsaldo = saldo + 2\nprint(saldo)",
+        "pasos": [
+          "Línea 1: saldo vale 4.",
+          "Línea 2: se calcula `saldo + 2`, es decir `4 + 2 = 6`, y se guarda en saldo. Ahora saldo vale 6; el 4 se reemplazó.",
+          "Línea 3: muestra 6."
+        ],
+        "salida": "6"
+      },
+      "cierre": "Ya puedes explicar por qué el saldo pasó de 4 a 6: se leyó el valor anterior, se sumó y se guardó de nuevo.",
+      "proyecto": "Ya puedes llevar la cuenta de lo que vas agregando a la merienda.",
+      "secuencia": [
+        "u1-l2-a01",
+        "u1-l2-a02",
+        "u1-l2-a03"
+      ],
+      "actividades": [
+        {
+          "id": "u1-l2-a01",
+          "version": 1,
+          "familia": "py.asignacion.seguir",
+          "uso": "guiada",
+          "nivel": "basico",
+          "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?",
+          "codigo": "puntos = 2\npuntos = puntos + 3\nprint(puntos)",
+          "ayuda": "Sustituye puntos en la segunda línea por el valor que tenía: 2 + 3.",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "2",
+              "porque": "La segunda línea reemplaza el 2 por un valor nuevo."
+            },
+            {
+              "id": "b",
+              "texto": "3",
+              "porque": "Se suma 3 al valor anterior; no se guarda solo el 3."
+            },
+            {
+              "id": "c",
+              "texto": "5",
+              "porque": "Correcto: se calcula 2 + 3 y el resultado se guarda en puntos."
+            }
+          ],
+          "correcta": "c",
+          "pista": "Resuelve primero el lado derecho de la segunda línea con el valor que tenía puntos.",
+          "explicacion": "puntos empieza en 2. La segunda línea calcula 2 + 3 = 5 y lo guarda en puntos. print muestra 5.",
+          "salida": "5"
+        },
+        {
+          "id": "u1-l2-a02",
+          "version": 1,
+          "familia": "py.asignacion.explicar",
+          "uso": "aplicacion",
+          "nivel": "basico",
+          "formato": "seleccion",
+          "consigna": "¿Cuál explicación describe correctamente la segunda línea?",
+          "codigo": "saldo = 4\nsaldo = saldo + 2",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "Toma el valor actual de saldo (4), le suma 2 y guarda 6 en saldo.",
+              "porque": "Correcto: describe el cálculo y que el resultado reemplaza el valor anterior."
+            },
+            {
+              "id": "b",
+              "texto": "Muestra el saldo en la pantalla.",
+              "porque": "Confunde asignar con mostrar: no hay print en esta línea."
+            },
+            {
+              "id": "c",
+              "texto": "Comprueba si saldo es igual a saldo + 2.",
+              "porque": "El signo = no compara; guarda un valor."
+            }
+          ],
+          "correcta": "a",
+          "pista": "¿Qué línea le daría a Python la orden de mostrar algo?",
+          "explicacion": "La segunda línea primero lee el valor previo (4), calcula 4 + 2 y después guarda 6 en saldo."
+        },
+        {
+          "id": "u1-l2-a03",
+          "version": 1,
+          "familia": "py.asignacion.guardar",
+          "uso": "aplicacion",
+          "nivel": "moderado",
+          "formato": "linea",
+          "consigna": "Había 7 empanadas y llegaron 3 más, así que al final debería mostrarse 10. El programa muestra 7. Elige la línea que causa el problema.",
+          "lineas": [
+            "empanadas = 7",
+            "empanadas + 3",
+            "print(empanadas)"
+          ],
+          "correctas": [
+            2
+          ],
+          "porque": {
+            "1": "Empezar con 7 empanadas es correcto.",
+            "2": "Correcto: calcula 10, pero no lo guarda en empanadas, así que el valor sigue siendo 7.",
+            "3": "Mostrar empanadas está bien; el problema es que su valor nunca cambió."
+          },
+          "pista": "¿En qué línea debería cambiar el valor de empanadas? ¿Cambia de verdad?",
+          "explicacion": "empanadas + 3 calcula 10 y lo descarta. Para conservarlo hay que asignarlo: empanadas = empanadas + 3.",
+          "salida": "7"
+        },
+        {
+          "id": "u1-l2-p01",
+          "version": 1,
+          "familia": "py.asignacion.seguir",
+          "uso": "practica",
+          "nivel": "basico",
+          "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?",
+          "codigo": "vasos = 10\nvasos = vasos - 4\nprint(vasos)",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "6",
+              "porque": "Correcto: 10 - 4 = 6 se guarda en vasos."
+            },
+            {
+              "id": "b",
+              "texto": "10",
+              "porque": "La segunda línea reemplaza el 10 por el resultado de la resta."
+            },
+            {
+              "id": "c",
+              "texto": "4",
+              "porque": "Se resta 4 al valor anterior; no se guarda el 4."
+            }
+          ],
+          "correcta": "a",
+          "pista": "Sustituye vasos por 10 en el lado derecho de la segunda línea.",
+          "explicacion": "vasos empieza en 10, la segunda línea calcula 10 - 4 = 6 y lo guarda. Se muestra 6.",
+          "salida": "6"
+        },
+        {
+          "id": "u1-l2-p02",
+          "version": 1,
+          "familia": "py.asignacion.guardar",
+          "uso": "practica",
+          "nivel": "basico",
+          "formato": "fichas",
+          "consigna": "Completa el programa para que el contador de pedidos aumente en 1.",
+          "codigo": "pedidos = 5\npedidos = ___ + 1\nprint(pedidos)",
+          "fichas": [
+            {
+              "id": "a",
+              "texto": "pedidos",
+              "porque": "Correcto: se toma el valor actual de pedidos y se le suma 1; se muestra 6."
+            },
+            {
+              "id": "b",
+              "texto": "\"pedidos\"",
+              "porque": "Un texto entre comillas no se puede sumar con un número: Python daría error."
+            },
+            {
+              "id": "c",
+              "texto": "print(pedidos)",
+              "porque": "print muestra un valor pero no devuelve un número para sumar."
+            }
+          ],
+          "correcta": "a",
+          "pista": "Para aumentar un contador hay que partir de su valor actual.",
+          "explicacion": "pedidos = pedidos + 1 lee el 5, calcula 6 y lo guarda en pedidos.",
+          "salida": "6"
+        },
+        {
+          "id": "u1-l2-p03",
+          "version": 1,
+          "familia": "py.asignacion.seguir",
+          "uso": "practica",
+          "nivel": "moderado",
+          "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?",
+          "codigo": "total = 0\ntotal = total + 2000\ntotal = total + 3000\nprint(total)",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "3000",
+              "porque": "La última línea suma 3000 al valor que ya tenía total (2000)."
+            },
+            {
+              "id": "b",
+              "texto": "5000",
+              "porque": "Correcto: total pasa de 0 a 2000 y luego a 5000."
+            },
+            {
+              "id": "c",
+              "texto": "0",
+              "porque": "Las asignaciones posteriores cambian el 0 inicial."
+            }
+          ],
+          "correcta": "b",
+          "pista": "Anota el valor de total después de cada línea.",
+          "explicacion": "total vale 0, luego 0 + 2000 = 2000, luego 2000 + 3000 = 5000. Se muestra 5000.",
+          "salida": "5000"
+        },
+        {
+          "id": "u1-l2-p04",
+          "version": 1,
+          "familia": "py.asignacion.orden",
+          "uso": "practica",
+          "nivel": "moderado",
+          "formato": "linea",
+          "consigna": "Un jugo cuesta 3000 y tiene un descuento de 500, así que debería mostrarse 2500. El programa muestra -2500. Elige la línea que causa el problema.",
+          "lineas": [
+            "precio = 3000",
+            "descuento = 500",
+            "precio = descuento - precio",
+            "print(precio)"
+          ],
+          "correctas": [
+            3
+          ],
+          "porque": {
+            "1": "El precio inicial es correcto.",
+            "2": "El descuento es correcto.",
+            "3": "Correcto: resta en el orden inverso; 500 - 3000 da -2500.",
+            "4": "Mostrar el precio está bien; el valor se calculó mal antes."
+          },
+          "pista": "¿A qué cantidad se le quita la otra?",
+          "explicacion": "El descuento se resta del precio: precio = precio - descuento, que da 2500.",
+          "salida": "-2500"
+        },
+        {
+          "id": "u1-l2-p05",
+          "version": 1,
+          "familia": "py.asignacion.explicar",
+          "uso": "practica",
+          "nivel": "moderado",
+          "formato": "seleccion",
+          "consigna": "Alguien explica la línea monedas = monedas * 2 así: «Multiplica las monedas por 2». ¿Qué le falta?",
+          "codigo": "monedas = 3\nmonedas = monedas * 2",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "Que el resultado (6) se guarda otra vez en monedas y reemplaza el 3.",
+              "porque": "Correcto: sin la asignación el cálculo se perdería."
+            },
+            {
+              "id": "b",
+              "texto": "Que el resultado se muestra en la pantalla.",
+              "porque": "No hay print: nada se muestra."
+            },
+            {
+              "id": "c",
+              "texto": "Que la línea compara monedas con monedas * 2.",
+              "porque": "El signo = asigna, no compara."
+            }
+          ],
+          "correcta": "a",
+          "pista": "¿Qué pasa con el resultado de la multiplicación?",
+          "explicacion": "La línea calcula 3 * 2 = 6 y lo guarda en monedas, que deja de valer 3."
+        },
+        {
+          "id": "u1-l2-t01",
+          "version": 1,
+          "familia": "py.asignacion.copia",
+          "uso": "transferencia",
+          "nivel": "moderado",
+          "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?",
+          "codigo": "a = 3\nb = a\na = 5\nprint(b)",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "3",
+              "porque": "Correcto: b recibió el 3 cuando se ejecutó b = a; cambiar a después no cambia b."
+            },
+            {
+              "id": "b",
+              "texto": "5",
+              "porque": "b = a copia el valor que a tenía en ese momento; no queda conectada a a."
+            },
+            {
+              "id": "c",
+              "texto": "a",
+              "porque": "Sin comillas, print(b) muestra el valor de b, no un nombre."
+            }
+          ],
+          "correcta": "a",
+          "pista": "Anota el valor de a y de b después de cada línea.",
+          "explicacion": "Después de b = a, b vale 3. a = 5 cambia solo a. print(b) muestra 3.",
+          "salida": "3"
+        },
+        {
+          "id": "u1-l2-t02",
+          "version": 1,
+          "familia": "py.asignacion.seguir",
+          "uso": "transferencia",
+          "nivel": "moderado",
+          "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?",
+          "codigo": "x = 1\nx = x + x\nx = x + x\nprint(x)",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "2",
+              "porque": "Ese es el valor después de la segunda línea; la tercera lo vuelve a duplicar."
+            },
+            {
+              "id": "b",
+              "texto": "4",
+              "porque": "Correcto: x pasa de 1 a 2 y luego a 4."
+            },
+            {
+              "id": "c",
+              "texto": "3",
+              "porque": "Cada línea suma x consigo misma: 1 + 1 y luego 2 + 2."
+            }
+          ],
+          "correcta": "b",
+          "pista": "En cada línea, usa el valor que x tenía justo antes.",
+          "explicacion": "x vale 1, luego 1 + 1 = 2, luego 2 + 2 = 4.",
+          "salida": "4"
+        }
+      ]
+    },
+    {
+      "id": "u1-l3",
+      "habilidad": "py.operacion",
+      "titulo": "Calcular y explicar la merienda",
+      "objetivo": "Al terminar podrás calcular el resultado de una operación y explicar qué representa.",
+      "explicacion": [
+        "Python calcula con + (suma), - (resta), * (multiplicación) y / (división).",
+        "Como en matemáticas, * y / se hacen antes que + y -. Los paréntesis cambian ese orden.",
+        "Explicar un programa es decir qué representa el resultado («cuánto cuesta la merienda»), no solo qué símbolos aparecen."
+      ],
+      "ampliada": [
+        "La división / siempre da un número decimal: `6 / 2` es `3.0`.",
+        "Usar nombres que describen los datos (`precio_jugo`, `cantidad`) ayuda a explicar el cálculo.",
+        "Si sumas un texto y un número, por ejemplo `\"3\" + 2`, Python da un error."
+      ],
+      "ejemplo": {
+        "codigo": "precio_empanada = 3000\ncantidad = 2\nprecio_jugo = 2500\ntotal = precio_empanada * cantidad + precio_jugo\nprint(total)",
+        "pasos": [
+          "Líneas 1 a 3: guardan el precio de una empanada, cuántas se compran y el precio del jugo.",
+          "Línea 4: primero multiplica `3000 * 2 = 6000` (las dos empanadas) y después suma el jugo: `6000 + 2500 = 8500`.",
+          "Línea 5: muestra 8500.",
+          "En palabras: el programa calcula cuánto cuesta una merienda de dos empanadas y un jugo."
+        ],
+        "salida": "8500"
+      },
+      "cierre": "Ya puedes explicar qué calcula un programa con operaciones y por qué el resultado es ese.",
+      "proyecto": "Completaste la merienda: sabes calcular su costo y explicar ese cálculo con tus palabras.",
+      "secuencia": [
+        "u1-l3-a01",
+        "u1-l3-a02",
+        "u1-l3-a03"
+      ],
+      "actividades": [
+        {
+          "id": "u1-l3-a01",
+          "version": 1,
+          "familia": "py.operacion.elegir",
+          "uso": "guiada",
+          "nivel": "basico",
+          "formato": "fichas",
+          "consigna": "Completa el programa para calcular cuánto cuestan 3 empanadas del mismo precio.",
+          "codigo": "precio = 3000\ncantidad = 3\ntotal = precio ___ cantidad",
+          "ayuda": "Comprar varias unidades del mismo precio es repetir ese precio tantas veces como unidades haya.",
+          "fichas": [
+            {
+              "id": "a",
+              "texto": "*",
+              "porque": "Correcto: 3000 * 3 = 9000, el costo de tres empanadas."
+            },
+            {
+              "id": "b",
+              "texto": "+",
+              "porque": "3000 + 3 = 3003 suma el precio y la cantidad, que no representa un costo."
+            },
+            {
+              "id": "c",
+              "texto": "-",
+              "porque": "Restar la cantidad al precio no tiene significado en este problema."
+            }
+          ],
+          "correcta": "a",
+          "pista": "¿Qué operación repite un valor varias veces?",
+          "explicacion": "El costo total es el precio multiplicado por la cantidad: 3000 * 3 = 9000.",
+          "salida": ""
+        },
+        {
+          "id": "u1-l3-a02",
+          "version": 1,
+          "familia": "py.operacion.explicar",
+          "uso": "aplicacion",
+          "nivel": "basico",
+          "formato": "seleccion",
+          "consigna": "¿Cuál explicación de este programa es la más completa?",
+          "codigo": "precio = 3000\ncantidad = 2\ntotal = precio * cantidad\nprint(total)",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "Calcula cuánto cuestan dos unidades de 3000 multiplicando precio por cantidad, y muestra 6000.",
+              "porque": "Correcto: dice qué representa el resultado, cómo se obtiene y qué se muestra."
+            },
+            {
+              "id": "b",
+              "texto": "Usa el símbolo * y una variable llamada total.",
+              "porque": "Describe símbolos, pero no qué calcula ni para qué."
+            },
+            {
+              "id": "c",
+              "texto": "Suma el precio y la cantidad y muestra el resultado.",
+              "porque": "El programa multiplica; sumar daría 3002."
+            }
+          ],
+          "correcta": "a",
+          "pista": "Una buena explicación dice qué representa el número que se muestra.",
+          "explicacion": "total es el costo de comprar dos unidades: 3000 * 2 = 6000. Explicarlo así conecta el código con su significado."
+        },
+        {
+          "id": "u1-l3-a03",
+          "version": 1,
+          "familia": "py.operacion.orden",
+          "uso": "aplicacion",
+          "nivel": "moderado",
+          "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?",
+          "codigo": "base = 2000\nextra = 500\ntotal = base + extra * 2\nprint(total)",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "3000",
+              "porque": "Correcto: primero 500 * 2 = 1000 y después 2000 + 1000."
+            },
+            {
+              "id": "b",
+              "texto": "5000",
+              "porque": "Ese sería el resultado de (base + extra) * 2. Sin paréntesis, la multiplicación va primero."
+            },
+            {
+              "id": "c",
+              "texto": "2500",
+              "porque": "La multiplicación por 2 también cuenta: no basta con sumar base y extra."
+            }
+          ],
+          "correcta": "a",
+          "pista": "¿Qué operación hace Python primero, la suma o la multiplicación?",
+          "explicacion": "La multiplicación va antes que la suma: 500 * 2 = 1000, y 2000 + 1000 = 3000.",
+          "salida": "3000"
+        },
+        {
+          "id": "u1-l3-p01",
+          "version": 1,
+          "familia": "py.operacion.division",
+          "uso": "practica",
+          "nivel": "basico",
+          "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?",
+          "codigo": "print(6 / 2)",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "3",
+              "porque": "El valor es tres, pero / siempre devuelve un decimal: se muestra 3.0."
+            },
+            {
+              "id": "b",
+              "texto": "3.0",
+              "porque": "Correcto: la división / devuelve un número decimal."
+            },
+            {
+              "id": "c",
+              "texto": "6 / 2",
+              "porque": "Sin comillas, Python calcula la operación en lugar de mostrarla como texto."
+            }
+          ],
+          "correcta": "b",
+          "pista": "Recuerda qué tipo de número produce siempre la división con /.",
+          "explicacion": "6 / 2 vale 3.0: la división / produce un decimal aunque el resultado sea exacto.",
+          "salida": "3.0"
+        },
+        {
+          "id": "u1-l3-p02",
+          "version": 1,
+          "familia": "py.operacion.elegir",
+          "uso": "practica",
+          "nivel": "moderado",
+          "formato": "linea",
+          "consigna": "Queremos el total de 4 jugos de 2500 más una empanada de 3000: debería mostrarse 13000. Elige la línea que causa el problema.",
+          "lineas": [
+            "jugos = 4",
+            "precio_jugo = 2500",
+            "total = jugos + precio_jugo + 3000",
+            "print(total)"
+          ],
+          "correctas": [
+            3
+          ],
+          "porque": {
+            "1": "La cantidad de jugos es correcta.",
+            "2": "El precio de cada jugo es correcto.",
+            "3": "Correcto: suma la cantidad de jugos en lugar de multiplicarla por su precio (da 5504).",
+            "4": "Mostrar el total está bien; el cálculo anterior es el problema."
+          },
+          "pista": "¿Cómo se calcula el costo de varios jugos del mismo precio?",
+          "explicacion": "El costo de los jugos es jugos * precio_jugo = 10000; más la empanada da 13000: total = jugos * precio_jugo + 3000.",
+          "salida": "5504"
+        },
+        {
+          "id": "u1-l3-p03",
+          "version": 1,
+          "familia": "py.operacion.orden",
+          "uso": "practica",
+          "nivel": "moderado",
+          "formato": "fichas",
+          "consigna": "Completa el programa para calcular el promedio de dos notas: primero se suman y después se divide entre 2.",
+          "codigo": "nota1 = 4\nnota2 = 5\npromedio = ___ / 2",
+          "fichas": [
+            {
+              "id": "a",
+              "texto": "(nota1 + nota2)",
+              "porque": "Correcto: los paréntesis hacen la suma primero: 9 / 2 = 4.5."
+            },
+            {
+              "id": "b",
+              "texto": "nota1 + nota2",
+              "porque": "Sin paréntesis solo nota2 se divide entre 2: 4 + 2.5 = 6.5."
+            },
+            {
+              "id": "c",
+              "texto": "nota1 * nota2",
+              "porque": "El promedio se basa en la suma, no en el producto."
+            }
+          ],
+          "correcta": "a",
+          "pista": "¿Qué operación iría primero si no hubiera paréntesis?",
+          "explicacion": "Los paréntesis cambian el orden: (4 + 5) / 2 = 4.5, el promedio de las dos notas.",
+          "salida": ""
+        },
+        {
+          "id": "u1-l3-p04",
+          "version": 1,
+          "familia": "py.operacion.explicar",
+          "uso": "practica",
+          "nivel": "moderado",
+          "formato": "seleccion",
+          "consigna": "Alguien explica la línea de total así: «Multiplica y suma». ¿Qué le falta a esa explicación?",
+          "codigo": "precio = 4000\ncantidad = 2\nenvio = 3000\ntotal = precio * cantidad + envio",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "Decir qué representa: el costo de los productos más el envío.",
+              "porque": "Correcto: la explicación nombra operaciones pero no dice qué significa el resultado."
+            },
+            {
+              "id": "b",
+              "texto": "Decir que el programa usa una variable llamada total.",
+              "porque": "Eso no ayuda a entender qué se calcula."
+            },
+            {
+              "id": "c",
+              "texto": "Decir que primero suma precio y cantidad.",
+              "porque": "Es incorrecto: la multiplicación va antes que la suma."
+            }
+          ],
+          "correcta": "a",
+          "pista": "¿Qué responderías si alguien pregunta «¿para qué sirve ese número?»?",
+          "explicacion": "total es lo que se paga en total: dos productos de 4000 más 3000 de envío, es decir 11000."
+        },
+        {
+          "id": "u1-l3-p05",
+          "version": 1,
+          "familia": "py.operacion.orden",
+          "uso": "practica",
+          "nivel": "basico",
+          "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?",
+          "codigo": "x = 10\ny = 3\nprint(x - y * 2)",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "14",
+              "porque": "Ese sería (x - y) * 2. La multiplicación va primero."
+            },
+            {
+              "id": "b",
+              "texto": "4",
+              "porque": "Correcto: 3 * 2 = 6 y 10 - 6 = 4."
+            },
+            {
+              "id": "c",
+              "texto": "7",
+              "porque": "La multiplicación por 2 también cuenta."
+            }
+          ],
+          "correcta": "b",
+          "pista": "Haz primero la multiplicación.",
+          "explicacion": "y * 2 = 6 se calcula primero; después 10 - 6 = 4.",
+          "salida": "4"
+        },
+        {
+          "id": "u1-l3-t01",
+          "version": 1,
+          "familia": "py.operacion.explicar",
+          "uso": "transferencia",
+          "nivel": "moderado",
+          "formato": "seleccion",
+          "consigna": "¿Cuál explicación describe mejor lo que calcula este programa?",
+          "codigo": "ancho = 3\nlargo = 4\narea = ancho * largo\nprint(area)",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "Calcula el área de un rectángulo de 3 por 4 multiplicando sus lados y muestra 12.",
+              "porque": "Correcto: conecta la operación con lo que representa."
+            },
+            {
+              "id": "b",
+              "texto": "Multiplica dos variables.",
+              "porque": "Es cierto, pero no dice qué representa el resultado."
+            },
+            {
+              "id": "c",
+              "texto": "Calcula el perímetro sumando los lados.",
+              "porque": "El programa multiplica; el perímetro se obtendría sumando los cuatro lados."
+            }
+          ],
+          "correcta": "a",
+          "pista": "Piensa qué representa multiplicar ancho por largo.",
+          "explicacion": "ancho * largo es el área del rectángulo: 3 * 4 = 12."
+        },
+        {
+          "id": "u1-l3-t02",
+          "version": 1,
+          "familia": "py.operacion.division",
+          "uso": "transferencia",
+          "nivel": "moderado",
+          "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?",
+          "codigo": "precio = 10000\ndescuento = precio * 0.1\nprint(precio - descuento)",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "9000.0",
+              "porque": "Correcto: el descuento es 1000.0 y 10000 - 1000.0 = 9000.0."
+            },
+            {
+              "id": "b",
+              "texto": "9999.9",
+              "porque": "Se resta el 10 % del precio (1000.0), no 0.1."
+            },
+            {
+              "id": "c",
+              "texto": "1000.0",
+              "porque": "Ese es el descuento; se muestra el precio menos el descuento."
+            }
+          ],
+          "correcta": "a",
+          "pista": "Calcula primero el valor de descuento.",
+          "explicacion": "descuento vale 10000 * 0.1 = 1000.0. El precio final es 10000 - 1000.0 = 9000.0; al operar con un decimal el resultado también es decimal.",
+          "salida": "9000.0"
+        }
+      ]
+    }
+  ]
+}

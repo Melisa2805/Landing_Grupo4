@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "npm run test:rag && npm run test:adaptativo && npm run test:pedagogia && npm run test:interfaz && npm run test:estabilidad && npm run test:persistencia && npm run test:medicion",
+    "test": "node scripts/pruebas.cjs",
     "test:pedagogia": "node --experimental-vm-modules tests/pedagogia.test.cjs",
     "test:interfaz": "node --experimental-vm-modules tests/interfaz.test.cjs",
     "test:rag": "node --experimental-vm-modules tests/rag.test.cjs",
@@ -17,7 +17,10 @@
     "test:persistencia": "node --experimental-vm-modules tests/persistencia.test.cjs",
     "test:medicion": "node --experimental-vm-modules tests/medicion.test.cjs",
     "experimento": "node --experimental-vm-modules scripts/experimento.cjs",
-    "test:postgres": "node --experimental-vm-modules tests/postgres.test.cjs"
+    "test:postgres": "node --experimental-vm-modules tests/postgres.test.cjs",
+    "reporte-expo": "node --experimental-vm-modules scripts/reporte-expo.cjs",
+    "calibracion": "node --experimental-vm-modules scripts/calibracion.cjs",
+    "capacidad": "node --experimental-vm-modules scripts/capacidad.cjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.22",
@@ -25,8 +28,9 @@
     "@monaco-editor/react": "^4.7.0",
     "@vercel/analytics": "^2.0.1",
     "lucide-react": "^1.64.0",
-    "next": "16.4.3",
+    "next": "16.4.6",
     "pg": "^8.23.1",
+    "qrcode-generator": "2.0.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

@@ -1,0 +1,339 @@
+{
+  "formato": 1,
+  "ruta": "python-fundamentos",
+  "unidad": "u3",
+  "version": "2026-11-17.1",
+  "estado": "borrador_pendiente_revision_docente",
+  "titulo": "Los gastos de la semana",
+  "subtitulo": "Unidad 3 · Listas y recorridos",
+  "proyecto": "Al terminar la unidad podrás explicar un programa que suma los gastos de una semana y encontrar por qué da un resultado inesperado.",
+  "requiere": "u2",
+  "habilidades": {
+    "py.lista": { "nombre": "Listas e índices", "observable": "Lee un elemento por su índice, empezando en 0, y usa len." },
+    "py.recorrido": { "nombre": "Recorridos con for", "observable": "Sigue cuántas veces y con qué valores se ejecuta el bloque de un for." },
+    "py.acumulador": { "nombre": "Acumuladores", "observable": "Sigue un acumulador y explica por qué se inicializa antes del bucle." }
+  },
+  "lecciones": [
+    {
+      "id": "u3-l1",
+      "habilidad": "py.lista",
+      "titulo": "Listas e índices",
+      "objetivo": "Al terminar podrás leer cualquier elemento de una lista por su posición.",
+      "explicacion": [
+        "Una lista guarda varios valores en orden: `gastos = [5000, 3000, 8000]`.",
+        "Cada elemento tiene una posición llamada índice, que empieza en 0: `gastos[0]` es 5000 y `gastos[2]` es 8000.",
+        "`len(gastos)` dice cuántos elementos hay (3). Por eso el último índice es `len(gastos) - 1`."
+      ],
+      "ampliada": [
+        "Pedir un índice que no existe, como `gastos[3]` en una lista de 3 elementos, produce un error (IndexError).",
+        "`gastos[-1]` es una forma corta de pedir el último elemento.",
+        "Una lista puede estar vacía: `[]`. Su `len` es 0."
+      ],
+      "ejemplo": {
+        "codigo": "gastos = [5000, 3000, 8000]\nprint(gastos[0])\nprint(len(gastos))\nprint(gastos[2])",
+        "pasos": [
+          "Línea 1: guarda tres gastos en orden, en las posiciones 0, 1 y 2.",
+          "Línea 2: `gastos[0]` es el primer elemento: muestra 5000.",
+          "Línea 3: la lista tiene 3 elementos: muestra 3.",
+          "Línea 4: `gastos[2]` es el tercero y último: muestra 8000."
+        ],
+        "salida": "5000\n3\n8000"
+      },
+      "cierre": "Ya puedes explicar por qué el primer elemento está en la posición 0 y cuál es el último índice válido.",
+      "proyecto": "Ya puedes guardar los gastos de la semana en una lista.",
+      "secuencia": ["u3-l1-a01", "u3-l1-a02", "u3-l1-a03"],
+      "actividades": [
+        { "id": "u3-l1-a01", "version": 1, "familia": "py.lista.indice", "uso": "guiada", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "frutas = [\"mango\", \"pera\", \"uva\"]\nprint(frutas[1])", "salida": "pera",
+          "ayuda": "El primer elemento está en el índice 0.",
+          "opciones": [
+            { "id": "a", "texto": "mango", "porque": "mango está en el índice 0." },
+            { "id": "b", "texto": "pera", "porque": "Correcto: el índice 1 es la segunda posición." },
+            { "id": "c", "texto": "uva", "porque": "uva está en el índice 2." }
+          ],
+          "correcta": "b", "pista": "Cuenta las posiciones empezando por 0.", "explicacion": "Los índices son 0 (mango), 1 (pera) y 2 (uva): frutas[1] es pera." },
+        { "id": "u3-l1-a02", "version": 1, "familia": "py.lista.len", "uso": "aplicacion", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "notas = [4, 3, 5, 2]\nprint(len(notas))", "salida": "4",
+          "opciones": [
+            { "id": "a", "texto": "4", "porque": "Correcto: la lista tiene cuatro elementos." },
+            { "id": "b", "texto": "3", "porque": "3 es el último índice, no la cantidad de elementos." },
+            { "id": "c", "texto": "2", "porque": "2 es el último valor de la lista, no su longitud." }
+          ],
+          "correcta": "a", "pista": "len cuenta elementos, no posiciones.", "explicacion": "len(notas) cuenta los elementos: hay 4." },
+        { "id": "u3-l1-a03", "version": 1, "familia": "py.lista.fuera", "uso": "aplicacion", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Cuál explicación es correcta?", "codigo": "dias = [\"lun\", \"mar\", \"mie\"]\nprint(dias[3])", "salida": "ERROR IndexError",
+          "opciones": [
+            { "id": "a", "texto": "Produce un error: los índices son 0, 1 y 2, así que la posición 3 no existe.", "porque": "Correcto: con 3 elementos, el último índice es 2." },
+            { "id": "b", "texto": "Muestra mie porque es el tercer elemento.", "porque": "El tercer elemento está en el índice 2, no en el 3." },
+            { "id": "c", "texto": "No muestra nada porque esa posición está vacía.", "porque": "Python no deja posiciones vacías: produce un error." }
+          ],
+          "correcta": "a", "pista": "¿Cuál es el último índice de una lista de 3 elementos?", "explicacion": "dias tiene índices 0 a 2. Pedir dias[3] produce IndexError." },
+        { "id": "u3-l1-p01", "version": 1, "familia": "py.lista.indice", "uso": "practica", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "precios = [1500, 2500]\nprint(precios[0] + precios[1])", "salida": "4000",
+          "opciones": [
+            { "id": "a", "texto": "4000", "porque": "Correcto: 1500 + 2500." },
+            { "id": "b", "texto": "1", "porque": "Se suman los valores, no los índices." },
+            { "id": "c", "texto": "2500", "porque": "Se suman los dos elementos, no solo el segundo." }
+          ],
+          "correcta": "a", "pista": "Sustituye cada precios[i] por su valor.", "explicacion": "precios[0] es 1500 y precios[1] es 2500; su suma es 4000." },
+        { "id": "u3-l1-p02", "version": 1, "familia": "py.lista.ultimo", "uso": "practica", "nivel": "basico", "formato": "fichas",
+          "consigna": "Completa para mostrar el último gasto de la lista.", "codigo": "gastos = [5000, 3000, 8000]\nprint(gastos[___])", "salida": "8000",
+          "fichas": [
+            { "id": "a", "texto": "2", "porque": "Correcto: con 3 elementos, el último índice es 2." },
+            { "id": "b", "texto": "3", "porque": "El índice 3 no existe y produciría un error." },
+            { "id": "c", "texto": "1", "porque": "El índice 1 es el segundo elemento." }
+          ],
+          "correcta": "a", "pista": "El último índice es la longitud menos uno.", "explicacion": "gastos[2] es 8000, el último elemento." },
+        { "id": "u3-l1-p03", "version": 1, "familia": "py.lista.indice", "uso": "practica", "nivel": "moderado", "formato": "linea",
+          "consigna": "El programa debería mostrar el primer día de la lista (lunes), pero muestra martes. Elige la línea que causa el problema.",
+          "lineas": ["dias = [\"lunes\", \"martes\", \"miércoles\"]", "primero = dias[1]", "print(primero)"], "correctas": [2], "salida": "martes",
+          "porque": { "1": "La lista está bien escrita.", "2": "Correcto: el primer elemento está en el índice 0, no en el 1.", "3": "Mostrar la variable está bien." },
+          "pista": "¿En qué índice empieza una lista?", "explicacion": "primero = dias[0] tomaría lunes; dias[1] es el segundo elemento." },
+        { "id": "u3-l1-p04", "version": 1, "familia": "py.lista.negativo", "uso": "practica", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "colores = [\"rojo\", \"azul\"]\nprint(colores[-1])", "salida": "azul",
+          "opciones": [
+            { "id": "a", "texto": "azul", "porque": "Correcto: -1 es el último elemento." },
+            { "id": "b", "texto": "rojo", "porque": "rojo es el primero (índice 0)." },
+            { "id": "c", "texto": "Un error", "porque": "Los índices negativos son válidos: cuentan desde el final." }
+          ],
+          "correcta": "a", "pista": "Los índices negativos cuentan desde el final.", "explicacion": "colores[-1] es el último elemento: azul." },
+        { "id": "u3-l1-p05", "version": 1, "familia": "py.lista.explicar", "uso": "practica", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "Alguien explica len(lista) - 1 así: «Es la longitud menos uno». ¿Qué le falta?", "codigo": "lista = [7, 8, 9]\nultimo = lista[len(lista) - 1]\nprint(ultimo)", "salida": "9",
+          "opciones": [
+            { "id": "a", "texto": "Para qué sirve: es el índice del último elemento, porque los índices empiezan en 0.", "porque": "Correcto: la explicación describe la operación pero no su propósito." },
+            { "id": "b", "texto": "Que borra el último elemento.", "porque": "No borra nada: solo lo lee." },
+            { "id": "c", "texto": "Que muestra la longitud.", "porque": "Se muestra el último elemento, 9, no la longitud." }
+          ],
+          "correcta": "a", "pista": "¿Por qué alguien restaría 1 a la longitud?", "explicacion": "Con 3 elementos los índices van de 0 a 2: len(lista) - 1 es 2, el último." },
+        { "id": "u3-l1-t01", "version": 1, "familia": "py.lista.ultimo", "uso": "transferencia", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "numeros = [10, 20, 30, 40]\nprint(numeros[len(numeros) - 2])", "salida": "30",
+          "opciones": [
+            { "id": "a", "texto": "30", "porque": "Correcto: len es 4, el índice es 2." },
+            { "id": "b", "texto": "20", "porque": "20 está en el índice 1." },
+            { "id": "c", "texto": "40", "porque": "40 está en el índice 3 (len - 1)." }
+          ],
+          "correcta": "a", "pista": "Calcula primero el índice.", "explicacion": "len(numeros) - 2 = 2, y numeros[2] es 30." },
+        { "id": "u3-l1-t02", "version": 1, "familia": "py.lista.len", "uso": "transferencia", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "vacia = []\nprint(len(vacia))", "salida": "0",
+          "opciones": [
+            { "id": "a", "texto": "0", "porque": "Correcto: la lista no tiene elementos." },
+            { "id": "b", "texto": "Un error", "porque": "Pedir la longitud de una lista vacía es válido." },
+            { "id": "c", "texto": "[]", "porque": "len devuelve un número, no la lista." }
+          ],
+          "correcta": "a", "pista": "¿Cuántos elementos hay entre los corchetes?", "explicacion": "Una lista vacía tiene longitud 0." }
+      ]
+    },
+    {
+      "id": "u3-l2",
+      "habilidad": "py.recorrido",
+      "titulo": "Recorrer una lista con for",
+      "objetivo": "Al terminar podrás decir cuántas veces se ejecuta un for y con qué valores.",
+      "explicacion": [
+        "`for gasto in gastos:` repite el bloque una vez por cada elemento de la lista, en orden.",
+        "En cada vuelta, la variable `gasto` toma el valor del elemento actual: primero el de la posición 0, luego el de la 1, y así.",
+        "Como en `if`, el bloque es lo que tiene sangría debajo del `for`. Lo que no tiene sangría corre una sola vez, al terminar."
+      ],
+      "ampliada": [
+        "El nombre de la variable del `for` lo eliges tú; conviene usar el singular de la lista (`gasto` para `gastos`).",
+        "Si la lista está vacía, el bloque no se ejecuta ninguna vez.",
+        "Para seguir un recorrido, escribe una tabla con cada vuelta y el valor que toma la variable."
+      ],
+      "ejemplo": {
+        "codigo": "gastos = [5000, 3000, 8000]\nfor gasto in gastos:\n    print(gasto)\nprint(\"Listo\")",
+        "pasos": [
+          "Vuelta 1: gasto vale 5000 y se muestra.",
+          "Vuelta 2: gasto vale 3000 y se muestra.",
+          "Vuelta 3: gasto vale 8000 y se muestra.",
+          "Ya no quedan elementos: el bucle termina y la última línea, sin sangría, muestra Listo una vez."
+        ],
+        "salida": "5000\n3000\n8000\nListo"
+      },
+      "cierre": "Ya puedes explicar qué valor toma la variable del for en cada vuelta y qué líneas se repiten.",
+      "proyecto": "Ya puedes revisar uno por uno los gastos de la semana.",
+      "secuencia": ["u3-l2-a01", "u3-l2-a02", "u3-l2-a03"],
+      "actividades": [
+        { "id": "u3-l2-a01", "version": 1, "familia": "py.recorrido.valores", "uso": "guiada", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "for n in [1, 2, 3]:\n    print(n * 10)", "salida": "10\n20\n30",
+          "ayuda": "En cada vuelta n toma un valor de la lista: 1, luego 2, luego 3.",
+          "opciones": [
+            { "id": "a", "texto": "10 y después 20 y después 30", "porque": "Correcto: una línea por vuelta." },
+            { "id": "b", "texto": "60", "porque": "Nada se suma: cada vuelta muestra su propio resultado." },
+            { "id": "c", "texto": "30", "porque": "print está dentro del bucle: se ejecuta en cada vuelta, no solo en la última." }
+          ],
+          "correcta": "a", "pista": "Haz una tabla con el valor de n en cada vuelta.", "explicacion": "El bloque corre tres veces con n = 1, 2 y 3: muestra 10, 20 y 30." },
+        { "id": "u3-l2-a02", "version": 1, "familia": "py.recorrido.vueltas", "uso": "aplicacion", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "contador = 0\nfor letra in [\"a\", \"b\", \"c\", \"d\"]:\n    contador = contador + 1\nprint(contador)", "salida": "4",
+          "opciones": [
+            { "id": "a", "texto": "4", "porque": "Correcto: hay una vuelta por cada letra." },
+            { "id": "b", "texto": "1", "porque": "contador aumenta en cada vuelta, no una sola vez." },
+            { "id": "c", "texto": "0", "porque": "El bloque sí se ejecuta: la lista no está vacía." }
+          ],
+          "correcta": "a", "pista": "¿Cuántas vueltas da el for?", "explicacion": "Cuatro elementos, cuatro vueltas: contador termina en 4." },
+        { "id": "u3-l2-a03", "version": 1, "familia": "py.recorrido.sangria", "uso": "aplicacion", "nivel": "basico", "formato": "linea",
+          "consigna": "El programa debería mostrar «Listo» una sola vez al final, pero lo muestra después de cada número. Elige la línea que causa el problema.",
+          "lineas": ["for n in [5, 6, 7]:", "    print(n)", "    print(\"Listo\")"], "correctas": [3], "salida": "5\nListo\n6\nListo\n7\nListo",
+          "porque": { "1": "El for recorre la lista correctamente.", "2": "Mostrar cada número sí debe repetirse.", "3": "Correcto: con sangría queda dentro del bucle y se repite." },
+          "pista": "¿Qué líneas pertenecen al bloque que se repite?", "explicacion": "Sin sangría, print(\"Listo\") correría una sola vez después del bucle." },
+        { "id": "u3-l2-p01", "version": 1, "familia": "py.recorrido.vacia", "uso": "practica", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "for x in []:\n    print(\"Hola\")\nprint(\"Fin\")", "salida": "Fin",
+          "opciones": [
+            { "id": "a", "texto": "Solo Fin", "porque": "Correcto: con la lista vacía el bloque no se ejecuta." },
+            { "id": "b", "texto": "Hola y después Fin", "porque": "No hay elementos, así que no hay vueltas." },
+            { "id": "c", "texto": "Un error", "porque": "Recorrer una lista vacía es válido." }
+          ],
+          "correcta": "a", "pista": "¿Cuántos elementos tiene la lista?", "explicacion": "Cero elementos, cero vueltas. Fin está fuera del bucle y se muestra." },
+        { "id": "u3-l2-p02", "version": 1, "familia": "py.recorrido.explicar", "uso": "practica", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Cuál explicación es correcta?", "codigo": "for nombre in [\"Ana\", \"Luis\"]:\n    print(\"Hola\", nombre)", "salida": "Hola Ana\nHola Luis",
+          "opciones": [
+            { "id": "a", "texto": "Saluda a cada nombre de la lista, uno por línea: Hola Ana y Hola Luis.", "porque": "Correcto: una vuelta por nombre." },
+            { "id": "b", "texto": "Muestra Hola nombre dos veces.", "porque": "nombre va sin comillas: se muestra su valor." },
+            { "id": "c", "texto": "Muestra Hola una vez y después la lista.", "porque": "print está dentro del bucle y recibe un nombre cada vez." }
+          ],
+          "correcta": "a", "pista": "¿Qué valor tiene nombre en cada vuelta?", "explicacion": "En la vuelta 1 nombre es Ana y en la 2 es Luis: se saluda a cada uno." },
+        { "id": "u3-l2-p03", "version": 1, "familia": "py.recorrido.estructura", "uso": "practica", "nivel": "basico", "formato": "fichas",
+          "consigna": "Completa para recorrer la lista de precios.", "codigo": "precios = [1000, 2000]\n___ precio in precios:\n    print(precio)", "salida": "1000\n2000",
+          "fichas": [
+            { "id": "a", "texto": "for", "porque": "Correcto: for recorre la lista elemento por elemento." },
+            { "id": "b", "texto": "if", "porque": "if decide una vez; no recorre elementos." },
+            { "id": "c", "texto": "print", "porque": "print muestra; no repite." }
+          ],
+          "correcta": "a", "pista": "¿Qué palabra repite un bloque por cada elemento?", "explicacion": "for precio in precios: da una vuelta por cada precio." },
+        { "id": "u3-l2-p04", "version": 1, "familia": "py.recorrido.condicion", "uso": "practica", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "veces = 0\nfor x in [3, 8, 1]:\n    if x > 2:\n        veces = veces + 1\nprint(veces)", "salida": "2",
+          "opciones": [
+            { "id": "a", "texto": "2", "porque": "Correcto: solo 3 y 8 son mayores que 2." },
+            { "id": "b", "texto": "3", "porque": "El 1 no cumple la condición." },
+            { "id": "c", "texto": "1", "porque": "Tanto 3 como 8 cumplen la condición." }
+          ],
+          "correcta": "a", "pista": "En cada vuelta, decide si x > 2.", "explicacion": "Vueltas: 3 sí cuenta, 8 sí cuenta, 1 no. veces termina en 2." },
+        { "id": "u3-l2-p05", "version": 1, "familia": "py.recorrido.variable", "uso": "practica", "nivel": "moderado", "formato": "linea",
+          "consigna": "El programa debería mostrar cada gasto, pero muestra el mismo número tres veces. Elige la línea que causa el problema.",
+          "lineas": ["gastos = [5000, 3000, 8000]", "for gasto in gastos:", "    print(gastos[0])"], "correctas": [3], "salida": "5000\n5000\n5000",
+          "porque": { "1": "La lista está bien.", "2": "El for recorre bien la lista.", "3": "Correcto: muestra siempre gastos[0] en lugar de la variable gasto." },
+          "pista": "¿Se usa la variable que cambia en cada vuelta?", "explicacion": "gasto cambia en cada vuelta; gastos[0] siempre es 5000. Debe ser print(gasto)." },
+        { "id": "u3-l2-t01", "version": 1, "familia": "py.recorrido.valores", "uso": "transferencia", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "for i in [2, 4]:\n    print(i, i * i)", "salida": "2 4\n4 16",
+          "opciones": [
+            { "id": "a", "texto": "2 4 y después 4 16", "porque": "Correcto: cada vuelta muestra el número y su cuadrado." },
+            { "id": "b", "texto": "4 y después 16", "porque": "print recibe dos valores: i y i * i." },
+            { "id": "c", "texto": "2 4 16", "porque": "Son dos vueltas, una línea por vuelta." }
+          ],
+          "correcta": "a", "pista": "¿Qué dos valores muestra print en cada vuelta?", "explicacion": "Vuelta 1: 2 y 4. Vuelta 2: 4 y 16." },
+        { "id": "u3-l2-t02", "version": 1, "familia": "py.recorrido.vueltas", "uso": "transferencia", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Cuántas veces se ejecuta print en este programa?", "codigo": "semana = [\"l\", \"m\", \"x\", \"j\", \"v\"]\nfor dia in semana:\n    print(dia)\nprint(\"fin\")", "salida": "l\nm\nx\nj\nv\nfin",
+          "opciones": [
+            { "id": "a", "texto": "6", "porque": "Correcto: cinco veces dentro del bucle y una al final." },
+            { "id": "b", "texto": "5", "porque": "Falta el print final, que está fuera del bucle." },
+            { "id": "c", "texto": "1", "porque": "El print del bucle se repite en cada vuelta." }
+          ],
+          "correcta": "a", "pista": "Cuenta las vueltas y suma las líneas que corren una sola vez.", "explicacion": "Cinco elementos dan cinco print dentro del bucle, más el print(\"fin\")." }
+      ]
+    },
+    {
+      "id": "u3-l3",
+      "habilidad": "py.acumulador",
+      "titulo": "Sumar los gastos de la semana",
+      "objetivo": "Al terminar podrás seguir un acumulador y explicar por qué empieza antes del bucle.",
+      "explicacion": [
+        "Para sumar todos los elementos se usa un acumulador: una variable que empieza en 0 antes del bucle.",
+        "Dentro del `for`, en cada vuelta se le suma el elemento actual: `total = total + gasto`.",
+        "Al terminar el bucle, el acumulador tiene la suma de todo. Si se reinicia dentro del bucle, se pierde lo acumulado."
+      ],
+      "ampliada": [
+        "`total = 0` va antes del `for` porque debe ejecutarse una sola vez.",
+        "El mismo patrón sirve para contar: `cuenta = cuenta + 1` en cada vuelta.",
+        "Python tiene `sum(gastos)`, que hace lo mismo; entender el acumulador te permite explicar cómo funciona."
+      ],
+      "ejemplo": {
+        "codigo": "gastos = [5000, 3000, 8000]\ntotal = 0\nfor gasto in gastos:\n    total = total + gasto\nprint(total)",
+        "pasos": [
+          "Antes del bucle: total vale 0.",
+          "Vuelta 1: `total = 0 + 5000`, ahora vale 5000.",
+          "Vuelta 2: `total = 5000 + 3000`, ahora vale 8000.",
+          "Vuelta 3: `total = 8000 + 8000`, ahora vale 16000. Al terminar se muestra 16000."
+        ],
+        "salida": "16000"
+      },
+      "cierre": "Ya puedes explicar cómo un acumulador construye un total vuelta a vuelta y por qué empieza antes del bucle.",
+      "proyecto": "Completaste los gastos de la semana: sabes sumarlos y explicar un resultado inesperado.",
+      "secuencia": ["u3-l3-a01", "u3-l3-a02", "u3-l3-a03"],
+      "actividades": [
+        { "id": "u3-l3-a01", "version": 1, "familia": "py.acumulador.seguir", "uso": "guiada", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "total = 0\nfor x in [2, 3, 4]:\n    total = total + x\nprint(total)", "salida": "9",
+          "ayuda": "Anota total después de cada vuelta: 2, luego 5, luego…",
+          "opciones": [
+            { "id": "a", "texto": "9", "porque": "Correcto: 2 + 3 + 4." },
+            { "id": "b", "texto": "4", "porque": "4 es el último elemento, pero total acumula todos." },
+            { "id": "c", "texto": "0", "porque": "total cambia en cada vuelta." }
+          ],
+          "correcta": "a", "pista": "Sigue el valor de total vuelta por vuelta.", "explicacion": "total pasa por 2, 5 y 9. Se muestra 9." },
+        { "id": "u3-l3-a02", "version": 1, "familia": "py.acumulador.reinicio", "uso": "aplicacion", "nivel": "moderado", "formato": "linea",
+          "consigna": "El programa debería mostrar el total de la semana (16000), pero muestra 8000. Elige la línea que causa el problema.",
+          "lineas": ["gastos = [5000, 3000, 8000]", "for gasto in gastos:", "    total = 0", "    total = total + gasto", "print(total)"], "correctas": [3], "salida": "8000",
+          "porque": { "1": "La lista es correcta.", "2": "El recorrido es correcto.", "3": "Correcto: reinicia el total en cada vuelta y se pierde lo acumulado.", "4": "Sumar el gasto al total es lo que se busca.", "5": "Mostrar el total al final está bien." },
+          "pista": "¿Cuántas veces se ejecuta total = 0?", "explicacion": "total = 0 dentro del bucle borra la suma en cada vuelta; al final solo queda el último gasto. Debe ir antes del for." },
+        { "id": "u3-l3-a03", "version": 1, "familia": "py.acumulador.explicar", "uso": "aplicacion", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Cuál explicación de este programa es la más completa?", "codigo": "gastos = [5000, 3000, 8000]\ntotal = 0\nfor gasto in gastos:\n    total = total + gasto\nprint(total)", "salida": "16000",
+          "opciones": [
+            { "id": "a", "texto": "Suma los gastos: empieza total en 0, en cada vuelta le agrega un gasto y al final muestra 16000.", "porque": "Correcto: dice qué calcula y cómo." },
+            { "id": "b", "texto": "Recorre la lista con for.", "porque": "Es cierto, pero no dice qué calcula." },
+            { "id": "c", "texto": "Muestra cada gasto y después 0.", "porque": "Solo se muestra el total final." }
+          ],
+          "correcta": "a", "pista": "Una buena explicación dice qué representa el número que se muestra.", "explicacion": "El programa acumula los tres gastos: total es la suma de la semana, 16000." },
+        { "id": "u3-l3-p01", "version": 1, "familia": "py.acumulador.contar", "uso": "practica", "nivel": "basico", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "cuenta = 0\nfor n in [7, 7, 7]:\n    cuenta = cuenta + 1\nprint(cuenta)", "salida": "3",
+          "opciones": [
+            { "id": "a", "texto": "3", "porque": "Correcto: se suma 1 por cada elemento." },
+            { "id": "b", "texto": "21", "porque": "Se suma 1 en cada vuelta, no el valor 7." },
+            { "id": "c", "texto": "7", "porque": "cuenta no depende del valor de n." }
+          ],
+          "correcta": "a", "pista": "¿Qué se suma en cada vuelta: n o 1?", "explicacion": "Se suma 1 por vuelta: tres vueltas, cuenta vale 3." },
+        { "id": "u3-l3-p02", "version": 1, "familia": "py.acumulador.seguir", "uso": "practica", "nivel": "basico", "formato": "fichas",
+          "consigna": "Completa para que total acumule cada precio.", "codigo": "total = 0\nfor precio in [1000, 2500]:\n    total = ___ + precio\nprint(total)", "salida": "3500",
+          "fichas": [
+            { "id": "a", "texto": "total", "porque": "Correcto: se suma al valor acumulado hasta ahora." },
+            { "id": "b", "texto": "0", "porque": "Sumar a 0 perdería lo acumulado: mostraría 2500." },
+            { "id": "c", "texto": "precio", "porque": "Sumaría el precio consigo mismo: mostraría 5000." }
+          ],
+          "correcta": "a", "pista": "¿De qué valor debe partir la suma en cada vuelta?", "explicacion": "total = total + precio acumula: 1000 y luego 3500." },
+        { "id": "u3-l3-p03", "version": 1, "familia": "py.acumulador.seguir", "uso": "practica", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "total = 0\nfor x in [10, 20]:\n    total = total + x\n    print(total)", "salida": "10\n30",
+          "opciones": [
+            { "id": "a", "texto": "10 y después 30", "porque": "Correcto: print está dentro del bucle y muestra el total parcial." },
+            { "id": "b", "texto": "30", "porque": "print tiene sangría: se ejecuta en cada vuelta." },
+            { "id": "c", "texto": "10 y después 20", "porque": "Se muestra el total acumulado, no cada elemento." }
+          ],
+          "correcta": "a", "pista": "¿print está dentro o fuera del bucle?", "explicacion": "Vuelta 1: total 10 y se muestra. Vuelta 2: total 30 y se muestra." },
+        { "id": "u3-l3-p04", "version": 1, "familia": "py.acumulador.guardar", "uso": "practica", "nivel": "moderado", "formato": "linea",
+          "consigna": "El programa debería mostrar la suma (6), pero muestra 0. Elige la línea que causa el problema.",
+          "lineas": ["numeros = [1, 2, 3]", "total = 0", "for n in numeros:", "    total + n", "print(total)"], "correctas": [4], "salida": "0",
+          "porque": { "1": "La lista es correcta.", "2": "Empezar en 0 es correcto.", "3": "El recorrido es correcto.", "4": "Correcto: calcula total + n pero no lo guarda.", "5": "Mostrar el total está bien." },
+          "pista": "¿Qué línea debería cambiar el valor de total? ¿Lo cambia?", "explicacion": "total + n se pierde; hace falta total = total + n." },
+        { "id": "u3-l3-p05", "version": 1, "familia": "py.acumulador.explicar", "uso": "practica", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "Alguien explica el programa así: «Suma los números». ¿Qué le falta?", "codigo": "total = 0\nfor n in [4, 5]:\n    if n > 4:\n        total = total + n\nprint(total)", "salida": "5",
+          "opciones": [
+            { "id": "a", "texto": "Que solo suma los números mayores que 4, así que el resultado es 5.", "porque": "Correcto: la condición cambia el resultado." },
+            { "id": "b", "texto": "Que muestra cada número.", "porque": "Solo se muestra el total." },
+            { "id": "c", "texto": "Que reinicia el total en cada vuelta.", "porque": "total = 0 está fuera del bucle." }
+          ],
+          "correcta": "a", "pista": "¿Se suman todos los números o solo algunos?", "explicacion": "El 4 no cumple n > 4, así que solo se suma el 5." },
+        { "id": "u3-l3-t01", "version": 1, "familia": "py.acumulador.promedio", "uso": "transferencia", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "gastos = [2000, 3000]\ntotal = 0\nfor g in gastos:\n    total = total + g\npromedio = total / len(gastos)\nprint(promedio)", "salida": "2500.0",
+          "opciones": [
+            { "id": "a", "texto": "2500.0", "porque": "Correcto: 5000 dividido entre 2." },
+            { "id": "b", "texto": "5000", "porque": "Ese es el total; luego se divide entre la cantidad." },
+            { "id": "c", "texto": "2500", "porque": "La división / siempre da un decimal." }
+          ],
+          "correcta": "a", "pista": "Calcula el total y divídelo entre la cantidad.", "explicacion": "total es 5000 y len(gastos) es 2: 5000 / 2 = 2500.0." },
+        { "id": "u3-l3-t02", "version": 1, "familia": "py.acumulador.maximo", "uso": "transferencia", "nivel": "moderado", "formato": "seleccion",
+          "consigna": "¿Qué muestra este programa?", "codigo": "maximo = 0\nfor x in [3, 9, 4]:\n    if x > maximo:\n        maximo = x\nprint(maximo)", "salida": "9",
+          "opciones": [
+            { "id": "a", "texto": "9", "porque": "Correcto: maximo guarda el mayor valor visto." },
+            { "id": "b", "texto": "4", "porque": "4 no es mayor que 9, así que no lo reemplaza." },
+            { "id": "c", "texto": "16", "porque": "No se suma: se guarda el mayor." }
+          ],
+          "correcta": "a", "pista": "Sigue maximo vuelta por vuelta.", "explicacion": "maximo pasa a 3, luego a 9; el 4 no lo supera. Se muestra 9." }
+      ]
+    }
+  ]
+}

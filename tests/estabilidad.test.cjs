@@ -257,6 +257,29 @@ test('413 del proveedor (solicitud mayor que el límite por minuto) no se presen
   await assert.rejects(chatCompletion({ system: '', user: '' }), { code: 'LLM_SOLICITUD', detalle: 'http_413' }); assert.equal(n, 1)
 })
 
+test('envío en curso: otra cuenta con la misma sesión, revisión y carga no recibe la práctica ajena; el duplicado propio sí se comparte', async () => {
+  let liberar
+  const retenido = new Promise((r) => { liberar = r })
+  let llamadas = 0
+  const e = await preparar({ transport: async (url, opciones) => {
+    llamadas++
+    await retenido
+    return Response.json({ choices: [{ message: { content: JSON.stringify(tutor()(JSON.parse(opciones.body))) } }] })
+  } })
+  await e.consentir('user_prueba_b')
+  const s = await e.abrir(codigo)
+  const propia = e.paso(s, 'responder', { respuesta })
+  while (llamadas === 0) await new Promise((r) => setImmediate(r))
+  const duplicada = e.paso(s, 'responder', { respuesta })
+  // Before the fix, the other account joined the pending promise and waited for it.
+  const limite = new Promise((_, rechazar) => setTimeout(() => rechazar(Object.assign(new Error('La otra cuenta quedó esperando el envío ajeno.'), { code: 'COMPARTIDO' })), 3000))
+  await assert.rejects(Promise.race([e.paso(s, 'responder', { respuesta }, 'user_prueba_b'), limite]), { code: 'SESION_INVALIDA' })
+  liberar()
+  const [a, b] = await Promise.all([propia, duplicada])
+  assert.equal(a.fase, 'feedback'); assert.equal(b.revision, a.revision)
+  assert.equal(llamadas, 1)
+})
+
 test('refuerzo: la cita de código tolera indentación distinta; una conclusión sin cita real queda sin verificar', async () => {
   const e = await preparar()
   let s = await e.contestar(await e.iniciar('def contar(estados):\n    n = 0\n    for e in estados:\n        n += 1\n    return n'), 'Recorre la lista y cuenta cuántos estados hay, devolviendo ese número.', tutor({ concepto: 'recorridos' }))
@@ -269,6 +292,59 @@ test('refuerzo: la cita de código tolera indentación distinta; una conclusión
   assert.ok(criterios.every((c) => c.estado === 'cumplido' && solucion.includes(c.cita)))
   assert.equal(casos[0].conclusion, 'no_verificable'); assert.ok(casos.slice(1).every((c) => c.conclusion === 'coincide'))
   assert.equal(f.evaluacionRefuerzo.estado, 'Revisión con evidencia insuficiente')
+  // Cases are shown after the submission with their call and expected value.
+  assert.equal(JSON.stringify(casos.map((c) => [c.entrada, c.esperado]).slice(0, 3)), JSON.stringify([['contar_pendientes([0, 1, 0])', '2'], ['contar_pendientes([])', '0'], ['contar_pendientes([1, 1])', '0']]))
+  assert.equal(f.evaluacionRefuerzo.metodo, 'ast')
+  const { metodoAnalisis } = await e.importar('lib/evaluacion.js')
+  assert.equal(metodoAnalisis({ estado: 'no_disponible' }), 'aproximado'); assert.equal(metodoAnalisis({ estado: 'invalida' }), 'ast')
+})
+
+test('refuerzo: prácticas consecutivas rotan variantes de la misma idea; agotadas, se identifica el repaso; otra cuenta no influye', async () => {
+  const e = await preparar()
+  await e.consentir('user_prueba_b')
+  const contar = 'def contar(estados):\n    n = 0\n    for e in estados:\n        n += 1\n    return n'
+  async function abrirRefuerzo(usuario) {
+    let s = await e.contestar(await e.iniciar(contar, {}, usuario), 'Recorre la lista y cuenta cuántos estados hay, devolviendo ese número.', tutor({ concepto: 'recorridos' }), usuario)
+    s = await e.paso(await e.paso(s, 'cerrar', {}, usuario), 'refuerzo', {}, usuario)
+    return s
+  }
+  const vistas = []
+  for (let i = 0; i < 4; i++) {
+    const s = await abrirRefuerzo()
+    vistas.push([s.refuerzo.nombre, s.refuerzo.repeticion])
+    // Reloading keeps the task chosen for this practice.
+    assert.equal((await e.sustentar({ accion: 'recuperar', sesion: s.sesion })).refuerzo.nombre, s.refuerzo.nombre)
+  }
+  assert.equal(JSON.stringify(vistas), JSON.stringify([['contar_pendientes', false], ['contar_mayores', false], ['sumar_pares', false], ['contar_pendientes', true]]))
+  const otra = await abrirRefuerzo('user_prueba_b')
+  assert.equal(otra.refuerzo.nombre, 'contar_pendientes'); assert.equal(otra.refuerzo.repeticion, false)
+  const { elegirRefuerzo } = await e.importar('lib/pedagogia.js')
+  const politica = { permitidos: ['operaciones'] }
+  const forzado = { conceptos: [{ concepto: 'operaciones', nombre: 'Operaciones', estado: 'pendiente', evidencia: [{ pregunta: 1 }] }] }
+  assert.equal(elegirRefuerzo(forzado, politica, ['segundos_totales', 'total_compra', 'costo_taxi']).nombre, 'costo_taxi')
+  assert.equal(elegirRefuerzo(forzado, politica, ['costo_taxi']).nombre, 'total_compra')
+})
+
+test('refuerzo: una corrección versionada conserva la primera revisión, muestra qué cambió y no reabre el cierre', async () => {
+  const e = await preparar()
+  let s = await e.contestar(await e.iniciar('def contar(estados):\n    n = 0\n    for e in estados:\n        n += 1\n    return n'), 'Recorre la lista y cuenta cuántos estados hay, devolviendo ese número.', tutor({ concepto: 'recorridos' }))
+  s = await e.paso(await e.paso(s, 'cerrar'), 'refuerzo')
+  const cierre = s.resumen
+  e.responder(revisor({ conclusion: 'difiere', nivel: 1, cita: 'return 0' }))
+  s = await e.paso(s, 'entregar', { codigo: 'def contar_pendientes(estados):\n    return 0' })
+  assert.equal(s.puedeCorregir, true); assert.equal(s.versionesRefuerzo.length, 0); assert.equal(s.cambiosRefuerzo, null)
+  s = await e.paso(s, 'corregir')
+  assert.equal(s.fase, 'refuerzo'); assert.equal(s.versionesRefuerzo.length, 1); assert.equal(s.puedeCorregir, false)
+  const antes = e.llamadas.length
+  const solucion = 'def contar_pendientes(estados):\n    pendientes = 0\n    for estado in estados:\n        if estado == 0:\n            pendientes += 1\n    return pendientes'
+  e.responder(revisor({ cita: 'pendientes += 1' }))
+  s = await e.paso(s, 'entregar', { codigo: solucion })
+  assert.equal(e.llamadas.length, antes + 1)
+  assert.equal(s.fase, 'refuerzo_revisado'); assert.equal(s.versionesRefuerzo[0].estado, 'La revisión estática señala aspectos por revisar')
+  assert.ok(s.cambiosRefuerzo.some((c) => c.antes !== c.ahora && c.ahora === 'Explicado'))
+  assert.equal(JSON.stringify(s.resumen), JSON.stringify(cierre), 'el cierre no se reabre')
+  await assert.rejects(e.paso(s, 'corregir'), { code: 'PASO_INVALIDO' })
+  assert.ok((await e.eventos('reinforcement_correction_started')).length === 1)
 })
 
 test('recorrido completo del promedio: correcta, parcial, fallo recuperable y falsa hasta el cierre y el refuerzo', async () => {
@@ -297,4 +373,36 @@ test('recorrido completo del promedio: correcta, parcial, fallo recuperable y fa
   s = await e.paso(s, 'entregar', { codigo: 'def promedio_lecturas(lecturas):\n    return sum(lecturas) / len(lecturas)' })
   assert.equal(s.fase, 'refuerzo_revisado'); assert.equal(s.evaluacionRefuerzo.pruebasEjecutadas, false)
   await assert.rejects(e.paso(s, 'entregar', { codigo: 'x' }), { code: 'PASO_INVALIDO' })
+})
+
+test('calibración: categorías de dos ejes, métricas y puertas del plan sobre el corpus, sin llamadas reales', async () => {
+  const fs = require('node:fs')
+  const corpus = JSON.parse(fs.readFileSync('tests/fixtures/calibracion/corpus.json', 'utf8'))
+  assert.equal(corpus.casos.length, 60); assert.equal(corpus.robustez.length, 20)
+  assert.equal(corpus.casos.filter((c) => c.particion === 'retenido').length, 20)
+  for (const cat of corpus.categorias) assert.equal(corpus.casos.filter((c) => c.etiquetaPropuesta === cat).length, 12, cat)
+  const e = await preparar()
+  const { categoriaDe, metricas, afirmaEjecucion } = await e.importar('lib/calibracion.js')
+  const vista = (h, extra = {}) => ({ fase: 'feedback', historial: [h], ...extra })
+  const crit = (...estados) => estados.map((estado, i) => ({ id: `c${i}`, estado }))
+  assert.equal(categoriaDe(vista({ clasificacion: 'evaluable', criterios: crit('cumplido', 'cumplido', 'cumplido'), evidencias: [] })), 'correcta')
+  assert.equal(categoriaDe(vista({ clasificacion: 'evaluable', criterios: crit('cumplido', 'parcial', 'cumplido'), evidencias: [] })), 'parcial')
+  assert.equal(categoriaDe(vista({ clasificacion: 'evaluable', criterios: crit('cumplido', 'no_cumplido', 'parcial'), evidencias: [] })), 'incompleta')
+  assert.equal(categoriaDe(vista({ clasificacion: 'evaluable', criterios: crit('cumplido'), evidencias: [{ veredicto: 'falsa' }] })), 'error_conceptual')
+  assert.equal(categoriaDe(vista({ clasificacion: 'sin_evidencia', criterios: [] })), 'insuficiente')
+  assert.equal(categoriaDe({ fase: 'pregunta', aclaracion: 'Explica solo esa idea.', historial: [] }), 'insuficiente')
+  assert.equal(afirmaEjecucion(vista({ feedback: { aciertos: ['Al ejecutar con [2, 4] da 3.'] } })), true)
+  // Perfect agreement passes every gate; a false conceptual error on a correct answer does not.
+  const perfecto = [...corpus.casos.map((c) => ({ id: c.id, categorias: Array(3).fill(c.etiquetaPropuesta) })),
+    ...corpus.robustez.map((r) => ({ id: r.id, categorias: Array(3).fill({ no_correcta: 'parcial', no_error_conceptual: 'parcial', error_conceptual: 'error_conceptual', no_penalizar_no_solicitado: 'correcta', insuficiente: 'insuficiente', no_inventar_ejecucion: 'correcta' }[r.regla]), ejecucion: [false, false, false] }))]
+  const ok = metricas(corpus, perfecto)
+  assert.equal(ok.aprobado, true); assert.equal(ok.acuerdoRetenido, 1); assert.equal(ok.consistencia, 1); assert.equal(ok.robustez, 1)
+  const mal = perfecto.map((r) => r.id.includes('-correcta-') ? { ...r, categorias: ['error_conceptual', 'correcta', 'correcta'] } : r.id === 'robustez-01' ? { ...r, categorias: ['correcta', 'parcial', 'parcial'] } : r)
+  const m = metricas(corpus, mal)
+  assert.equal(m.aprobado, false); assert.equal(m.puertas.falsosErroresConceptuales, false); assert.equal(m.puertas.consistencia, false)
+  assert.equal(JSON.stringify(m.fallosRobustez), JSON.stringify(['robustez-01']))
+  // End to end with the simulated tutor: a complete paraphrase is «correcta».
+  const caso = corpus.casos.find((c) => c.id === 'compra-correcta-2')
+  const v = await e.contestar(await e.iniciar(corpus.programas.compra), caso.respuesta, tutor({ nivel: 2, cita: caso.respuesta.slice(0, 20) }))
+  assert.equal(categoriaDe(v), 'correcta')
 })

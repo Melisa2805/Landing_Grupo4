@@ -51,7 +51,7 @@ async function entorno({ env, transport, pythonDisponible = true, reloj, db, usu
   let salida
   const contexto = vm.createContext({
     process: { env: variables, cwd: () => raiz },
-    AbortSignal, Buffer, URL,
+    AbortSignal, Buffer, URL, Response, Request, Headers,
     ...(reloj ? { Date: class extends Date { static now() { return reloj() } } } : {}),
     console: { error(...args) { registros.push(args) } },
     fetch: async (url, opciones) => {
@@ -71,7 +71,7 @@ async function entorno({ env, transport, pythonDisponible = true, reloj, db, usu
   }
   async function crearModulo(nombre) {
     let modulo
-    if (nombre.startsWith('node:') || ['react', 'react/jsx-runtime', 'lucide-react'].includes(nombre)) {
+    if (nombre.startsWith('node:') || ['react', 'react/jsx-runtime', 'lucide-react', 'qrcode-generator'].includes(nombre)) {
       let nativo = require(nombre)
       if (nombre === 'node:child_process' && !pythonDisponible) nativo = { ...nativo, execFile: (bin, args, options, callback) => {
         const { PassThrough } = require('node:stream')
@@ -82,6 +82,10 @@ async function entorno({ env, transport, pythonDisponible = true, reloj, db, usu
       modulo = new vm.SyntheticModule(nombres, function () {
         for (const k of nombres) this.setExport(k, k === 'default' ? nativo : nativo[k])
       }, { context: contexto })
+    } else if (nombre === 'next/link') {
+      // Static render of client views: a plain anchor is enough.
+      const React = require('react')
+      modulo = new vm.SyntheticModule(['default'], function () { this.setExport('default', ({ href, children, ...p }) => React.createElement('a', { href, ...p }, children)) }, { context: contexto })
     } else if (nombre === 'next/server') {
       modulo = new vm.SyntheticModule(['NextResponse'], function () {
         this.setExport('NextResponse', { json: (data, opciones) => Response.json(data, opciones) })
@@ -106,9 +110,11 @@ async function entorno({ env, transport, pythonDisponible = true, reloj, db, usu
       modulo = new vm.SourceTextModule(source, { context: contexto, identifier: nombre, importModuleDynamically: (specifier) => import(specifier) })
     }
     await modulo.link(async (specifier, padre) => {
-      if (['next/server', '@clerk/nextjs/server', 'lucide-react'].includes(specifier) || specifier.startsWith('node:') || specifier.startsWith('react')) return cargar(specifier)
+      if (['next/server', 'next/link', '@clerk/nextjs/server', 'lucide-react', 'qrcode-generator'].includes(specifier) || specifier.startsWith('node:') || specifier.startsWith('react')) return cargar(specifier)
       const destino = path.resolve(path.dirname(padre.identifier), specifier)
-      return cargar(path.extname(destino) ? destino : `${destino}.js`)
+      if (path.extname(destino)) return cargar(destino)
+      // Like Next: an import without extension may be a .js or a .jsx module.
+      return cargar(await fs.access(`${destino}.js`).then(() => `${destino}.js`, () => `${destino}.jsx`))
     })
     return modulo
   }

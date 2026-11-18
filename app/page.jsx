@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ShieldCheck, Code2, HelpCircle, ArrowRight } from 'lucide-react'
+import { ShieldCheck, Code2, HelpCircle, ArrowRight, BookOpen } from 'lucide-react'
 import { HowItWorks, ExampleQuestion, MiniQuiz, Reveal } from './components/landing-interactions'
 import { HeroVisual, InteractiveComparison } from './components/landing-showcase'
 import ScrollToTop from './components/scroll-to-top'
@@ -17,17 +17,20 @@ export default function LandingPage() {
             <ShieldCheck aria-hidden="true" className="w-4 h-4" /> Grupo 4 - IA para Programación
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight">
-            Descubre qué necesitas repasar para <span className="text-blue-500">explicar tu código</span>.
+            Aprende Python y descubre qué necesitas repasar para <span className="text-blue-500">explicar tu código</span>.
           </h1>
           <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto">
-            Para programación inicial en Python. Pegas el código que hiciste, con o sin ayuda de IA, y respondes hasta tres preguntas sobre él. Recibes lo que explicaste, lo que falta y un siguiente paso; no hay nota.
+            Dos formas de practicar, independientes entre sí. <strong className="text-slate-200">Aprender:</strong> lecciones breves de Python desde el teléfono, sin cuenta. <strong className="text-slate-200">Sustentar:</strong> pegas el código que hiciste, con o sin ayuda de IA, respondes hasta tres preguntas y recibes lo que explicaste, lo que falta y un siguiente paso; no hay nota.
           </p>
-          <p className="text-sm text-slate-400">Puedes cerrar después de cada explicación. Necesitas iniciar sesión para que tu práctica quede guardada.</p>
-          <div className="pt-4 flex flex-col justify-center items-center lg:items-start gap-3">
-            <Link href="/simulador" className={`${styles.primaryAction} group w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-4 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30`}>
+          <div className="pt-4 grid gap-3 sm:grid-cols-2 sm:max-w-2xl mx-auto lg:mx-0">
+            <Link href="/aprender" className={`${styles.primaryAction} group bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-4 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30`}>
+              <BookOpen aria-hidden="true" className="w-5 h-5 shrink-0" />Aprender Python paso a paso
+            </Link>
+            <Link href="/simulador" className={`${styles.primaryAction} group border border-blue-500 hover:bg-blue-950 text-white font-bold px-6 py-4 rounded-xl text-lg flex items-center justify-center gap-2`}>
               Practicar con mi código <ArrowRight aria-hidden="true" className="w-5 h-5 shrink-0 motion-safe:group-hover:translate-x-1 motion-safe:transition-transform" />
             </Link>
-            <p className="text-sm text-slate-400">Hasta tres preguntas sobre tu propio programa</p>
+            <p className="text-sm text-slate-400">Sin cuenta · tu avance se guarda en este navegador</p>
+            <p className="text-sm text-slate-400">Hasta tres preguntas sobre tu propio programa · requiere iniciar sesión</p>
           </div>
         </div>
         <HeroVisual />

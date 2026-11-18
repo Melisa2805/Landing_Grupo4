@@ -38,7 +38,8 @@ const CLERK = { NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: `pk_live_${Buffer.from('clerk
     const base = `http://127.0.0.1:${port}`
     await until(async () => { if (app.exitCode !== null) throw new Error(estadoInicio); try { const r = await fetch(base, { signal: AbortSignal.timeout(2000) }); estadoInicio = `HTTP ${r.status}`; return r.ok } catch (e) { estadoInicio = e.name; return false } }, 'arranque Next')
     const landing = await (await fetch(base)).text()
-    for (const texto of ['Descubre qué necesitas repasar', 'Practicar con mi código', 'Hasta tres preguntas', 'Iniciar sesión']) assert.ok(landing.includes(texto), texto)
+    for (const texto of ['descubre qué necesitas repasar', 'Aprender Python paso a paso', 'Practicar con mi código', 'Hasta tres preguntas', 'Iniciar sesión']) assert.ok(landing.includes(texto), texto)
+    for (const ruta of ['/aprender', '/expo']) assert.equal((await fetch(base + ruta)).status, 200, ruta)
     for (const texto of ['pydefense codigo.py', 'Administrador', 'Práctica rápida']) assert.ok(!landing.includes(texto), texto)
     assert.equal((await fetch(`${base}/simulador`)).status, 200)
     for (const ruta of ['/api/sustentacion', '/api/participacion', '/api/generar-preguntas', '/api/evaluar-respuestas']) {
@@ -67,11 +68,76 @@ const CLERK = { NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: `pk_live_${Buffer.from('clerk
     for (const [nombre, width, height, mobile] of [['escritorio', 1440, 1000, false], ['movil', 390, 844, true]]) {
       await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile })
       await send('Page.navigate', { url: base })
-      await until(async () => evaluate("document.readyState === 'complete' && document.body.innerText.includes('Descubre qué necesitas repasar')"), `landing ${nombre}`)
+      await until(async () => evaluate("document.readyState === 'complete' && document.body.innerText.includes('descubre qué necesitas repasar')"), `landing ${nombre}`)
       medidas[nombre] = await evaluate('({ overflow: document.documentElement.scrollWidth > innerWidth, llegada: sessionStorage.getItem("pydefense-llegada") !== null })')
       assert.equal(medidas[nombre].overflow, false, nombre); assert.equal(medidas[nombre].llegada, true)
     }
-    console.log(JSON.stringify({ recorrido: 'OK', medidas, llamadasSimuladas: llamadas, llamadasIAReal: 0, comprobaciones: ['landing fiel al recorrido', '401 en todas las API sin tocar almacenamiento', 'marca local de llegada', 'escritorio 1440 y móvil 390 sin desbordamiento'], noVerificado: 'práctica autenticada: requiere credenciales de prueba de Clerk' }))
+    // Aprender without an account, as a visitor arriving from the QR: complete
+    // lesson 1 with one error and its hint, reload, and continue to lesson 2.
+    const texto = (t) => `document.body.innerText.includes(${JSON.stringify(t)})`
+    const pulsar = (t) => evaluate(`(() => { const b = [...document.querySelectorAll('button, a')].find((x) => x.innerText.trim().startsWith(${JSON.stringify(t)}) && !x.disabled); if (!b) return false; b.click(); return true })()`)
+    const elegir = (t) => evaluate(`(() => { const l = [...document.querySelectorAll('label')].find((x) => x.innerText.trim().startsWith(${JSON.stringify(t)})); if (!l) return false; l.querySelector('input').click(); return true })()`)
+    const desborda = () => evaluate('document.documentElement.scrollWidth > innerWidth')
+    // `--capturas <dir>` saves full-page screenshots for a visual review.
+    const dirCapturas = process.argv.includes('--capturas') ? process.argv[process.argv.indexOf('--capturas') + 1] : null
+    const capturar = async (nombre) => {
+      if (!dirCapturas) return
+      await sleep(150)
+      const { data } = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true })
+      await fs.writeFile(path.join(dirCapturas, `${nombre}.png`), Buffer.from(data, 'base64'))
+    }
+    const recorridoAprender = {}
+    for (const [nombre, width, height, mobile] of [['movil', 390, 844, true], ['escritorio', 1440, 1000, false]]) {
+      await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile })
+      await send('Page.navigate', { url: `${base}/expo` })
+      await until(() => evaluate(texto('Empezar la lección 1')), `expo ${nombre}`)
+      assert.equal(await desborda(), false, `expo ${nombre}`); await capturar(`${nombre}-1-expo`)
+      await evaluate('localStorage.clear()')
+      // Measurement is optional: declining sends nothing (no storage is created, see below).
+      if (nombre === 'movil') {
+        await send('Page.reload')
+        await until(() => evaluate(texto('¿Nos ayudas a medir PyDefense')), `permiso ${nombre}`)
+        assert.ok(await pulsar('No, gracias'))
+        await until(() => evaluate(texto('No contamos tu visita')), `rechazo ${nombre}`)
+      }
+      assert.ok(await pulsar('Empezar la lección 1'))
+      await until(() => evaluate(texto('Guardar y mostrar valores')), `aprender ${nombre}`); await capturar(`${nombre}-2-inicio`)
+      assert.ok(await pulsar('Empezar:'))
+      await until(() => evaluate(texto('Ejemplo resuelto')), `enseñanza ${nombre}`)
+      assert.equal(await desborda(), false, `enseñanza ${nombre}`)
+      assert.ok(await pulsar('Ver el ejemplo paso a paso')); await capturar(`${nombre}-3-ensenanza`)
+      assert.ok(await pulsar('Practicar esta idea'))
+      await until(() => evaluate(texto('Práctica guiada')), `guiada ${nombre}`)
+      assert.ok(await elegir('2500')); assert.ok(await pulsar('Comprobar'))
+      await until(() => evaluate(texto('Correcto, con ayuda.')), `acierto guiado ${nombre}`)
+      assert.ok(await pulsar('Continuar'))
+      await until(() => evaluate(texto('Actividad 2 de 3')), `actividad 2 ${nombre}`)
+      assert.ok(await elegir('agua')); assert.ok(await pulsar('Comprobar'))
+      await until(() => evaluate(texto('Pista:')), `pista ${nombre}`); await capturar(`${nombre}-4-pista`)
+      assert.ok(await evaluate(texto('Te queda 1 intento')))
+      assert.ok(await elegir('bebida')); assert.ok(await pulsar('Comprobar'))
+      await until(() => evaluate(texto('Correcto, con ayuda.')), `acierto con pista ${nombre}`)
+      assert.ok(await pulsar('Continuar'))
+      await until(() => evaluate(texto('Actividad 3 de 3')), `actividad 3 ${nombre}`)
+      assert.ok(await elegir('Guarda dos valores')); assert.ok(await pulsar('Comprobar'))
+      await until(() => evaluate(texto('¡Correcto!')), `acierto autónomo ${nombre}`)
+      assert.ok(await pulsar('Continuar'))
+      await until(() => evaluate(texto('Lección completada')), `resumen ${nombre}`)
+      assert.ok(await evaluate(texto('Resolviste 1 de 2 sin ayuda'))); await capturar(`${nombre}-5-resumen`)
+      assert.equal(await desborda(), false, `resumen ${nombre}`)
+      // The lesson is already recorded: a reload keeps it and opens lesson 2.
+      await send('Page.reload')
+      await until(() => evaluate(texto('Lección completada')), `recarga ${nombre}`)
+      assert.ok(await pulsar('Siguiente lección'))
+      await until(() => evaluate(texto('Seguir un cambio de valor')), `lección 2 ${nombre}`)
+      assert.ok(await pulsar('Volver a la ruta'))
+      await until(() => evaluate(texto('1 de 9 lecciones completadas')), `progreso ${nombre}`); await capturar(`${nombre}-6-progreso`)
+      recorridoAprender[nombre] = await evaluate('JSON.parse(localStorage.getItem("pydefense-aprender:v1")).progreso.lecciones["u1-l1"].ultima')
+      assert.equal(recorridoAprender[nombre].aplicacionesSinAyuda, 1)
+    }
+    assert.equal(llamadas, 0)
+    await assert.rejects(fs.access(path.join(dir, 'datos')), 'Aprender y el rechazo de la medición no crean almacenamiento')
+    console.log(JSON.stringify({ recorrido: 'OK', medidas, recorridoAprender, llamadasSimuladas: llamadas, llamadasIAReal: 0, comprobaciones: ['landing fiel al recorrido', '401 en todas las API sin tocar almacenamiento', 'marca local de llegada', 'escritorio 1440 y móvil 390 sin desbordamiento', 'Aprender L1 completa desde /expo sin cuenta, error con pista, recarga y lección 2, en 390 y 1440', 'rechazar la medición no envía datos'], noVerificado: 'práctica autenticada: requiere credenciales de prueba de Clerk' }))
   } finally {
     ws?.close(); chrome?.kill('SIGTERM'); app?.kill('SIGTERM'); mock.closeAllConnections(); await new Promise((r) => mock.close(r))
     await sleep(300); await fs.rm(dir, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 })

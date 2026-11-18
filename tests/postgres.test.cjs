@@ -36,7 +36,7 @@ const sinUrl = !url && 'Define PYDEFENSE_TEST_DATABASE_URL para ejecutar esta in
 test('PostgreSQL: migración concurrente única, inicio idempotente y una sola transición entre instancias', { skip: sinUrl }, async () => {
   const [a, b, c] = await instancias(3)
   await Promise.all([a, b, c].map(async (e) => (await e.importar('lib/db.js')).baseDatos()))
-  assert.deepEqual((await a.db.query('SELECT version FROM esquema_migraciones ORDER BY version')).rows.map((r) => r.version), [1, 2])
+  assert.equal(JSON.stringify((await a.db.query('SELECT version FROM esquema_migraciones ORDER BY version')).rows.map((r) => Number(r.version))), JSON.stringify((await a.importar('lib/esquema.js')).MIGRACIONES.map(([v]) => v)))
   await a.consentir()
   const idSolicitud = randomUUID()
   const inicios = await Promise.all([a, b, c].map((e) => e.iniciar(codigo, { idSolicitud })))

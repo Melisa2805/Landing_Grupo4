@@ -142,5 +142,5 @@ test('una base sin migrar se prepara una sola vez aunque varias instancias arran
   const a = await entorno()
   const otras = await Promise.all([1, 2, 3].map(() => entorno({ db: a.db })))
   await Promise.all([a, ...otras].map(async (e) => (await e.importar('lib/db.js')).baseDatos()))
-  assert.deepEqual((await a.db.query('SELECT version FROM esquema_migraciones ORDER BY version')).rows.map((r) => r.version), [1, 2])
+  assert.equal(JSON.stringify((await a.db.query('SELECT version FROM esquema_migraciones ORDER BY version')).rows.map((r) => Number(r.version))), JSON.stringify((await a.importar('lib/esquema.js')).MIGRACIONES.map(([v]) => v)))
 })
