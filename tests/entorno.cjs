@@ -51,7 +51,7 @@ async function entorno({ env, transport, pythonDisponible = true, reloj, db, usu
   let salida
   const contexto = vm.createContext({
     process: { env: variables, cwd: () => raiz },
-    AbortSignal, Buffer, URL,
+    AbortSignal, Buffer, URL, Response, Request, Headers,
     ...(reloj ? { Date: class extends Date { static now() { return reloj() } } } : {}),
     console: { error(...args) { registros.push(args) } },
     fetch: async (url, opciones) => {

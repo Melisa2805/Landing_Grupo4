@@ -9,7 +9,8 @@ import { iniciarLeccion, empezarActividades, responder, pedirPista, verSolucion,
 import { progresoInicial, registrarCierre, estadoLecciones, siguienteLeccion, habilidades, unidadCompleta } from '../../lib/aprender/progreso'
 import { crearAlmacen, CLAVE } from '../../lib/aprender/almacen-local'
 import { Actividad, Codigo, Texto, primario, secundario } from './actividad'
-import Compartir from '../components/compartir'
+import InvitacionPersonal from '../components/invitacion-personal'
+import { declararHito } from '../components/medicion-visita'
 
 const CATALOGO = u1
 const HUELLA = huella(CATALOGO)
@@ -67,6 +68,15 @@ export default function Aprender({ demostracion = false, bienvenida = null }) {
     if (r.soloMemoria) setModo('memoria')
   }, [])
 
+  // Milestones for the event measurement, only if the visitor said yes (each
+  // is sent once; the helper does nothing otherwise).
+  useEffect(() => {
+    if (!registro || demostracion) return
+    const hechas = Object.keys(registro.progreso.lecciones)
+    if (hechas.length || registro.sesion?.items?.some((i) => i.feedbackVisto)) declararHito('primer_valor')
+    for (const id of hechas) declararHito(`leccion_${CATALOGO.lecciones.findIndex((l) => l.id === id) + 1}`)
+  }, [registro, demostracion])
+
   const sesion = registro?.sesion || null
   const ir = (cambio) => actualizar((r) => ({ ...r, sesion: cambio(r.sesion) }))
   const abrir = (leccionId) => actualizar((r) => ({ ...r, sesion: iniciarLeccion(CATALOGO, leccionId, { semilla: semillaNueva(), ahora: Date.now(), huellaCatalogo: HUELLA }) }))
@@ -90,7 +100,7 @@ export default function Aprender({ demostracion = false, bienvenida = null }) {
     {!sesion ? <Inicio progreso={registro.progreso} modo={modo} bienvenida={bienvenida} onAbrir={abrir} onBorrar={borrarTodo} demostracion={demostracion} />
       : sesion.paso === 'ensenar' ? <Ensenanza sesion={sesion} onEmpezar={() => ir(empezarActividades)} onSalir={volverAlInicio} />
         : sesion.paso === 'actividades' ? <EnCurso sesion={sesion} ir={ir} onSalir={volverAlInicio} onContinuar={continuar} />
-          : <Resumen sesion={sesion} progreso={registro.progreso} onSiguiente={(siguiente) => siguiente ? abrir(siguiente) : volverAlInicio()} />}
+          : <Resumen sesion={sesion} progreso={registro.progreso} demostracion={demostracion} onSiguiente={(siguiente) => siguiente ? abrir(siguiente) : volverAlInicio()} />}
   </main>
 }
 
@@ -200,7 +210,7 @@ function EnCurso({ sesion, ir, onSalir, onContinuar }) {
   </div>
 }
 
-function Resumen({ sesion, progreso, onSiguiente }) {
+function Resumen({ sesion, progreso, onSiguiente, demostracion }) {
   const r = resumenSesion(CATALOGO, sesion)
   const titulo = useRef(null)
   useEffect(() => { titulo.current?.focus() }, [])
@@ -226,7 +236,7 @@ function Resumen({ sesion, progreso, onSiguiente }) {
       <button type="button" className={siguiente ? secundario : primario} onClick={() => onSiguiente(null)}>{completa ? 'Ver la unidad completa' : 'Volver a las lecciones'}</button>
       <Link href="/simulador" className={secundario}>Explicar mi propio código en Sustentar</Link>
     </div>
-    {/* General campaign link: no personal code and nothing about the lesson. */}
-    <Compartir modo="general" destino="/aprender" campana="aprender" texto="Estoy aprendiendo Python con lecciones cortas en PyDefense. ¡Pruébalo!" invitacion="¿Conoces a alguien que esté empezando con Python? Invítalo a probar la lección." />
+    {/* Personal link without an account; falls back to the general link. */}
+    {!demostracion && <InvitacionPersonal texto="Estoy aprendiendo Python con lecciones cortas en PyDefense. ¡Pruébalo!" invitacion="¿Conoces a alguien que esté empezando con Python? Invítalo a probar la lección." />}
   </section>
 }

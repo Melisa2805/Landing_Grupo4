@@ -93,6 +93,13 @@ const CLERK = { NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: `pk_live_${Buffer.from('clerk
       await until(() => evaluate(texto('Empezar la lección 1')), `expo ${nombre}`)
       assert.equal(await desborda(), false, `expo ${nombre}`); await capturar(`${nombre}-1-expo`)
       await evaluate('localStorage.clear()')
+      // Measurement is optional: declining sends nothing (no storage is created, see below).
+      if (nombre === 'movil') {
+        await send('Page.reload')
+        await until(() => evaluate(texto('¿Nos ayudas a medir PyDefense')), `permiso ${nombre}`)
+        assert.ok(await pulsar('No, gracias'))
+        await until(() => evaluate(texto('No contamos tu visita')), `rechazo ${nombre}`)
+      }
       assert.ok(await pulsar('Empezar la lección 1'))
       await until(() => evaluate(texto('Guardar y mostrar valores')), `aprender ${nombre}`); await capturar(`${nombre}-2-inicio`)
       assert.ok(await pulsar('Empezar:'))
@@ -129,7 +136,8 @@ const CLERK = { NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: `pk_live_${Buffer.from('clerk
       assert.equal(recorridoAprender[nombre].aplicacionesSinAyuda, 1)
     }
     assert.equal(llamadas, 0)
-    console.log(JSON.stringify({ recorrido: 'OK', medidas, recorridoAprender, llamadasSimuladas: llamadas, llamadasIAReal: 0, comprobaciones: ['landing fiel al recorrido', '401 en todas las API sin tocar almacenamiento', 'marca local de llegada', 'escritorio 1440 y móvil 390 sin desbordamiento', 'Aprender L1 completa desde /expo sin cuenta, error con pista, recarga y lección 2, en 390 y 1440'], noVerificado: 'práctica autenticada: requiere credenciales de prueba de Clerk' }))
+    await assert.rejects(fs.access(path.join(dir, 'datos')), 'Aprender y el rechazo de la medición no crean almacenamiento')
+    console.log(JSON.stringify({ recorrido: 'OK', medidas, recorridoAprender, llamadasSimuladas: llamadas, llamadasIAReal: 0, comprobaciones: ['landing fiel al recorrido', '401 en todas las API sin tocar almacenamiento', 'marca local de llegada', 'escritorio 1440 y móvil 390 sin desbordamiento', 'Aprender L1 completa desde /expo sin cuenta, error con pista, recarga y lección 2, en 390 y 1440', 'rechazar la medición no envía datos'], noVerificado: 'práctica autenticada: requiere credenciales de prueba de Clerk' }))
   } finally {
     ws?.close(); chrome?.kill('SIGTERM'); app?.kill('SIGTERM'); mock.closeAllConnections(); await new Promise((r) => mock.close(r))
     await sleep(300); await fs.rm(dir, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 })

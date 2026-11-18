@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, BookOpen, Code2 } from 'lucide-react'
+import PermisoMedicion from './permiso-medicion'
 
 export const metadata = {
   title: 'PyDefense en ExpoAndes',
@@ -26,6 +27,6 @@ export default async function Expo({ searchParams }) {
       <span className="flex items-center gap-3"><Code2 aria-hidden="true" className="h-6 w-6 text-blue-400" />Tengo código propio: practicar explicarlo</span><ArrowRight aria-hidden="true" className="h-5 w-5" />
     </Link>
     <p className="text-sm text-slate-400">Las lecciones guardan tu avance solo en este navegador. Para practicar con tu propio código necesitas iniciar sesión.</p>
-    {demo && <p className="text-sm text-blue-200">Modo demostración del stand: nada se guarda en este dispositivo.</p>}
+    {demo ? <p className="text-sm text-blue-200">Modo demostración del stand: nada se guarda en este dispositivo.</p> : <PermisoMedicion />}
   </main>
 }
