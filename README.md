@@ -1,8 +1,24 @@
 # PyDefense
 
-Herramienta para que estudiantes de programación practiquen cómo explicar y sustentar su propio código Python.
+Herramienta para que estudiantes de programación aprendan Python paso a paso y practiquen cómo explicar y sustentar su propio código.
 
-## Producto
+PyDefense tiene dos módulos independientes: **Aprender** (lecciones breves, sin cuenta, con misión diaria, repaso y racha si se guarda el avance en la cuenta) y **Sustentar** (práctica de explicación sobre el código propio con retroalimentación de IA). Ninguno exige usar el otro.
+
+## Aprender
+
+- Ruta «Python desde cero»: 3 unidades (La merienda, El descuento, Los gastos de la semana), 9 microlecciones y 90 actividades escritas por el equipo, más 71 variantes de práctica generadas desde plantillas. Contenido pendiente de revisión docente.
+- Cada lección: objetivo, explicación, ejemplo paso a paso, práctica guiada y dos aplicaciones. Formatos: elegir la salida o la mejor explicación, completar con fichas y señalar la línea con el error (táctil, teclado y lector).
+- Sin cuenta, el avance se guarda en el navegador. Con cuenta y el consentimiento `aprender-v1` (separado de Sustentar y del estudio): misión diaria de 3 a 5 actividades, repasos a 1-3-7-14 días, racha por días (día pedagógico de Bogotá desde las 03:00) y avance en cualquier dispositivo.
+- No usa IA. Las claves se verifican ejecutando solo el código de los autores: `python3 -I scripts/verificar_contenido.py knowledge/aprender/python/u*.json` y `python3 -I scripts/generar_variantes.py --comprobar`.
+
+## ExpoAndes
+
+- `/expo`: entrada del QR general. `/expo/qr`: QR imprimible (usa `PYDEFENSE_DOMINIO_PUBLICO`). `?modo=demostracion` para los dispositivos del stand (no guarda nada).
+- Invitación personal sin cuenta (`/r/<código>`) y medición opcional de visitas solo para mayores de 18 años que la aceptan; se borra a los 30 días.
+- Encuesta voluntaria y anónima de cuatro preguntas cerradas.
+- `npm run reporte-expo -- --desde ISO --hasta ISO` produce el embudo agregado (con supresión de cifras pequeñas); `--purgar` borra lo vencido.
+
+## Sustentar
 
 Alpha 0.2 propone una práctica sobre el programa del estudiante: permite iniciar sesión, aceptar el consentimiento, pegar o cargar código Python e indicar opcionalmente los temas cursados. Presenta hasta tres preguntas de sustentación, adaptadas al código, al nivel indicado y a las respuestas anteriores, y recibe respuestas escritas.
 
@@ -124,7 +140,12 @@ Las prácticas se asocian a la cuenta y se guardan en PostgreSQL o PGlite para p
 | `npm run dev` | Arrancar en desarrollo. |
 | `npm run build` | Compilar para producción. |
 | `npm run start` | Ejecutar la compilación de producción. |
-| `npm test` | Ejecutar las suites de RAG, adaptación, pedagogía, interfaz, estabilidad, persistencia y medición con IA simulada. |
+| `npm test` | Ejecutar las once suites (Sustentar, Aprender, piloto, servidor del piloto y referidos) con IA simulada y un resumen por suite. |
+| `npm run test:recorrido -- --build` | Recorrido real con Chromium en 390 y 1440 px (portada, `/expo`, lección 1 de Aprender). `--capturas <dir>` guarda capturas. |
+| `npm run reporte-expo` | Embudo agregado de la feria; `--purgar` borra visitas y enlaces vencidos. |
+| `npm run calibracion` | Valida el corpus de calibración del evaluador; con `--ejecutar --max-llamadas N` lo ejecuta contra el proveedor. |
+| `npm run capacidad` | Ensayo de capacidad de la evaluación en vivo; sin `--ejecutar` solo muestra el plan. |
+| `npm run test:proveedor -- --live` | Una evaluación real con datos sintéticos. |
 | `npm run test:interfaz` | Ejecutar las pruebas de componentes y contratos de la interfaz. |
 | `npm run test:pedagogia` | Ejecutar las pruebas de pertinencia, evidencia y límites pedagógicos. |
 
