@@ -87,7 +87,7 @@ export function ExampleQuestion() {
       <div className={`${styles.exampleInvite} p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6`}>
         <div className="space-y-3">
           <h2 className="text-2xl font-bold">Practica con tu propio código</h2>
-          <p className="text-sm text-slate-400">Hasta tres preguntas sobre tu programa y un cierre con lo que descubriste.</p>
+          <p className="text-sm text-slate-400">Hasta tres preguntas sobre tu programa y un resumen de lo que explicaste y de lo que conviene repasar.</p>
         </div>
         <div className="flex flex-col items-center gap-3 md:shrink-0">
           <Link href="/simulador" className={`${styles.primaryAction} flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-3 text-center font-semibold`}>Quiero probar con mi código <ArrowRight aria-hidden="true" className="w-5 h-5 shrink-0" /></Link>
@@ -105,11 +105,11 @@ export function ExampleQuestion() {
           <div className="space-y-2">
             <label htmlFor="example-answer" className="text-sm text-slate-300 block">Tu explicación</label>
             <textarea id="example-answer" rows={3} placeholder="Escribe cómo lo explicarías…" className={`${styles.focusable} w-full min-h-28 resize-y rounded-xl border border-slate-700 bg-slate-950 p-3 text-sm placeholder:text-slate-500`} />
-            <p className="text-xs text-slate-400">Este espacio es para practicar; tu respuesta no se envía ni se evalúa.</p>
+            <p className="text-xs text-slate-400">Vista previa: puedes escribir aquí, pero este texto no se guarda ni se evalúa.</p>
           </div>
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
             <button type="button" onClick={() => dialogRef.current.close()} className={`${styles.focusable} px-5 py-3 rounded-xl border border-slate-700 hover:bg-slate-800`}>Cerrar</button>
-            <Link href="/simulador" onClick={() => dialogRef.current.close()} className={`${styles.primaryAction} text-center bg-blue-600 hover:bg-blue-500 font-semibold px-5 py-3 rounded-xl`}>Probar el simulador</Link>
+            <Link href="/simulador" onClick={() => dialogRef.current.close()} className={`${styles.primaryAction} text-center bg-blue-600 hover:bg-blue-500 font-semibold px-5 py-3 rounded-xl`}>Iniciar práctica con retroalimentación</Link>
           </div>
         </div>
       </dialog>

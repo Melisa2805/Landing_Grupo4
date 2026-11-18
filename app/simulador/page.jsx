@@ -314,7 +314,7 @@ export default function SimuladorPage() {
   if (!estado) return <main className="max-w-2xl mx-auto px-4 py-12 space-y-3">{error ? <p role="alert" className="text-red-200">{error}</p> : aviso ? <p role="status">{aviso}</p> : <p role="status">Preparando tu práctica…</p>}</main>
   if (!estado.consentimiento.vigente) return <main className="max-w-2xl mx-auto px-4 py-12 space-y-5">
     <h1 className="text-2xl font-bold">Antes de practicar</h1>
-    <p className="text-slate-300">Solo se pide una vez. Esta prueba registra tus usos durante siete días; así se usan tus datos:</p>
+    <p className="text-slate-300">Revisa cómo se usan tus datos en esta práctica. Si estas condiciones cambian, te pediremos aceptarlas de nuevo.</p>
     <ul className="space-y-3 rounded-xl border border-slate-700 bg-slate-900/60 p-5 text-slate-200">{PUNTOS_CONSENTIMIENTO.map((p) => <li key={p} className="flex gap-3"><CheckCircle2 aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" /><span>{p}</span></li>)}</ul>
     <p className="text-sm text-slate-300">Proveedor de IA configurado: {estado.proveedor || 'no informado por el servidor'}. Responsable: {estado.contacto || 'el equipo del Grupo 4'}.</p>
     {error && <p role="alert" className="text-red-200">{error}</p>}
@@ -379,7 +379,7 @@ export default function SimuladorPage() {
               onChange={(value) => cambiarCodigo(value || '')}
               options={{ readOnly: bloqueado, ariaLabel: etiquetaEditor, minimap: { enabled: false }, fontSize: 15, automaticLayout: true, tabSize: 4, scrollBeyondLastLine: false, wordWrap: 'on' }} />}
           </div>
-          {!sesion && (esEjemplo(codigo) ? <p className="text-sm text-blue-200">Código de ejemplo: reemplázalo por el tuyo. No cuenta para el estudio.</p>
+          {!sesion && (esEjemplo(codigo) ? <p className="text-sm text-blue-200">Código de ejemplo: reemplázalo por el tuyo. Las prácticas con el ejemplo no cuentan para el estudio del curso.</p>
             : !codigo.trim() && <button className="text-sm underline" disabled={leyendoArchivo} onClick={() => setCodigo(CODIGO_EJEMPLO)}>Usar el código de ejemplo</button>)}
           {valorEditor.length > 10000 && <p className="text-sm text-slate-400">{valorEditor.length}/12000 caracteres</p>}
         </> : <details open={codigoVisible} onToggle={(e) => setCodigoVisible(e.currentTarget.open)} className="rounded-xl border border-slate-700 overflow-hidden"><summary className="cursor-pointer p-3 text-sm">Código de esta práctica{fragmentoActivo ? ' · la parte de la pregunta está resaltada' : ''}</summary><CodigoResaltado codigo={sesion.codigo} fragmento={fragmentoActivo} /></details>}
@@ -451,7 +451,7 @@ export default function SimuladorPage() {
             {[['util', 'Sí'], ['no_util', 'No']].map(([valor, etiqueta]) => <button key={valor} className={secundario} aria-pressed={utilidad[`${ultimo.instancia}:${ultimo.version}`] === valor} disabled={!!utilidad[`${ultimo.instancia}:${ultimo.version}`]} onClick={() => utilidadFeedback(ultimo, valor)}>{etiqueta}</button>)}
           </div>}
           {sesion.puedeReparar && !caducada && <details className="text-sm space-y-3"><summary className="cursor-pointer">¿Algo no encaja con lo que quisiste decir?</summary>
-            <p className="mt-2 text-slate-300">Puedes pedir una reparación por pregunta. No cambia ninguna nota, porque no hay nota.</p>
+            <p className="mt-2 text-slate-300">Puedes pedir una revisión de esta retroalimentación una vez por pregunta. No hay nota que cambie.</p>
             <div className="flex flex-wrap gap-3 mt-2">
               <button className={secundario} disabled={evaluacionBloqueada} onClick={() => enviar('reparar', { tipo: 'reformular' })}>No entendí la explicación</button>
               <button className={secundario} disabled={bloqueado} aria-pressed={reparacion.tipo === 'intencion'} onClick={() => setReparacion({ tipo: 'intencion', texto: '' })}>Esto no refleja lo que quise decir</button>
@@ -466,8 +466,8 @@ export default function SimuladorPage() {
           </details>}
           {!caducada && (sesion.siguiente === 'pregunta' ? <div className="grid sm:grid-cols-2 gap-3">
             <button className={boton} disabled={bloqueado} onClick={() => enviar('continuar')}>Explorar otra parte</button>
-            <button className={`${secundario} py-3`} disabled={bloqueado} onClick={() => enviar('cerrar')}>Cerrar con lo que descubriste</button>
-          </div> : <button className={boton} disabled={bloqueado} onClick={() => enviar('continuar')}>Ver el cierre</button>)}
+            <button className={`${secundario} py-3`} disabled={bloqueado} onClick={() => enviar('cerrar')}>Terminar y ver resumen</button>
+          </div> : <button className={boton} disabled={bloqueado} onClick={() => enviar('continuar')}>Ver el resumen</button>)}
         </div>}
         {fase === 'cierre' && sesion.resumen && <div className="space-y-5">
           <h3 ref={foco} tabIndex={-1} className="text-xl font-bold flex items-center gap-2"><CheckCircle2 aria-hidden="true" className="h-6 w-6 text-emerald-400" />Práctica completada</h3>

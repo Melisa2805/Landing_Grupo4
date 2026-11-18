@@ -292,6 +292,11 @@ test('refuerzo: la cita de código tolera indentación distinta; una conclusión
   assert.ok(criterios.every((c) => c.estado === 'cumplido' && solucion.includes(c.cita)))
   assert.equal(casos[0].conclusion, 'no_verificable'); assert.ok(casos.slice(1).every((c) => c.conclusion === 'coincide'))
   assert.equal(f.evaluacionRefuerzo.estado, 'Revisión con evidencia insuficiente')
+  // Cases are shown after the submission with their call and expected value.
+  assert.equal(JSON.stringify(casos.map((c) => [c.entrada, c.esperado]).slice(0, 3)), JSON.stringify([['contar_pendientes([0, 1, 0])', '2'], ['contar_pendientes([])', '0'], ['contar_pendientes([1, 1])', '0']]))
+  assert.equal(f.evaluacionRefuerzo.metodo, 'ast')
+  const { metodoAnalisis } = await e.importar('lib/evaluacion.js')
+  assert.equal(metodoAnalisis({ estado: 'no_disponible' }), 'aproximado'); assert.equal(metodoAnalisis({ estado: 'invalida' }), 'ast')
 })
 
 test('recorrido completo del promedio: correcta, parcial, fallo recuperable y falsa hasta el cierre y el refuerzo', async () => {
