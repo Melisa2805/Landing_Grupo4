@@ -73,24 +73,25 @@ test('render: el cierre describe evidencia, duda, siguiente paso y límites, sin
   assert.ok(vacio.includes('no significa que no sepas'))
 })
 
-test('render: el refuerzo muestra primero lo observado, un caso y el siguiente paso; el método y los controles quedan después', async () => {
+test('render: el refuerzo separa solución, funcionamiento y comprensión; detalles plegados y sin contradicciones', async () => {
   const e = await entorno()
   const { EvaluacionRefuerzo } = await e.importar('app/simulador/components.jsx')
-  const casos = [{ id: 'caso_1', conclusion: 'coincide', razon: 'Devuelve el conteo.', entrada: 'contar([0, 1])', esperado: '1' }, { id: 'caso_2', conclusion: 'difiere', razon: 'Con la lista vacía falla.', entrada: 'contar([])', esperado: '0' }]
-  const evaluacion = { estado: 'La revisión estática señala aspectos por revisar', metodo: 'ast', controles: [{ nombre: 'Sintaxis', estado: 'cumple', detalle: 'AST' }], interpretacion: { criterios: [{ id: 'a', descripcion: 'Resultado', estado: 'parcial', razon: 'Falta un caso límite.' }], casos, sugerencia: 'Revisa el caso vacío.' }, cierre: 'Interpretación estática.' }
+  const casos = [{ id: 'caso_1', conclusion: 'coincide', razon: 'Devuelve el conteo.', entrada: 'contar([0, 1])', esperado: '1' }, { id: 'caso_2', conclusion: 'coincide', razon: 'Con la lista vacía da 0.', entrada: 'contar([])', esperado: '0' }]
+  const dimensiones = { conceptual: { estado: 'correcta', detalle: 'Coincide con lo esperado en 2 de 2 casos razonados por la IA.' }, funcional: { estado: 'no_comprobada', comprobacion: { llamada: 'contar([])', esperado: '0' } }, comprension: { estado: 'sin_evidencia', detalle: 'Este refuerzo revisa tu código, no tu explicación.' } }
+  const evaluacion = { estado: 'La revisión estima que tu solución es correcta', metodo: 'ast', dimensiones, controles: [{ nombre: 'Sintaxis', estado: 'cumple', detalle: 'AST' }], interpretacion: { criterios: [{ id: 'concepto', descripcion: 'Mantener un conteo', estado: 'cumplido', noVerificable: true, razon: 'Usa un contador.' }], casos, sugerencia: 'Compruébalo tú: ejecuta contar([]) en tu computador; debería devolver 0.' }, cierre: 'Interpretación estática.' }
   const html = renderToStaticMarkup(React.createElement(EvaluacionRefuerzo, { evaluacion }))
-  for (const texto of ['Qué observamos', 'Parcial · Resultado', 'Un caso revisado', 'contar([])', 'se espera', 'Siguiente paso', 'Cómo se revisó el código', 'No se ejecutaron pruebas', 'El código no se ejecutó']) assert.ok(html.includes(texto), texto)
-  // Reading order: result, observations, highlighted case (the one that differs), next step, then details.
-  const orden = ['La revisión estática señala', 'Qué observamos', 'Un caso revisado', 'Siguiente paso', 'Cómo se revisó el código'].map((t) => html.indexOf(t))
+  for (const t of ['parece correcta (estimación de la IA)', 'Funcionamiento: no comprobado', 'no hay pruebas aprobadas ni fallidas', 'Comprensión: sin evidencia todavía', 'Siguiente paso', 'Compruébalo tú', 'Ver detalles de la revisión', 'Estimado sin cita en tu código']) assert.ok(html.includes(t), t)
+  // Reading order: verdict, three dimensions, next step, then the folded details.
+  const orden = ['La revisión estima que tu solución es correcta', 'Tu solución:', 'Funcionamiento:', 'Comprensión:', 'Siguiente paso', 'Ver detalles de la revisión', 'Casos razonados', 'Cómo se revisó el código'].map((t) => html.indexOf(t))
   assert.deepEqual([...orden].sort((a, b) => a - b), orden)
-  assert.ok(html.indexOf('contar([])') < html.indexOf('Ver los 2 casos'))
-  assert.ok(html.indexOf('Sintaxis') > html.indexOf('Cómo se revisó el código'))
-  assert.ok(!html.includes('Reconocimiento aproximado'))
-  assert.ok(!html.includes('<button')); assert.ok(sinCifras(html.replace(/contar\(\[[^)]*\]\)|se espera <code[^>]*>\d+/g, '')))
-  const aprox = renderToStaticMarkup(React.createElement(EvaluacionRefuerzo, { evaluacion: { ...evaluacion, metodo: 'aproximado', controles: [{ nombre: 'Sintaxis Python', estado: 'no_verificado', detalle: 'x' }, { nombre: 'Resultado devuelto', estado: 'no_cumple', detalle: 'Falta return.' }] } }))
-  assert.ok(aprox.includes('Reconocimiento aproximado: la sintaxis no se verificó con Python.'))
-  // A failed control changes the result and stays visible before the details.
-  assert.ok(aprox.indexOf('Por corregir: Resultado devuelto') < aprox.indexOf('Cómo se revisó el código'))
+  for (const prohibido of ['evidencia insuficiente', 'No verificado ·', 'Un caso con diferencias']) assert.ok(!html.includes(prohibido), prohibido)
+  assert.ok(!html.includes('<button')); assert.ok(sinCifras(html.replace(/\d+ de \d+ casos/, '').replace(/contar\(\[[^)]*\]\)|se espera <code[^>]*>\d+|devolver \d+/g, '')))
+  const conDiferencia = renderToStaticMarkup(React.createElement(EvaluacionRefuerzo, { evaluacion: { ...evaluacion, estado: 'La revisión señala aspectos por revisar', dimensiones: { ...dimensiones, conceptual: { estado: 'diferencias', detalle: 'x' } }, interpretacion: { ...evaluacion.interpretacion, casos: [{ ...casos[0], conclusion: 'difiere' }] } } }))
+  assert.ok(conDiferencia.indexOf('Un caso con diferencias') < conDiferencia.indexOf('Siguiente paso'))
+  const aprox = renderToStaticMarkup(React.createElement(EvaluacionRefuerzo, { evaluacion: { ...evaluacion, metodo: 'aproximado', controles: [{ nombre: 'Resultado devuelto', estado: 'no_cumple', detalle: 'Falta return.' }] } }))
+  assert.ok(aprox.includes('Reconocimiento aproximado')); assert.ok(aprox.indexOf('Por corregir: Resultado devuelto') < aprox.indexOf('Ver detalles'))
+  // Older saved reviews without dimensions still render.
+  assert.ok(renderToStaticMarkup(React.createElement(EvaluacionRefuerzo, { evaluacion: { ...evaluacion, dimensiones: undefined } })).includes('Ver detalles de la revisión'))
 })
 
 test('render: una omisión no se muestra como cero ni como error', async () => {

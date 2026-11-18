@@ -254,7 +254,7 @@ test('reparación por error factual corrige o retira afirmaciones del tutor cont
 test('413 del proveedor (solicitud mayor que el límite por minuto) no se presenta como espera ni se reintenta', async () => {
   let n = 0; const e = await entorno({ transport: async () => { n++; return new Response('', { status: 413 }) } })
   const { chatCompletion } = await e.importar('lib/llm.js')
-  await assert.rejects(chatCompletion({ system: '', user: '' }), { code: 'LLM_SOLICITUD', detalle: 'http_413' }); assert.equal(n, 1)
+  await assert.rejects(chatCompletion({ system: '', user: '' }), { code: 'LLM_DEMASIADO_LARGO', detalle: 'http_413' }); assert.equal(n, 1)
 })
 
 test('envío en curso: otra cuenta con la misma sesión, revisión y carga no recibe la práctica ajena; el duplicado propio sí se comparte', async () => {
@@ -291,7 +291,7 @@ test('refuerzo: la cita de código tolera indentación distinta; una conclusión
   const { criterios, casos } = f.evaluacionRefuerzo.interpretacion
   assert.ok(criterios.every((c) => c.estado === 'cumplido' && solucion.includes(c.cita)))
   assert.equal(casos[0].conclusion, 'no_verificable'); assert.ok(casos.slice(1).every((c) => c.conclusion === 'coincide'))
-  assert.equal(f.evaluacionRefuerzo.estado, 'Revisión con evidencia insuficiente')
+  assert.equal(f.evaluacionRefuerzo.estado, 'La revisión estima que tu solución es correcta')
   // Cases are shown after the submission with their call and expected value.
   assert.equal(JSON.stringify(casos.map((c) => [c.entrada, c.esperado]).slice(0, 3)), JSON.stringify([['contar_pendientes([0, 1, 0])', '2'], ['contar_pendientes([])', '0'], ['contar_pendientes([1, 1])', '0']]))
   assert.equal(f.evaluacionRefuerzo.metodo, 'ast')
@@ -340,7 +340,7 @@ test('refuerzo: una corrección versionada conserva la primera revisión, muestr
   e.responder(revisor({ cita: 'pendientes += 1' }))
   s = await e.paso(s, 'entregar', { codigo: solucion })
   assert.equal(e.llamadas.length, antes + 1)
-  assert.equal(s.fase, 'refuerzo_revisado'); assert.equal(s.versionesRefuerzo[0].estado, 'La revisión estática señala aspectos por revisar')
+  assert.equal(s.fase, 'refuerzo_revisado'); assert.equal(s.versionesRefuerzo[0].estado, 'La revisión señala aspectos por revisar')
   assert.ok(s.cambiosRefuerzo.some((c) => c.antes !== c.ahora && c.ahora === 'Explicado'))
   assert.equal(JSON.stringify(s.resumen), JSON.stringify(cierre), 'el cierre no se reabre')
   await assert.rejects(e.paso(s, 'corregir'), { code: 'PASO_INVALIDO' })
@@ -405,4 +405,36 @@ test('calibración: categorías de dos ejes, métricas y puertas del plan sobre 
   const caso = corpus.casos.find((c) => c.id === 'compra-correcta-2')
   const v = await e.contestar(await e.iniciar(corpus.programas.compra), caso.respuesta, tutor({ nivel: 2, cita: caso.respuesta.slice(0, 20) }))
   assert.equal(categoriaDe(v), 'correcta')
+})
+
+test('400 json_validate_failed de Groq: un reintento automático; si persiste, se pide reenviar sin perder la respuesta', async () => {
+  const fallo = () => Response.json({ error: { message: 'Failed to generate JSON. Please adjust your prompt.', type: 'invalid_request_error', code: 'json_validate_failed' } }, { status: 400 })
+  const ok = Response.json({ choices: [{ message: { content: '{"a":1}' } }] })
+  let n = 0
+  const e = await entorno({ transport: async () => (++n === 1 ? fallo() : ok) })
+  const { chatCompletion } = await e.importar('lib/llm.js')
+  assert.equal(await chatCompletion({ system: '', user: '' }), '{"a":1}'); assert.equal(n, 2)
+  let m = 0
+  const f = await entorno({ transport: async () => { m++; return fallo() } })
+  await assert.rejects((await f.importar('lib/llm.js')).chatCompletion({ system: '', user: '' }), { code: 'MODELO_JSON', detalle: 'json_validate_failed' }); assert.equal(m, 2)
+  let k = 0
+  const g = await entorno({ transport: async () => { k++; return Response.json({ error: { code: 'invalid_api_param' } }, { status: 400 }) } })
+  await assert.rejects((await g.importar('lib/llm.js')).chatCompletion({ system: '', user: '' }), { code: 'LLM_SOLICITUD', detalle: 'http_400_invalid_api_param' }); assert.equal(k, 1, 'otros 400 no se reintentan')
+})
+
+test('refuerzo correcto sin ejecución: no es «insuficiente», el siguiente paso no pide lo no solicitado y propone comprobarlo', async () => {
+  const e = await preparar()
+  let s = await e.contestar(await e.iniciar('def contar(estados):\n    n = 0\n    for e in estados:\n        n += 1\n    return n'), 'Recorre la lista y cuenta cuántos estados hay, devolviendo ese número.', tutor({ concepto: 'recorridos' }))
+  s = await e.paso(await e.paso(s, 'cerrar'), 'refuerzo')
+  e.responder((req) => ({ ...revisor({ cita: 'pendientes += 1' })(req), sugerencia: 'El código satisface la especificación; podrías añadir comentarios o validaciones de tipo para mayor claridad.' }))
+  const f = await e.paso(s, 'entregar', { codigo: 'def contar_pendientes(estados):\n    pendientes = 0\n    for estado in estados:\n        if estado == 0:\n            pendientes += 1\n    return pendientes' })
+  const r = f.evaluacionRefuerzo
+  assert.equal(r.estado, 'La revisión estima que tu solución es correcta')
+  assert.equal(JSON.stringify([r.dimensiones.conceptual.estado, r.dimensiones.funcional.estado, r.dimensiones.comprension.estado]), JSON.stringify(['correcta', 'no_comprobada', 'sin_evidencia']))
+  assert.ok(!/comentari|validaci/i.test(r.interpretacion.sugerencia))
+  assert.match(r.interpretacion.sugerencia, /^Compruébalo tú: ejecuta contar_pendientes\(\[/)
+  assert.match(r.interpretacion.sugerencia, /mantener un conteo durante un recorrido/)
+  assert.ok(!['contar_pendientes([0, 1, 0])', 'contar_pendientes([])'].includes(r.dimensiones.funcional.comprobacion.llamada), 'no repite un ejemplo del enunciado')
+  const enviada = JSON.parse(e.llamadas.at(-1).messages[1].content).casosParaRevisionEstatica
+  assert.ok(enviada.every((c) => c.entrada.startsWith('contar_pendientes(')))
 })

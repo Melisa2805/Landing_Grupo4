@@ -330,8 +330,11 @@ test('refuerzo acepta parámetros alternativos y lambda; casos adicionales no se
     assert.ok(f.evaluacionRefuerzo.controles.every((c) => c.estado === 'cumple'))
     const llamada = JSON.parse(e.llamadas.at(-1).messages[1].content)
     assert.equal(llamada.casosParaRevisionEstatica.length, 5)
-    assert.ok(llamada.casosParaRevisionEstatica.some((c) => c.entrada[0] === 0))
-    assert.equal(f.evaluacionRefuerzo.estado, 'La revisión estática no encontró diferencias')
+    // Cases reach the model as explicit calls, never as bare argument lists.
+    assert.ok(llamada.casosParaRevisionEstatica.every((c) => /^total_compra\(.*\)$/.test(c.entrada) && typeof c.esperado === 'string'))
+    assert.ok(llamada.casosParaRevisionEstatica.some((c) => c.entrada === 'total_compra(0, 8)'))
+    assert.equal(f.evaluacionRefuerzo.estado, 'La revisión estima que tu solución es correcta')
+    assert.equal(f.evaluacionRefuerzo.dimensiones.funcional.estado, 'no_comprobada')
   }
 })
 
@@ -390,7 +393,12 @@ test('refuerzo: casos incompletos se rechazan; diferencias o incertidumbre impid
     const f = await e.paso(s, 'entregar', { codigo })
     assert.equal(f.fase, 'refuerzo_revisado')
     if (conclusion === 'difiere') assert.notEqual(f.evaluacionRefuerzo.interpretacion.criterios.find((c) => c.id === 'correccion').estado, 'cumplido')
-    else assert.equal(f.evaluacionRefuerzo.estado, 'Revisión con evidencia insuficiente')
+    // One case the AI could not settle, with the rest coinciding, is still a
+    // correct estimate: what is missing is execution, not a correct solution.
+    else {
+      assert.equal(f.evaluacionRefuerzo.estado, 'La revisión estima que tu solución es correcta')
+      assert.equal(f.evaluacionRefuerzo.interpretacion.casos[4].conclusion, 'no_verificable')
+    }
     assert.ok(f.evaluacionRefuerzo.interpretacion.sugerencia)
   }
 })
