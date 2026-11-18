@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
 import Editor from '@monaco-editor/react'
 import { useAuth, SignInButton } from '@clerk/nextjs'
 import { Retroalimentacion, Resumen, EvaluacionRefuerzo } from './components'
@@ -225,6 +226,8 @@ export default function SimuladorPage() {
       if (!data.sesion || !Array.isArray(data.historial) || (sesion && accion !== 'recuperar' && accion !== 'iniciar' && (data.sesion !== sesion.sesion || data.revision < sesion.revision))) throw new Error('inconsistente')
       setSesion(data); setSintaxis(null)
       guardada.current = data.sesion
+      if (data.fase === 'cierre') setEstado((actual) => ({ ...actual, practicaAbierta: null }))
+      if (accion === 'recuperar') setCodigo(data.codigo)
       if (accion === 'iniciar') inicio.current = null
       if (data.codigoRefuerzo) setCodigoRefuerzo(data.codigoRefuerzo)
       if (['continuar', 'saltar', 'cerrar'].includes(accion) || (accion === 'responder' && data.fase === 'feedback')) setRespuesta('')
@@ -343,9 +346,9 @@ export default function SimuladorPage() {
       <h1 className="text-2xl font-bold flex items-center gap-2"><Code2 className="text-blue-400" /> Practica tu sustentación</h1>
       <p className="text-slate-300 mt-2">Pega tu código y practica explicarlo. Hasta tres preguntas, sin nota.</p>
     </header>
-    <div className="grid lg:grid-cols-2 gap-5 xl:gap-8 items-start">
-      <div className="min-w-0 space-y-4 lg:sticky lg:top-24">
-        <h2 className="font-semibold">{enRefuerzo ? 'Tu solución del refuerzo' : 'Tu código Python'}</h2>
+    <div className={fase === 'cierre' ? "mx-auto max-w-3xl" : "grid lg:grid-cols-2 gap-5 xl:gap-8 items-start"}>
+      <div hidden={fase === 'cierre'} className="min-w-0 space-y-4 lg:sticky lg:top-24">
+        <h2 id="editor-practica" tabIndex={-1} className="font-semibold scroll-mt-24">{enRefuerzo ? 'Tu solución del refuerzo' : 'Tu código Python'}</h2>
         {editable ? <>
           {!sesion && <details className="rounded-xl border border-slate-700 p-4 text-sm">
             <summary className="cursor-pointer font-semibold">¿Qué has trabajado ya en clase? <span className="font-normal text-slate-400">(opcional){temas ? ` · ${TEMAS.find(([v]) => v === temas)?.[1]}` : ''}</span></summary>
@@ -386,6 +389,7 @@ export default function SimuladorPage() {
           </div>
           {!sesion && (esEjemplo(codigo) ? <p className="text-sm text-blue-200">Código de ejemplo: reemplázalo por el tuyo. Las prácticas con el ejemplo no cuentan para el estudio del curso.</p>
             : !codigo.trim() && <button className="text-sm underline" disabled={leyendoArchivo} onClick={() => setCodigo(CODIGO_EJEMPLO)}>Usar el código de ejemplo</button>)}
+          {enRefuerzo && <button className={boton} disabled={evaluacionBloqueada || !codigoRefuerzo.trim() || codigoRefuerzo.length > 12000} onClick={() => enviar('entregar', { codigo: codigoRefuerzo })}>{sesion.versionesRefuerzo?.length ? 'Enviar mi solución corregida' : 'Enviar mi solución'}</button>}
           {valorEditor.length > 10000 && <p className="text-sm text-slate-400">{valorEditor.length}/12000 caracteres</p>}
         </> : <details open={codigoVisible} onToggle={(e) => setCodigoVisible(e.currentTarget.open)} className="rounded-xl border border-slate-700 overflow-hidden"><summary className="cursor-pointer p-3 text-sm">{fase === 'refuerzo_revisado' ? `Tu solución enviada · ${sesion.refuerzo?.nombre}` : `Código de esta práctica${fragmentoActivo ? ' · la parte de la pregunta está resaltada' : ''}`}</summary><CodigoResaltado codigo={fase === 'refuerzo_revisado' ? sesion.codigoRefuerzo : sesion.codigo} fragmento={fase === 'refuerzo_revisado' ? null : fragmentoActivo} /></details>}
         {enRefuerzo && <details><summary className="cursor-pointer text-sm">Consultar el código original</summary><pre className="mt-2 overflow-auto whitespace-pre-wrap rounded bg-slate-950 p-3 text-sm"><code>{sesion.codigo}</code></pre></details>}
@@ -403,7 +407,7 @@ export default function SimuladorPage() {
       <section aria-label="Práctica" aria-busy={ocupado} className={`min-w-0 space-y-5 bg-slate-900/60 border border-slate-700 p-5 xl:p-7 rounded-xl break-words ${sesion ? 'order-first lg:order-none' : ''}`}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-bold flex items-center gap-2"><HelpCircle className="text-blue-400" /> Práctica guiada</h2>
-          {sesion && <Progreso sesion={sesion} />}
+          {sesion && fase !== 'cierre' && <Progreso sesion={sesion} />}
         </div>
         {espera > 0 && <p className="text-amber-200">Podrás enviar de nuevo en {espera} s. Puedes seguir editando tu texto.</p>}
         {error && <div role="alert" className="rounded-lg border border-red-700 p-3 text-red-200 space-y-2"><p>{error}</p>
@@ -414,7 +418,9 @@ export default function SimuladorPage() {
             {[[Code2, 'Pega', 'tu código'], [MessageSquare, 'Responde', 'hasta 3 preguntas'], [Lightbulb, 'Recibe ayuda', 'sin nota']].map(([Icono, titulo, sub]) => <li key={titulo} className="rounded-xl border border-slate-700 bg-slate-950/40 p-4"><Icono aria-hidden="true" className="mx-auto h-7 w-7 text-blue-400" /><p className="mt-2 font-semibold text-slate-100">{titulo}</p><p className="text-xs text-slate-400">{sub}</p></li>)}
           </ol>
         </div>}
-        {caducada && <p className="rounded-lg border border-amber-600 p-3 text-amber-100">Esta práctica caducó (2 horas). Puedes revisar lo que hiciste o iniciar una nueva.</p>}
+        {caducada && <div className="space-y-2"><p className="text-amber-100">Terminó el tiempo para responder preguntas en esta práctica.</p>
+          {fase !== 'feedback' && (sesion.completadas ? <button className={boton} disabled={bloqueado} onClick={() => enviar('cerrar')}>Ver mi resumen</button>
+            : <button className={boton} onClick={nuevaPractica}>Comenzar otra práctica</button>)}</div>}
         {fase === 'confianza' && !caducada && <div className="space-y-4">
           <h3 ref={foco} tabIndex={-1} className="font-semibold text-lg">Pregunta {sesion.numero} · {sesion.tema.nombre}</h3>
           {sesion.tema.reemplazo && <p className="text-sm text-slate-300">Esta pregunta reemplaza la anterior, que no cuenta en tu contra.</p>}
@@ -469,23 +475,27 @@ export default function SimuladorPage() {
               <button className="border border-blue-500 rounded px-4 py-2 disabled:opacity-50" disabled={evaluacionBloqueada || (reparacion.tipo === 'intencion' && !reparacion.texto.trim())} onClick={() => enviar('reparar', { tipo: reparacion.tipo, texto: reparacion.texto.trim() || null })}>Enviar</button>
             </div>}
           </details>}
-          {!caducada && (sesion.siguiente === 'pregunta' ? <div className="grid sm:grid-cols-2 gap-3">
-            <button className={boton} disabled={bloqueado} onClick={() => enviar('continuar')}>Explorar otra parte</button>
-            <button className={`${secundario} py-3`} disabled={bloqueado} onClick={() => enviar('cerrar')}>Terminar y ver resumen</button>
-          </div> : <button className={boton} disabled={bloqueado} onClick={() => enviar('continuar')}>Ver el resumen</button>)}
+          {sesion.ofertaRefuerzo && !caducada && <section className="border-t border-slate-700 pt-4 space-y-2">
+            <h4 className="font-semibold text-blue-200">¿Quieres practicar esta idea?</h4>
+            <p>{sesion.ofertaRefuerzo.motivo}</p>
+            <button className={boton} disabled={bloqueado} onClick={() => enviar('refuerzo')}>Practicar ahora</button>
+          </section>}
+          <div className="flex flex-wrap items-center gap-3">
+            {!caducada && sesion.siguiente === 'pregunta' && <button className={boton} disabled={bloqueado} onClick={() => enviar('continuar')}>Siguiente pregunta</button>}
+            <button className={sesion.ofertaRefuerzo || sesion.siguiente === 'pregunta' ? secundario : boton} disabled={bloqueado} onClick={() => enviar('cerrar')}>Finalizar práctica</button>
+          </div>
         </div>}
         {fase === 'cierre' && sesion.resumen && <div className="space-y-5">
           <h3 ref={foco} tabIndex={-1} className="text-xl font-bold flex items-center gap-2"><CheckCircle2 aria-hidden="true" className="h-6 w-6 text-emerald-400" />Práctica completada</h3>
           <Resumen resumen={sesion.resumen} />
           <GuardarResumen resumen={sesion.resumen} historial={sesion.historial} />
-          {sesion.resumen.refuerzoDisponible && <div className="rounded-xl border border-blue-700 p-4 space-y-3">
-            <p>Si quieres, practica la misma idea con un ejercicio pequeño. Es opcional y no cambia tu cierre.</p>
-            <button className={secundario} disabled={bloqueado} onClick={() => enviar('refuerzo')}>Probar un ejercicio opcional</button>
-          </div>}
-          <div className="grid sm:grid-cols-2 gap-3">
-            <button className={boton} disabled={ocupado} onClick={otroPrograma}>Practicar con otro programa</button>
-            <button className={`${secundario} py-3`} disabled={ocupado} onClick={nuevaPractica}>Repetir con este código</button>
-          </div>
+          <nav aria-label="Después de la práctica" className="flex flex-wrap items-center gap-4 border-t border-slate-700 pt-5">
+            <Link className={boton} href="/" onClick={() => {
+              try { localStorage.removeItem(clave) } catch {}
+            }}>Finalizar</Link>
+            <button className="underline" onClick={otroPrograma}>Practicar con otro programa</button>
+            <button className="underline" onClick={nuevaPractica}>Repetir con este código</button>
+          </nav>
         </div>}
         {enRefuerzo && sesion.refuerzo && <div className="space-y-4">
           <h3 ref={foco} tabIndex={-1} className="text-xl font-bold">Refuerzo opcional</h3>
@@ -495,21 +505,18 @@ export default function SimuladorPage() {
             <p><strong>Entradas:</strong> {sesion.refuerzo.entradas}</p><p><strong>Salida:</strong> {sesion.refuerzo.salidas}</p>
             <ul className="list-disc pl-5">{sesion.refuerzo.restricciones.map((r) => <li key={r}>{r}</li>)}</ul>
             <h4 className="font-semibold">Ejemplos</h4><ul className="space-y-2">{sesion.refuerzo.casos.map((c, i) => <li key={i}><code className="break-all">{c.entrada}</code> → {c.esperado}</li>)}</ul>
-            <p className="text-sm text-amber-200">{sesion.analisis.limitacion}</p>
+            <p className="text-sm text-slate-300"><a href="#editor-practica" className="underline">Ir al editor para escribir mi solución</a>. Revisaremos el código sin ejecutarlo.</p>
             {!!sesion.versionesRefuerzo?.length && <p className="text-sm text-slate-300">Estás corrigiendo tu solución. La revisión anterior se conserva y podrás compararla.</p>}
-            <button className={boton} disabled={evaluacionBloqueada || !codigoRefuerzo.trim() || codigoRefuerzo.length > 12000} onClick={() => enviar('entregar', { codigo: codigoRefuerzo })}>{sesion.versionesRefuerzo?.length ? 'Enviar mi solución corregida' : 'Enviar mi solución'}</button>
           </div> : <div className="space-y-4">
             <EvaluacionRefuerzo evaluacion={sesion.evaluacionRefuerzo} />
             {sesion.cambiosRefuerzo && <div className="rounded-xl border border-blue-800 p-4 space-y-1"><h4 className="font-semibold">Qué cambió respecto a tu entrega anterior</h4>
               {sesion.cambiosRefuerzo.length ? <ul className="list-disc pl-5 text-sm">{sesion.cambiosRefuerzo.map((c) => <li key={c.nombre}>{c.nombre}: {c.antes} → {c.ahora}</li>)}</ul> : <p className="text-sm text-slate-300">La revisión no cambió en ningún punto.</p>}</div>}
             {!!sesion.versionesRefuerzo?.length && <details className="text-sm"><summary className="cursor-pointer">Ver la revisión de tu primera entrega</summary><div className="mt-3"><EvaluacionRefuerzo evaluacion={sesion.versionesRefuerzo[0]} /></div></details>}
-            {sesion.puedeCorregir && <button className={secundario} disabled={ocupado} onClick={() => enviar('corregir')}>Corregir mi solución (una vez)</button>}
           </div>}
-          <details><summary className="cursor-pointer">Volver a ver el cierre</summary><div className="mt-3"><Resumen resumen={sesion.resumen} /></div></details>
-          <button className={secundario} disabled={ocupado} onClick={otroPrograma}>{fase === 'refuerzo' ? 'Terminar por ahora' : 'Practicar con otro programa'}</button>
+          <button className={fase === 'refuerzo' ? secundario : boton} disabled={bloqueado} onClick={() => enviar('cerrar')}>{fase === 'refuerzo' ? 'Omitir ejercicio y finalizar' : 'Ver el resumen de mi práctica'}</button>
         </div>}
         {!!sesion?.historial.length && <details className="border-t border-slate-700 pt-3"><summary className="cursor-pointer">Tus respuestas en esta práctica</summary><ol className="space-y-5 mt-3">{sesion.historial.map((h, i) => <li key={h.instancia || i} className="text-sm space-y-2"><p className="font-semibold">{i + 1}. {h.pregunta}</p>{h.respuesta && <p className="whitespace-pre-wrap text-slate-300">{h.respuesta}</p>}<p>{h.feedback.estado}</p><Retroalimentacion registro={h} /></li>)}</ol></details>}
-        {sesion?.resumen && ['cierre', 'refuerzo', 'refuerzo_revisado'].includes(fase) && <Compartir key={sesion.sesion} />}
+        {sesion?.resumen && fase === 'cierre' && <Compartir key={sesion.sesion} />}
         {sesion?.resumen && fase === 'cierre' && <Encuesta modulo="sustentar" />}
       </section>
     </div>

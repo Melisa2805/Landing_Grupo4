@@ -22,7 +22,7 @@ PyDefense tiene dos módulos independientes: **Aprender** (lecciones breves, sin
 
 Alpha 0.2 propone una práctica sobre el programa del estudiante: permite iniciar sesión, aceptar el consentimiento, pegar o cargar código Python e indicar opcionalmente los temas cursados. Presenta hasta tres preguntas de sustentación, adaptadas al código, al nivel indicado y a las respuestas anteriores, y recibe respuestas escritas.
 
-El resultado es **retroalimentación cualitativa** sobre qué pudo explicar, qué falta por comprender y qué debería repasar. **No se ejecuta el código ni se entrega una nota global 0–10.** Al cerrar, se puede consultar, copiar o descargar un resumen, compartir una invitación a PyDefense y, cuando corresponde, realizar un refuerzo opcional.
+El resultado es **retroalimentación cualitativa** sobre qué pudo explicar, qué falta por comprender y qué debería repasar. **No se ejecuta el código ni se entrega una nota global 0–10.** Tras la última retroalimentación se ofrece un ejercicio opcional si hay un concepto pertinente. El estudiante puede omitirlo, abandonarlo o enviar una solución. El cierre reúne las explicaciones y, si hubo una entrega, la evidencia del ejercicio. Desde allí se puede copiar o descargar el resumen, compartir una invitación, repetir con el mismo código, usar otro programa o finalizar.
 
 **Alpha 0.2:** https://pydefense-dev.vercel.app
 
