@@ -199,3 +199,29 @@ test('render de actividades: radios etiquetados por línea, pista tras el primer
   assert.ok(revisada.includes('Practicar una parecida (opcional)')); assert.ok(revisada.includes('Continuar'))
   assert.ok(revisada.indexOf('Repasemos la solución') < revisada.indexOf('Continuar'))
 })
+
+test('vistas compartidas: resumen con crédito honesto, racha que no se presenta como dominio y lista por unidades', async () => {
+  const React = require('react')
+  const { renderToStaticMarkup } = require('react-dom/server')
+  const e = await entorno()
+  const { Resumen, Racha, ListaLecciones, CATALOGO } = await e.importar('app/aprender/vistas.jsx')
+  const m = await e.importar('lib/aprender/motor.js')
+  const { estadoLecciones } = await e.importar('lib/aprender/progreso.js')
+  let s = m.empezarActividades(m.iniciarLeccion(CATALOGO, 'u2-l1', { semilla: 1, ahora: 1, huellaCatalogo: 'h' }))
+  while (s.paso === 'actividades') {
+    const a = m.estadoItem(CATALOGO, s).actividad
+    s = m.confirmar(m.responder(CATALOGO, s, a.formato === 'linea' ? a.correctas[0] : a.correcta), { ahora: 2 })
+  }
+  const vista = m.vistaSesion(CATALOGO, s)
+  const render = (props) => renderToStaticMarkup(React.createElement(Resumen, { vista, siguiente: null, onSiguiente() {}, demostracion: true, ...props }))
+  assert.ok(render({ credito: { nuevo: true, cuenta: true }, racha: { actual: 3 } }).includes('Día acreditado: llevas 3 días seguidos.'))
+  assert.ok(render({ credito: { nuevo: false, cuenta: false } }).includes('no suma un día nuevo'))
+  assert.ok(render({ credito: { nuevo: false, cuenta: true } }).includes('Hoy ya estaba acreditado'))
+  const sinCredito = render({})
+  assert.ok(sinCredito.includes('Lección completada')); assert.ok(!sinCredito.includes('Día acreditado')); assert.ok(sinCredito.includes('no es una nota ni certifica dominio'))
+  const racha = renderToStaticMarkup(React.createElement(Racha, { racha: { actual: 2, record: 5, hoyAcreditado: false }, hoy: '2026-11-20' }))
+  for (const t of ['2 días seguidos', 'récord 5', 'mide constancia, no lo que sabes', '3:00 a. m.', 'Ocultar racha']) assert.ok(racha.includes(t), t)
+  const lista = renderToStaticMarkup(React.createElement(ListaLecciones, { lecciones: estadoLecciones(CATALOGO, { lecciones: {} }).map((l) => ({ ...l, unidad: CATALOGO.unidades.find((u) => u.lecciones.includes(l.id)).unidad })), onAbrir() {} }))
+  for (const t of ['La merienda', 'El descuento', 'Los gastos de la semana', 'Comparar valores']) assert.ok(lista.includes(t), t)
+  assert.equal((lista.match(/disabled=""/g) || []).length, 8, 'solo la primera lección está abierta')
+})

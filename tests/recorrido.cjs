@@ -123,15 +123,15 @@ const CLERK = { NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: `pk_live_${Buffer.from('clerk
       await until(() => evaluate(texto('¡Correcto!')), `acierto autónomo ${nombre}`)
       assert.ok(await pulsar('Continuar'))
       await until(() => evaluate(texto('Lección completada')), `resumen ${nombre}`)
-      assert.ok(await evaluate(texto('Resolviste 1 de 2 aplicaciones sin ayuda'))); await capturar(`${nombre}-5-resumen`)
+      assert.ok(await evaluate(texto('Resolviste 1 de 2 sin ayuda'))); await capturar(`${nombre}-5-resumen`)
       assert.equal(await desborda(), false, `resumen ${nombre}`)
       // The lesson is already recorded: a reload keeps it and opens lesson 2.
       await send('Page.reload')
       await until(() => evaluate(texto('Lección completada')), `recarga ${nombre}`)
       assert.ok(await pulsar('Siguiente lección'))
       await until(() => evaluate(texto('Seguir un cambio de valor')), `lección 2 ${nombre}`)
-      assert.ok(await pulsar('Volver a las lecciones'))
-      await until(() => evaluate(texto('1 de 3 lecciones completadas')), `progreso ${nombre}`); await capturar(`${nombre}-6-progreso`)
+      assert.ok(await pulsar('Volver a la ruta'))
+      await until(() => evaluate(texto('1 de 9 lecciones completadas')), `progreso ${nombre}`); await capturar(`${nombre}-6-progreso`)
       recorridoAprender[nombre] = await evaluate('JSON.parse(localStorage.getItem("pydefense-aprender:v1")).progreso.lecciones["u1-l1"].ultima')
       assert.equal(recorridoAprender[nombre].aplicacionesSinAyuda, 1)
     }
