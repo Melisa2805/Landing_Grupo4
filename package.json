@@ -12,6 +12,7 @@
     "start": "next start",
     "test:adaptativo": "node --experimental-vm-modules tests/adaptativo.test.cjs",
     "test:estabilidad": "node --experimental-vm-modules tests/estabilidad.test.cjs",
+    "test:proveedores": "node --experimental-vm-modules tests/proveedores.test.cjs",
     "test:proveedor": "node --experimental-vm-modules scripts/comprobar-proveedor.cjs",
     "test:recorrido": "node tests/recorrido.cjs",
     "test:persistencia": "node --experimental-vm-modules tests/persistencia.test.cjs",
