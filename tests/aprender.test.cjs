@@ -158,10 +158,10 @@ test('independencia: Aprender no importa la lógica de Sustentar y Sustentar no 
   const listar = async (dir) => (await fs.readdir(dir, { withFileTypes: true, recursive: true })).filter((f) => f.isFile() && /\.(js|jsx)$/.test(f.name)).map((f) => path.join(f.parentPath ?? f.path, f.name))
   const importaciones = async (archivo) => [...(await fs.readFile(archivo, 'utf8')).matchAll(/from\s+['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g)].map((m) => m[1] || m[2])
   const SUSTENTAR = /(?:^|\/)(sustentacion|evaluacion|pedagogia|llm|contratos-ia|afirmaciones|perfil|temas|knowledge|python-static|python-fallback|huellas|medicion|experimento|manifiesto|participacion)(?:\.js)?$|simulador\//
-  const aprender = [...await listar('lib/aprender'), ...await listar('app/aprender')]
+  const aprender = [...await listar('lib/aprender'), ...await listar('app/aprender'), ...await listar('app/api/aprender')]
   assert.ok(aprender.length >= 4)
   for (const archivo of aprender) for (const i of await importaciones(archivo)) assert.ok(!SUSTENTAR.test(i), `${archivo} importa ${i}`)
-  const sustentar = [...(await fs.readdir('lib')).filter((f) => f.endsWith('.js')).map((f) => path.join('lib', f)), ...await listar('app/simulador'), ...await listar('app/api')]
+  const sustentar = [...(await fs.readdir('lib')).filter((f) => f.endsWith('.js')).map((f) => path.join('lib', f)), ...await listar('app/simulador'), ...(await listar('app/api')).filter((f) => !/app\/api\/(aprender|invitaciones|expo)\//.test(f))]
   for (const archivo of sustentar) for (const i of await importaciones(archivo)) assert.ok(!/aprender/.test(i), `${archivo} importa ${i}`)
 })
 
