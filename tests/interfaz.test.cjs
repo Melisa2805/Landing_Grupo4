@@ -26,7 +26,7 @@ test('archivos Python: conserva el contenido y valida extensión, tamaño, vací
 test('render: espera con gif de carga y texto accesible', async () => {
   const e = await entorno()
   const { Procesando } = await e.importar('app/simulador/ux.jsx')
-  for (const accion of ['iniciar', 'confianza', 'continuar', 'saltar']) {
+  for (const accion of ['iniciar', 'responder', 'continuar', 'saltar']) {
     const html = renderToStaticMarkup(React.createElement(Procesando, { accion }))
     assert.ok(html.includes('role="status"'))
     assert.ok(html.includes('aria-live="polite"'))
@@ -107,10 +107,10 @@ test('render: una omisión no se muestra como cero ni como error', async () => {
   assert.ok(html.includes('no se considera incorrecta')); assert.ok(sinCifras(html)); assert.ok(!html.includes('Lo que falta'))
 })
 
-test('contrato de interfaz: identidad, confianza previa, cierre, reparación y borrador por usuario; sin selector ni apelación', async () => {
+test('contrato de interfaz: identidad, respuesta directa, cierre, reparación y borrador por usuario; sin selector ni apelación', async () => {
   const page = await fs.readFile('app/simulador/page.jsx', 'utf8')
-  for (const token of ['max-w-[1680px]', 'lg:grid-cols-2', 'min-w-0', 'localStorage.setItem', 'aria-busy', 'foco.current?.focus()', 'SignInButton', 'pydefense-v4:', "enviar('confianza', { valor })", "enviar('confianza', { valor: null })", "enviar('cerrar')", "enviar('reparar'", "enviar('refuerzo')", "motivo: 'tema_no_cursado'", 'Prefiero no responder', 'No he visto este tema', 'Necesito una aclaración', 'No entendí la explicación', 'Esto no refleja lo que quise decir', 'Creo que hay un error en el análisis del código', 'visibilityState', 'Acepto y quiero practicar', 'Retirar y borrar mis datos']) assert.ok(page.includes(token), token)
-  for (const prohibido of ['maxPreguntas', 'Máximo de preguntas', "'revisar'", 'Solicitar revisión', '/10', 'puntaje', 'promedio de la sustentación', 'Dominio']) assert.ok(!page.includes(prohibido), prohibido)
+  for (const token of ['max-w-[1680px]', 'lg:grid-cols-2', 'min-w-0', 'localStorage.setItem', 'aria-busy', 'foco.current?.focus()', 'SignInButton', 'pydefense-v4:', "motivo: 'prefiero_pasar'", "enviar('cerrar')", "enviar('reparar'", "enviar('refuerzo')", "motivo: 'tema_no_cursado'", 'Prefiero no responder', 'No he visto este tema', 'Necesito una aclaración', 'No entendí la explicación', 'Esto no refleja lo que quise decir', 'Creo que hay un error en el análisis del código', 'visibilityState', 'Acepto y quiero practicar', 'Retirar y borrar mis datos']) assert.ok(page.includes(token), token)
+  for (const prohibido of ["enviar('confianza'", '¿qué tan seguro', 'CONFIANZA.map', 'maxPreguntas', 'Máximo de preguntas', "'revisar'", 'Solicitar revisión', '/10', 'puntaje', 'promedio de la sustentación', 'Dominio']) assert.ok(!page.includes(prohibido), prohibido)
   assert.ok(page.indexOf('Tu código Python') < page.indexOf('aria-label="Práctica"'))
   const layout = await fs.readFile('app/layout.jsx', 'utf8')
   assert.ok(!layout.includes('Administrador')); assert.ok(layout.includes('<Show when="signed-out">'))
@@ -121,7 +121,7 @@ test('contrato de interfaz: identidad, confianza previa, cierre, reparación y b
 test('render: progreso sin juicio, código resaltado y resumen exportable sin cifras', async () => {
   const e = await entorno()
   const { Progreso, CodigoResaltado, textoResumen } = await e.importar('app/simulador/ux.jsx')
-  const sesion = { fase: 'confianza', limite: 3, historial: [{ omitida: false }, { omitida: true }] }
+  const sesion = { fase: 'pregunta', limite: 3, historial: [{ omitida: false }, { omitida: true }] }
   const progreso = renderToStaticMarkup(React.createElement(Progreso, { sesion }))
   for (const texto of ['Pregunta 1: respondida', 'Pregunta 2: omitida', 'Pregunta 3: en curso', 'Cierre: pendiente']) assert.ok(progreso.includes(texto), texto)
   assert.ok(!/incorrect|error|fall/i.test(progreso))

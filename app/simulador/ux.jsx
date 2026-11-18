@@ -10,7 +10,7 @@ export function Progreso({ sesion }) {
   const pasos = Array.from({ length: sesion.limite }, (_, i) => {
     const h = sesion.historial[i]
     if (h) return h.omitida ? 'omitida' : 'hecha'
-    return !cerrada && i === sesion.historial.length && ['confianza', 'pregunta'].includes(sesion.fase) ? 'actual' : cerrada ? 'no_usada' : 'pendiente'
+    return !cerrada && i === sesion.historial.length && sesion.fase === 'pregunta' ? 'actual' : cerrada ? 'no_usada' : 'pendiente'
   })
   const estilo = { hecha: 'bg-emerald-500 border-emerald-500 text-slate-950', omitida: 'bg-slate-600 border-slate-500 text-slate-200', actual: 'border-blue-400 text-blue-200 ring-2 ring-blue-500/40', pendiente: 'border-slate-600 text-slate-400', no_usada: 'border-slate-700 text-slate-600' }
   const texto = { hecha: 'respondida', omitida: 'omitida', actual: 'en curso', pendiente: 'pendiente', no_usada: 'no usada' }
@@ -34,7 +34,7 @@ export function CodigoResaltado({ codigo, fragmento }) {
 }
 
 const MENSAJES = {
-  iniciar: 'Analizando tu código y preparando la primera pregunta…', confianza: 'Mostrando la pregunta…', responder: 'El tutor está leyendo tu explicación. Puede tardar unos segundos…',
+  iniciar: 'Analizando tu código y preparando la primera pregunta…', responder: 'El tutor está leyendo tu explicación. Puede tardar unos segundos…',
   reparar: 'Revisando de nuevo la retroalimentación…', entregar: 'Revisando tu solución…', continuar: 'Preparando el siguiente paso…', saltar: 'Preparando la siguiente pregunta…', cerrar: 'Preparando tu cierre…', recuperar: 'Recuperando tu práctica…',
 }
 export function Procesando({ accion }) {

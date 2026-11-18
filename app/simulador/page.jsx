@@ -64,7 +64,6 @@ function EnunciadoEjercicio({ texto }) {
 }
 
 const TEMAS = [['basico', 'Variables, operaciones y funciones'], ['condicionales', 'También condicionales'], ['ciclos_listas', 'También ciclos y listas'], ['no_seguro', 'No estoy seguro']]
-const CONFIANZA = [[1, 'Nada seguro'], [2, 'Poco'], [3, 'Algo seguro'], [4, 'Bastante'], [5, 'Muy seguro']]
 const DIA_MS = 24 * 3600_000
 const boton = 'w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-white'
 const secundario = 'border border-slate-500 px-4 py-2 rounded-lg disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white'
@@ -156,19 +155,8 @@ export default function SimuladorPage() {
     // The status is loaded once per visit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listo])
-  useEffect(() => { foco.current?.focus() }, [sesion?.fase, sesion?.numero])
+  useEffect(() => { foco.current?.focus() }, [sesion?.fase, sesion?.numero, sesion?.instancia])
   useEffect(() => { try { setCodigoVisible(window.matchMedia('(min-width: 1024px)').matches) } catch {} }, [])
-  // Keys 1-5 answer the confidence card when no text field has the focus.
-  useEffect(() => {
-    if (sesion?.fase !== 'confianza') return
-    const tecla = (e) => {
-      if (e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName) || e.target?.isContentEditable) return
-      if (/^[1-5]$/.test(e.key)) { e.preventDefault(); enviar('confianza', { valor: Number(e.key) }) }
-    }
-    window.addEventListener('keydown', tecla)
-    return () => window.removeEventListener('keydown', tecla)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sesion?.fase, sesion?.revision])
   useEffect(() => {
     if (esperaHasta <= Date.now()) return
     const timer = setInterval(() => {
@@ -336,11 +324,11 @@ export default function SimuladorPage() {
   const bloqueado = ocupado || !listo || leyendoArchivo
   const espera = Math.max(0, Math.ceil((esperaHasta - ahora) / 1000))
   const evaluacionBloqueada = bloqueado || espera > 0
-  const caducada = sesion && !sesion.vigente && ['confianza', 'pregunta', 'feedback'].includes(fase)
+  const caducada = sesion && !sesion.vigente && ['pregunta', 'feedback'].includes(fase)
   const valorEditor = enRefuerzo ? codigoRefuerzo : codigo
   const cambiarCodigo = enRefuerzo ? setCodigoRefuerzo : setCodigo
   const etiquetaEditor = enRefuerzo ? 'Tu solución del refuerzo' : 'Código Python para explicar'
-  const fragmentoActivo = ['confianza', 'pregunta'].includes(fase) ? sesion.tema?.fragmento : fase === 'feedback' ? ultimo?.referencia : null
+  const fragmentoActivo = fase === 'pregunta' ? sesion.tema?.fragmento : fase === 'feedback' ? ultimo?.referencia : null
   return <main className="simulador mx-auto w-full max-w-[1680px] px-4 lg:px-8 py-6 space-y-6">
     <header className="border-b border-slate-800 pb-4">
       <h1 className="text-2xl font-bold flex items-center gap-2"><Code2 className="text-blue-400" /> Practica tu sustentación</h1>
@@ -421,37 +409,24 @@ export default function SimuladorPage() {
         {caducada && <div className="space-y-2"><p className="text-amber-100">Terminó el tiempo para responder preguntas en esta práctica.</p>
           {fase !== 'feedback' && (sesion.completadas ? <button className={boton} disabled={bloqueado} onClick={() => enviar('cerrar')}>Ver mi resumen</button>
             : <button className={boton} onClick={nuevaPractica}>Comenzar otra práctica</button>)}</div>}
-        {fase === 'confianza' && !caducada && <div className="space-y-4">
+        {fase === 'pregunta' && !caducada && <div className="space-y-4">
           <h3 ref={foco} tabIndex={-1} className="font-semibold text-lg">Pregunta {sesion.numero} · {sesion.tema.nombre}</h3>
           {sesion.tema.reemplazo && <p className="text-sm text-slate-300">Esta pregunta reemplaza la anterior, que no cuenta en tu contra.</p>}
           {sesion.tema.fragmento && <pre className="overflow-x-auto rounded-lg bg-slate-950 p-3 text-sm"><code>{sesion.tema.fragmento}</code></pre>}
-          {sesion.pregunta && <p className="whitespace-pre-wrap text-lg leading-relaxed">{sesion.pregunta}</p>}
-          <p id="confianza">Antes de responder: ¿qué tan seguro te sientes para responder esta pregunta?</p>
-          <div role="group" aria-labelledby="confianza" className="grid grid-cols-5 gap-2">
-            {CONFIANZA.map(([valor, etiqueta]) => <button key={valor} disabled={bloqueado} onClick={() => enviar('confianza', { valor })} aria-label={`${valor}, ${etiqueta}`} className="rounded-xl border border-slate-600 bg-slate-950/60 py-3 transition hover:-translate-y-0.5 hover:border-blue-400 hover:bg-blue-950/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400 disabled:opacity-50"><span className="block text-xl font-bold">{valor}</span><span className="block text-[11px] leading-tight text-slate-300 min-h-4 px-1">{etiqueta}</span></button>)}
-          </div>
-          <p className="text-xs text-slate-500">Tecla 1–5 como atajo.</p>
-          <div className="flex flex-wrap gap-3">
-            <button className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('confianza', { valor: null })}>Prefiero no responder</button>
-            <button className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'tema_no_cursado' })}>No he visto este tema</button>
-            {sesion.completadas > 0 && <button className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('cerrar')}>Terminar aquí</button>}
-          </div>
-        </div>}
-        {fase === 'pregunta' && !caducada && <div className="space-y-4">
-          <h3 className="font-semibold text-lg">Pregunta {sesion.numero} · {sesion.tema.nombre}</h3>
-          <p className="whitespace-pre-wrap text-lg leading-relaxed">{sesion.pregunta}</p>
+          <p id="enunciado-pregunta" className="whitespace-pre-wrap text-lg leading-relaxed">{sesion.pregunta}</p>
           <details><summary className="cursor-pointer text-sm">Qué se observará</summary><ul className="list-disc pl-5 text-sm mt-2">{sesion.objetivos.map((o) => <li key={o}>{o}</li>)}</ul></details>
           {sesion.aclaracion && <p role="status" className="rounded-lg border border-blue-600 p-3">{sesion.aclaracion}</p>}
           <label htmlFor="respuesta" className="block text-sm">Cuéntalo con tus palabras</label>
-          <textarea ref={foco} id="respuesta" rows={7} maxLength={4000} value={respuesta} disabled={bloqueado} onChange={(e) => setRespuesta(e.target.value)}
+          <textarea id="respuesta" aria-describedby="enunciado-pregunta" rows={7} maxLength={4000} value={respuesta} disabled={bloqueado} onChange={(e) => setRespuesta(e.target.value)}
             onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && respuesta.trim() && !evaluacionBloqueada) { e.preventDefault(); enviar('responder', { respuesta }) } }}
             placeholder="Por ejemplo: «Recibe…, hace…, y devuelve…». Un ejemplo pequeño ayuda." className="w-full bg-slate-950 border border-slate-600 rounded-lg p-3 focus:border-blue-400" />
           <p className="text-xs text-slate-400">{respuesta.length}/4000 caracteres · Ctrl + Enter para enviar · tu borrador se guarda en este navegador</p>
           <button className={boton} disabled={evaluacionBloqueada || !respuesta.trim()} onClick={() => enviar('responder', { respuesta })}>Enviar respuesta</button>
           <div className="flex flex-wrap gap-3">
-            <button title="Usa una de las tres preguntas y no cuenta como error" className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'no_se' })}>No sé / prefiero pasar</button>
+            <button title="Usa una de las tres preguntas y no cuenta como error" className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'prefiero_pasar' })}>Prefiero no responder</button>
             <button title={sesion.puedeReemplazar ? 'La reemplaza una vez sin usar una pregunta' : 'La retira sin contarla en tu contra'} className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('saltar', { motivo: 'tema_no_cursado' })}>No he visto este tema</button>
             <button title="Mantiene la misma pregunta" className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado || sesion.aclaraciones >= 2} onClick={() => enviar('aclarar')}>Necesito una aclaración</button>
+            {sesion.completadas > 0 && <button className="underline text-sm text-slate-300 disabled:opacity-50" disabled={bloqueado} onClick={() => enviar('cerrar')}>Terminar aquí</button>}
           </div>
         </div>}
         {fase === 'feedback' && ultimo && <div className="space-y-4">
