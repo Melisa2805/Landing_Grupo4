@@ -161,3 +161,12 @@ test('simulación de 14 días: siempre hay una sesión acreditable (lección, mi
   assert.equal(registro.filter((x) => x === 'leccion').length, 9)
   assert.ok(registro.slice(9).every((x) => x === 'mision' || x === 'repaso'))
 })
+
+test('recordatorio: iCalendar diario en hora de Bogotá, con líneas CRLF y sin datos personales', async () => {
+  const { e } = await cargar()
+  const { recordatorioICS } = await e.importar('lib/aprender/recordatorio.js')
+  const ics = recordatorioICS({ hora: 7, url: 'https://pydefense.test/aprender', hoy: '2026-11-20', uid: 'abc' })
+  for (const t of ['BEGIN:VCALENDAR', 'TZID:America/Bogota', 'TZOFFSETTO:-0500', 'DTSTART;TZID=America/Bogota:20261120T070000', 'RRULE:FREQ=DAILY', 'BEGIN:VALARM']) assert.ok(ics.includes(t), t)
+  assert.ok(ics.split('\r\n').length > 20); assert.ok(!/\r?\n(?<!\r\n)/.test(ics.replace(/\r\n/g, '')))
+  assert.ok(!/@[a-z]+\.[a-z]/.test(ics.replace('@pydefense', '')), 'sin correos')
+})

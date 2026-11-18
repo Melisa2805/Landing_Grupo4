@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
-import { PlayCircle, Trash2, Target, RotateCcw, CheckCircle2, CloudUpload } from 'lucide-react'
+import { PlayCircle, Trash2, Target, RotateCcw, CheckCircle2, CloudUpload, CalendarPlus } from 'lucide-react'
 import { huella } from '../../lib/aprender/catalogo'
 import { unidadDe } from '../../lib/aprender/ruta'
 import { iniciarLeccion, empezarActividades, responder, pedirPista, verSolucion, confirmar, practicarParecida, vistaSesion } from '../../lib/aprender/motor'
 import { progresoInicial, registrarCierre, estadoLecciones, siguienteLeccion, habilidades } from '../../lib/aprender/progreso'
 import { crearAlmacen, CLAVE } from '../../lib/aprender/almacen-local'
 import { PUNTOS_APRENDER, VERSION_CONSENTIMIENTO_APRENDER } from '../../lib/aprender/consentimiento'
+import { recordatorioICS } from '../../lib/aprender/recordatorio'
 import { primario, secundario } from './actividad'
 import { CATALOGO, Titulo, Racha, ListaLecciones, SustentarOpcional, Ensenanza, EnCurso, Resumen } from './vistas'
 import { declararHito } from '../components/medicion-visita'
@@ -279,10 +280,32 @@ function InicioCuenta({ estado, siguiente, ocupado, onAbrir, onBorrar }) {
         <span className="block text-xs text-slate-400">{h.observable}</span>
       </li>)}</ul>
     </section>}
+    <Recordatorio hoy={estado.hoy} />
     <SustentarOpcional />
     <footer className="space-y-3 border-t border-slate-800 pt-4 text-sm text-slate-400">
       <p>Tu avance se guarda en tu cuenta. Las opciones que eliges se borran a los 30 días.</p>
       <button type="button" onClick={onBorrar} className="inline-flex min-h-11 items-center gap-2 underline"><Trash2 aria-hidden="true" className="h-4 w-4" />Borrar mi progreso de Aprender</button>
     </footer>
   </div>
+}
+
+// Optional reminder created on the device: nothing is sent or recorded.
+function Recordatorio({ hoy }) {
+  const [hora, setHora] = useState(19)
+  function descargar() {
+    const ics = recordatorioICS({ hora, url: `${window.location.origin}/aprender`, hoy, uid: nuevaClave() })
+    const enlace = document.createElement('a')
+    enlace.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }))
+    enlace.download = 'pydefense-recordatorio.ics'
+    enlace.click()
+    setTimeout(() => URL.revokeObjectURL(enlace.href), 1000)
+  }
+  return <section aria-labelledby="titulo-recordatorio" className="space-y-2 rounded-2xl border border-slate-700 p-4 text-sm">
+    <h2 id="titulo-recordatorio" className="font-semibold">Recordatorio diario (opcional)</h2>
+    <p className="text-slate-300">Agrega a tu calendario un aviso diario para practicar. Se crea en tu dispositivo: PyDefense no envía recordatorios ni sabe si lo agregaste.</p>
+    <div className="flex flex-wrap items-center gap-3">
+      <label className="flex items-center gap-2">Hora <select value={hora} onChange={(e) => setHora(Number(e.target.value))} className="min-h-11 rounded-lg border border-slate-600 bg-slate-950 px-2">{[7, 12, 18, 19, 20, 21].map((h) => <option key={h} value={h}>{`${h}:00`}</option>)}</select></label>
+      <button type="button" onClick={descargar} className={secundario}><CalendarPlus aria-hidden="true" className="h-4 w-4" />Descargar recordatorio</button>
+    </div>
+  </section>
 }
