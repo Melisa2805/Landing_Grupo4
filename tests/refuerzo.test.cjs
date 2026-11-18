@@ -22,13 +22,28 @@ test('perfil estructural: distingue matrices, listas, condiciones y operaciones,
   const p = Object.fromEntries(Object.entries(PROGRAMAS).map(([k, v]) => [k, perfilEstructura(v)]))
   assert.equal(p.matrices.estructura, 'matriz'); assert.equal(p.matrices.profundidadCiclos, 3); assert.equal(p.matrices.nivel, 3)
   assert.equal(p.sumaMatrices.estructura, 'matriz'); assert.equal(p.transpuesta.estructura, 'matriz'); assert.equal(p.transpuesta.profundidadCiclos, 2)
-  assert.equal(p.aprobados.estructura, 'lista'); assert.equal(p.aprobados.profundidadCiclos, 1)
+  assert.equal(p.aprobados.estructura, 'coleccion'); assert.equal(p.aprobados.profundidadCiclos, 1)
   assert.equal(p.envio.estructura, 'condicional'); assert.equal(p.compra.estructura, 'simple')
   const dic = perfilEstructura('def frecuencias(palabras):\n    conteo = {}\n    for p in palabras:\n        conteo[p] = conteo.get(p, 0) + 1\n    return conteo')
-  assert.equal(dic.diccionario, true); assert.equal(dic.estructura, 'lista'); assert.equal(p.aprobados.diccionario, false)
+  assert.equal(dic.diccionario, true); assert.equal(dic.estructura, 'coleccion'); assert.equal(p.aprobados.diccionario, false)
+  // A loop without collections is not a list program; a matrix built with append is a matrix.
+  assert.equal(perfilEstructura('def fibonacci(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a').estructura, 'ciclo')
+  assert.equal(perfilEstructura('def tabla(n):\n    t = []\n    for i in range(n):\n        fila = []\n        for j in range(n):\n            fila.append(i * j)\n        t.append(fila)\n    return t').estructura, 'matriz')
   // Two loops in sequence are not nested; a matrix only mentioned in text does not count.
   assert.equal(perfilEstructura('def f(xs):\n    for x in xs:\n        print(x)\n    for x in xs:\n        print(x)').profundidadCiclos, 1)
   assert.equal(perfilEstructura('def f(x):\n    # m[i][j] es una matriz\n    texto = "a[i][j] [[1]]"\n    return x * 2').estructura, 'simple')
+})
+
+test('rasgos de técnica generales: búsqueda por mitades, intercambios, índices vecinos, actualización simultánea', async () => {
+  const { rasgos, cobertura } = await (await entorno()).importar('lib/complejidad.js')
+  const lista = (c) => [...rasgos(c)].sort()
+  const binaria = 'def b(l, x):\n    i, f = 0, len(l) - 1\n    while i <= f:\n        m = (i + f) // 2\n        if l[m] == x:\n            return m\n        elif l[m] < x:\n            i = m + 1\n        else:\n            f = m - 1\n    return -1'
+  for (const r of ['ciclo_condicional', 'dividir_mitades', 'salida_anticipada', 'condicion', 'asignacion_simultanea']) assert.ok(lista(binaria).includes(r), r)
+  const burbuja = 'def o(d):\n    for i in range(len(d)):\n        for j in range(len(d) - 1):\n            if d[j] > d[j + 1]:\n                d[j], d[j + 1] = d[j + 1], d[j]\n    return d'
+  for (const r of ['ciclos_anidados', 'indice_vecino', 'asignacion_simultanea']) assert.ok(lista(burbuja).includes(r), r)
+  // A plain count keeps little of a bubble sort; another nested-loop sort keeps it all.
+  assert.ok(cobertura(burbuja, 'def c(l):\n    n = 0\n    for x in l:\n        if x < 0:\n            n += 1\n    return n') < 0.6)
+  assert.equal(cobertura(burbuja, burbuja.replace('d[j] > d[j + 1]', 'd[j] < d[j + 1]')), 1)
 })
 
 test('programa con matrices: el refuerzo sigue en matrices, empieza por el error observado y progresa', async () => {
@@ -134,7 +149,15 @@ const GENERADO = {
   casos: [{ entrada: 'multiplicar_por_vector([[1, 2, 3], [4, 5, 6]], [2, 1, 3])', esperado: '[13, 31]' }, { entrada: 'multiplicar_por_vector([[1, 0], [0, 1]], [5, 7])', esperado: '[5, 7]' }],
   casosRevision: [{ entrada: 'multiplicar_por_vector([[2]], [3])', esperado: '[6]' }, { entrada: 'multiplicar_por_vector([[1, 1, 1]], [1, 2, 3])', esperado: '[6]' }, { entrada: 'multiplicar_por_vector([[0, 0], [1, 2], [3, 4]], [1, 1])', esperado: '[0, 3, 7]' }],
   relacion: 'Tu programa multiplica matrices y en tus respuestas confundiste qué dimensiones deben coincidir; aquí lo practicas con una matriz y un vector.',
+  solucionReferencia: 'def multiplicar_por_vector(matriz, vector):\n    resultado = []\n    for fila in matriz:\n        total = 0\n        for j in range(len(vector)):\n            total += fila[j] * vector[j]\n        resultado.append(total)\n    return resultado',
 }
+// Same technique and depth as the matrix product (three nested loops): for a practice without errors.
+const SUPERIOR = { ...GENERADO, nombre: 'producto_por_transpuesta', parametros: ['a'],
+  enunciado: 'Escribe producto_por_transpuesta(a), que multiplique la matriz a por su transpuesta: el elemento (i, j) del resultado es la suma de a[i][k] * a[j][k].',
+  casos: [{ entrada: 'producto_por_transpuesta([[1, 2], [3, 4]])', esperado: '[[5, 11], [11, 25]]' }, { entrada: 'producto_por_transpuesta([[1, 0, 2]])', esperado: '[[5]]' }],
+  casosRevision: [{ entrada: 'producto_por_transpuesta([[2]])', esperado: '[[4]]' }, { entrada: 'producto_por_transpuesta([[1], [2]])', esperado: '[[1, 2], [2, 4]]' }, { entrada: 'producto_por_transpuesta([[1, 1], [0, 1]])', esperado: '[[2, 1], [1, 1]]' }],
+  solucionReferencia: 'def producto_por_transpuesta(a):\n    n = len(a)\n    m = len(a[0])\n    resultado = [[0] * n for _ in range(n)]\n    for i in range(n):\n        for j in range(n):\n            for k in range(m):\n                resultado[i][j] += a[i][k] * a[j][k]\n    return resultado' }
+const VERIFICADO_SUPERIOR = ['[[5, 11], [11, 25]]', '[[5]]', '[[4]]', '[[1, 2], [2, 4]]', '[[2, 1], [1, 1]]']
 const VERIFICADO = ['[13, 31]', '[5, 7]', '[6]', '[6.0]', '[0, 3, 7]']
 const GEN = { ...BASE, PYDEFENSE_REFUERZO_GENERADO: 'activado' }
 // Routes by prompt: generator, verifier, practice review, otherwise the tutor.
@@ -206,6 +229,8 @@ test('sin ejercicio por defecto: una propuesta rechazada se corrige en un segund
     ['estructura.matriz', { generar: () => ({ ...GENERADO, nombre: 'total', parametros: ['a', 'b'], casos: [{ entrada: 'total(2, 3)', esperado: '6' }, { entrada: 'total(0, 3)', esperado: '0' }], casosRevision: [{ entrada: 'total(1, 1)', esperado: '1' }, { entrada: 'total(4, 2)', esperado: '8' }, { entrada: 'total(5, 0)', esperado: '0' }] }) }],
     ['revela_solucion', { generar: () => ({ ...GENERADO, enunciado: 'Completa: def multiplicar_por_vector(matriz, vector): return [...]' }) }],
     ['nombre', { generar: () => ({ ...GENERADO, nombre: 'multiplicar_matrices' }) }],
+    ['solucion.firma', { generar: () => ({ ...GENERADO, solucionReferencia: 'resultado = []' }) }],
+    ['nivel.demasiado_simple', { generar: () => ({ ...GENERADO, solucionReferencia: 'def multiplicar_por_vector(matriz, vector):\n    return [sum(f[j] * vector[j] for j in range(len(vector))) for f in matriz]' }) }],
     ['casos.no_literal', { generar: () => ({ ...GENERADO, casos: [{ entrada: 'multiplicar_por_vector(m, v)', esperado: '[1]' }, GENERADO.casos[1]] }) }],
     ['casos.aridad', { generar: () => ({ ...GENERADO, casos: [{ entrada: 'multiplicar_por_vector([[1]])', esperado: '[1]' }, GENERADO.casos[1]] }) }],
     ['estructura.diccionario', { codigo: 'def frecuencias(palabras):\n    conteo = {}\n    for p in palabras:\n        conteo[p] = conteo.get(p, 0) + 1\n    return conteo', generar: () => ({ ...GENERADO, nombre: 'contar_palabra', parametros: ['palabras'], casos: [{ entrada: "contar_palabra(['a', 'b'])", esperado: '2' }, { entrada: 'contar_palabra([])', esperado: '0' }], casosRevision: [{ entrada: "contar_palabra(['a'])", esperado: '1' }, { entrada: "contar_palabra(['a', 'a'])", esperado: '2' }, { entrada: "contar_palabra(['x', 'y', 'z'])", esperado: '3' }] }) }],
@@ -214,7 +239,7 @@ test('sin ejercicio por defecto: una propuesta rechazada se corrige en un segund
     const { e, r, s } = await hastaOfertaGenerada(comportamiento, comportamiento.codigo)
     await assert.rejects(e.paso(s, 'refuerzo'), { code: 'REFUERZO_NO_DISPONIBLE', detalle: motivo }, motivo)
     // Two attempts, the second told why the first was rejected; no catalog task.
-    assert.equal(r.generador.length, 2, motivo); assert.equal(r.generador[1].correccion, motivo)
+    assert.equal(r.generador.length, 2, motivo); assert.ok(typeof r.generador[1].correccion === 'string' && r.generador[1].correccion.length > 10, motivo)
     const v = await e.sustentar({ accion: 'recuperar', sesion: s.sesion })
     assert.equal(v.fase, 'feedback'); assert.equal(v.refuerzo, null); assert.ok(v.ofertaRefuerzo, 'se puede reintentar')
     assert.equal((await e.eventos('reinforcement_started')).length, 0)
@@ -228,24 +253,35 @@ test('sin ejercicio por defecto: una propuesta rechazada se corrige en un segund
   assert.equal((await segunda.e.eventos('reinforcement_started'))[0].datos.intento, 2)
 })
 
-test('sin errores el nivel no puede ser inferior al programa; el segundo intento usa un modelo más capaz de OpenAI', async () => {
+test('sin errores el nivel no puede ser inferior: lo mide la solución de referencia y el verificador; la generación usa un modelo más capaz', async () => {
   const bien = { tutorOpciones: { nivel: 2, veredicto: 'correcta' } }
-  const { e, r, s } = await hastaOfertaGenerada({ ...bien, nivel: 'inferior' })
+  // Matrix × vector (two loops) is below a matrix product when nothing failed.
+  const { e, r, s } = await hastaOfertaGenerada(bien)
   assert.match(s.ofertaRefuerzo.motivo, /nivel similar o algo mayor/)
-  await assert.rejects(e.paso(s, 'refuerzo'), { code: 'REFUERZO_NO_DISPONIBLE', detalle: 'verificacion.nivel_inferior' })
-  assert.equal(r.generador[0].foco.huboError, false); assert.equal(r.generador[0].foco.sinErrores, true)
-  // With OpenAI configured, the retry goes to the stronger model directly.
+  await assert.rejects(e.paso(s, 'refuerzo'), { code: 'REFUERZO_NO_DISPONIBLE', detalle: 'nivel.inferior' })
+  assert.equal(r.verificador.length, 0, 'rechazado antes de verificar'); assert.equal(r.generador[0].foco.sinErrores, true)
+  assert.match(r.generador[1].correccion, /más fácil que el programa/)
+  // The verifier's own judgement also counts.
+  const juez = await hastaOfertaGenerada({ ...bien, generar: () => SUPERIOR, verificar: () => VERIFICADO_SUPERIOR, nivel: 'inferior' })
+  await assert.rejects(juez.e.paso(juez.s, 'refuerzo'), { code: 'REFUERZO_NO_DISPONIBLE', detalle: 'verificacion.nivel_inferior' })
+  // With OpenAI configured both generations go to the strong model; verification stays on the normal chain.
   const env = { ...GEN, OPENAI_API_KEY: 'sk-ficticia', OPENAI_MODEL: 'gpt-6-luna' }
-  const x = await hastaRefuerzo({ ...bien, nivel: (n) => n === 1 ? 'inferior' : 'superior' }, PROGRAMAS.matrices, env)
-  assert.equal(x.s.refuerzo.nombre, 'multiplicar_por_vector')
+  const x = await hastaRefuerzo({ ...bien, generar: (d, n) => n === 1 ? GENERADO : SUPERIOR, verificar: () => VERIFICADO_SUPERIOR, nivel: 'similar' }, PROGRAMAS.matrices, env)
+  assert.equal(x.s.refuerzo.nombre, 'producto_por_transpuesta')
   const sol = x.r.urls.filter((u) => u.model === 'gpt-6.2-sol')
-  assert.equal(sol.length, 2, 'generación y verificación del segundo intento'); assert.ok(sol.every((u) => u.url === 'https://api.openai.com/v1/responses'))
-  assert.equal((await x.e.eventos('reinforcement_started'))[0].datos.modeloAlternativo, 'gpt-6.2-sol')
+  assert.equal(sol.length, 2, 'dos generaciones'); assert.ok(sol.every((u) => u.url === 'https://api.openai.com/v1/responses'))
+  assert.ok(x.r.urls.some((u) => u.url === 'https://llm.test/v1/chat/completions' && u.model === 'modelo-simulado'), 'verificación con otro modelo')
+  const d = (await x.e.eventos('reinforcement_started'))[0].datos
+  assert.equal(d.modeloGenerador, 'gpt-6.2-sol'); assert.equal(d.intento, 2); assert.equal(d.rechazoPrevio, 'nivel.inferior')
+  assert.ok(!JSON.stringify(x.s).includes('def producto_por_transpuesta'), 'la solución de referencia no llega al navegador')
+  const v = await x.e.paso(x.s, 'entregar', { codigo: SUPERIOR.solucionReferencia })
+  assert.ok(!JSON.stringify(x.r.revision.at(-1).ejercicio).includes('solucionReferencia'), 'ni a la revisión de la entrega')
+  assert.equal(v.fase, 'refuerzo_revisado')
 })
 
 test('refuerzo generado en otros programas: conserva la estructura de listas y se puede desactivar', async () => {
-  const { r } = await hastaRefuerzo({ generar: () => ({ ...GENERADO, nombre: 'contar_altas', parametros: ['notas'], casos: [{ entrada: 'contar_altas([1, 4, 5])', esperado: '2' }, { entrada: 'contar_altas([])', esperado: '0' }], casosRevision: [{ entrada: 'contar_altas([3])', esperado: '1' }, { entrada: 'contar_altas([2, 2])', esperado: '0' }, { entrada: 'contar_altas([5, 5, 5])', esperado: '3' }] }), verificar: () => ['2', '0', '1', '0', '3'] }, PROGRAMAS.aprobados)
-  assert.equal(r.generador[0].perfil.estructura, 'lista')
+  const { r } = await hastaRefuerzo({ generar: () => ({ ...GENERADO, nombre: 'contar_altas', parametros: ['notas'], solucionReferencia: 'def contar_altas(notas):\n    cuenta = 0\n    for n in notas:\n        if n >= 4:\n            cuenta += 1\n    return cuenta', casos: [{ entrada: 'contar_altas([1, 4, 5])', esperado: '2' }, { entrada: 'contar_altas([])', esperado: '0' }], casosRevision: [{ entrada: 'contar_altas([3])', esperado: '1' }, { entrada: 'contar_altas([2, 2])', esperado: '0' }, { entrada: 'contar_altas([5, 5, 5])', esperado: '3' }] }), verificar: () => ['2', '0', '1', '0', '3'] }, PROGRAMAS.aprobados)
+  assert.equal(r.generador[0].perfil.estructura, 'coleccion')
   const sin = await hastaRefuerzo({}, PROGRAMAS.matrices, { ...BASE, PYDEFENSE_REFUERZO_GENERADO: 'desactivado' })
   assert.equal(sin.r.generador.length, 0); assert.ok(MATRICES.includes(sin.s.refuerzo.nombre), 'solo con la generación desactivada se usa el catálogo')
 })

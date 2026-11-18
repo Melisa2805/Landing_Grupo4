@@ -38,7 +38,7 @@ const sesiones = conjunto.programas.filter((p) => !solo || solo.includes(p.id)).
       try {
         const v = await e.paso(s, 'refuerzo')
         const d = (await e.eventos('reinforcement_started'))[0].datos
-        r.refuerzo = { ms: Date.now() - inicio, intento: d.intento, rechazoPrevio: d.rechazoPrevio || null, modeloAlternativo: d.modeloAlternativo || null,
+        r.refuerzo = { ms: Date.now() - inicio, intento: d.intento, rechazoPrevio: d.rechazoPrevio || null, modeloGenerador: d.modeloGenerador || null,
           nombre: v.refuerzo.nombre, motivo: v.refuerzo.motivo, enunciado: v.refuerzo.enunciado, casos: v.refuerzo.casos }
       } catch (error) { r.refuerzo = { ms: Date.now() - inicio, error: error.code, detalle: error.detalle || null } }
     } catch (error) { r.error = error.code || 'ERROR'; r.detalle = error.detalle || null }
