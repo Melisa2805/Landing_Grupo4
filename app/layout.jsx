@@ -1,13 +1,14 @@
-import { ClerkProvider, Show, SignInButton, UserButton } from '@clerk/nextjs'
+import { ClerkProvider, Show, UserButton } from '@clerk/nextjs'
 import './globals.css'
 import LogoLink from './components/logo-link'
 import LimpiezaLocal from './components/limpieza-local'
 import CapturaReferido from './components/captura-referido'
+import { Navegacion, BotonSesion } from './components/navegacion'
 import { Analytics } from '@vercel/analytics/next'
 
 export const metadata = {
-  title: 'PyDefense - Practica tu sustentación de código Python',
-  description: 'Practica la explicación de tu código Python con hasta tres preguntas e identifica qué necesitas repasar.',
+  title: 'PyDefense - Aprende Python y practica explicar tu código',
+  description: 'Lecciones breves de Python para el móvil y práctica de sustentación sobre tu propio código, con retroalimentación.',
 }
 
 export default function RootLayout({ children }) {
@@ -19,19 +20,13 @@ export default function RootLayout({ children }) {
           <CapturaReferido />
           <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-4 flex flex-wrap gap-3 justify-between items-center max-w-7xl mx-auto rounded-b-xl">
             <LogoLink />
-            <div>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+              <Navegacion />
               <Show when="signed-out">
-                <SignInButton mode="modal" forceRedirectUrl="/simulador" signUpForceRedirectUrl="/simulador">
-                  <button className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-lg text-sm transition">
-                    Iniciar sesión
-                  </button>
-                </SignInButton>
+                <BotonSesion />
               </Show>
               <Show when="signed-in">
-                <div className="flex items-center gap-4">
-                  <a href="/simulador" className="text-sm font-medium text-blue-400 hover:text-blue-300">Practicar</a>
-                  <UserButton />
-                </div>
+                <UserButton />
               </Show>
             </div>
           </header>
