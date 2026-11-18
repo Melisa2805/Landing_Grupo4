@@ -40,6 +40,10 @@ async function entorno({ env, transport, pythonDisponible = true, reloj, db, usu
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'pydefense-test-'))
   temporales.push(dir)
   const variables = { ...(env || { LLM_BASE_URL: 'https://llm.test/v1', LLM_MODEL: 'modelo-simulado', LLM_API_KEY: 'clave-ficticia-tests' }) }
+  // Template wording by default so earlier suites keep exact call counts;
+  // tests/preguntas.test.cjs enables AI wording explicitly.
+  variables.PYDEFENSE_PREGUNTAS_GENERADAS ??= 'desactivado'
+  variables.PYDEFENSE_REFUERZO_GENERADO ??= 'desactivado'
   // Operator scripts (`db: 'entorno'`) never receive test secrets.
   if (db !== 'entorno') {
     variables.PYDEFENSE_SESSION_SECRET ??= 'secreto-de-sesion-para-pruebas'

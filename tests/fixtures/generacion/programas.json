@@ -1,0 +1,29 @@
+{
+  "nota": "Programas no usados al ajustar los prompts (conjunto de evaluación). Cada uno con una respuesta correcta y otra con un error típico.",
+  "programas": [
+    { "id": "busqueda_binaria", "codigo": "def busqueda_binaria(lista, objetivo):\n    inicio = 0\n    fin = len(lista) - 1\n    while inicio <= fin:\n        medio = (inicio + fin) // 2\n        if lista[medio] == objetivo:\n            return medio\n        elif lista[medio] < objetivo:\n            inicio = medio + 1\n        else:\n            fin = medio - 1\n    return -1",
+      "correcta": "Busca la posición de objetivo en una lista ordenada. Mira el elemento del medio: si es el objetivo devuelve su índice; si es menor, descarta la mitad izquierda moviendo inicio a medio + 1; si es mayor, descarta la derecha moviendo fin a medio - 1. Repite mientras inicio <= fin y, si el rango queda vacío, devuelve -1 porque no está. Funciona solo si la lista está ordenada.",
+      "error": "Recorre la lista elemento por elemento desde el principio hasta encontrar el objetivo y devuelve el elemento encontrado; la lista puede estar desordenada." },
+    { "id": "palindromo", "codigo": "def es_palindromo(texto):\n    limpio = texto.lower().replace(' ', '')\n    izquierda = 0\n    derecha = len(limpio) - 1\n    while izquierda < derecha:\n        if limpio[izquierda] != limpio[derecha]:\n            return False\n        izquierda += 1\n        derecha -= 1\n    return True",
+      "correcta": "Dice si un texto se lee igual al derecho y al revés sin importar mayúsculas ni espacios. Primero lo pasa a minúsculas y quita los espacios. Luego compara el primer y el último carácter, se acerca desde ambos extremos y, si alguna pareja es distinta, devuelve False. Si los índices se cruzan sin diferencias, devuelve True.",
+      "error": "Devuelve el texto al revés para poder compararlo; si el texto tiene espacios da un error." },
+    { "id": "burbuja", "codigo": "def ordenar_burbuja(numeros):\n    datos = numeros[:]\n    n = len(datos)\n    for i in range(n):\n        for j in range(n - 1 - i):\n            if datos[j] > datos[j + 1]:\n                datos[j], datos[j + 1] = datos[j + 1], datos[j]\n    return datos",
+      "correcta": "Ordena de menor a mayor una copia de la lista. En cada pasada compara elementos vecinos y los intercambia si están en el orden equivocado, así el mayor que queda va al final. Por eso la j llega cada vez hasta n - 1 - i: los últimos i ya están en su lugar. Devuelve la copia ordenada sin modificar la original.",
+      "error": "Ordena la lista de mayor a menor y modifica la lista original; el segundo ciclo recorre siempre toda la lista." },
+    { "id": "fibonacci", "codigo": "def fibonacci(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a",
+      "correcta": "Devuelve el n-ésimo número de Fibonacci empezando en fibonacci(0) = 0 y fibonacci(1) = 1. Guarda los dos últimos valores en a y b y en cada repetición avanza: a pasa a ser b y b la suma de ambos. Después de n pasos, a es el término n. Por ejemplo, fibonacci(5) es 5.",
+      "error": "Devuelve una lista con los primeros n números de Fibonacci, sumando cada número con el anterior." },
+    { "id": "maximo", "codigo": "def maximo(numeros):\n    mayor = numeros[0]\n    for x in numeros[1:]:\n        if x > mayor:\n            mayor = x\n    return mayor",
+      "correcta": "Encuentra el número más grande de una lista no vacía. Empieza suponiendo que el primero es el mayor y recorre el resto; cada vez que encuentra uno más grande lo guarda en mayor. Al terminar devuelve ese valor. Si la lista está vacía fallaría porque no existe numeros[0].",
+      "error": "Devuelve la posición del número más grande; empieza con mayor en 0 para que funcione también con listas vacías." },
+    { "id": "tabla", "codigo": "def tabla_multiplicar(n):\n    tabla = []\n    for i in range(1, n + 1):\n        fila = []\n        for j in range(1, n + 1):\n            fila.append(i * j)\n        tabla.append(fila)\n    return tabla",
+      "correcta": "Construye la tabla de multiplicar de 1 a n como una matriz: una lista de n filas, cada una con n valores. El ciclo externo recorre las filas i y el interno las columnas j; en la posición fila i, columna j guarda i * j. Por ejemplo, con n = 2 devuelve [[1, 2], [2, 4]].",
+      "error": "Devuelve una sola lista con los n múltiplos de n, porque los dos ciclos recorren lo mismo." },
+    { "id": "promedios_dict", "codigo": "def promedios(notas_por_estudiante):\n    resultado = {}\n    for nombre, notas in notas_por_estudiante.items():\n        if notas:\n            resultado[nombre] = sum(notas) / len(notas)\n        else:\n            resultado[nombre] = 0\n    return resultado",
+      "correcta": "Recibe un diccionario que asocia cada estudiante con su lista de notas y devuelve otro diccionario con el promedio de cada uno. Recorre los pares nombre y notas; si la lista tiene notas, divide la suma entre la cantidad; si está vacía, guarda 0 para no dividir entre cero.",
+      "error": "Calcula el promedio de todas las notas de todos los estudiantes juntos y devuelve un solo número." },
+    { "id": "palabras_largas", "codigo": "def palabras_largas(texto, minimo):\n    cuenta = 0\n    for palabra in texto.split():\n        if len(palabra) >= minimo:\n            cuenta += 1\n    return cuenta",
+      "correcta": "Cuenta cuántas palabras del texto tienen al menos minimo letras. Separa el texto por espacios, recorre cada palabra y suma uno al contador cuando su longitud es mayor o igual que minimo. Devuelve la cantidad.",
+      "error": "Devuelve la palabra más larga del texto, comparando cada palabra con minimo." }
+  ]
+}

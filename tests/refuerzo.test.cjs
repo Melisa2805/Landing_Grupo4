@@ -136,24 +136,32 @@ const GENERADO = {
   relacion: 'Tu programa multiplica matrices y en tus respuestas confundiste qué dimensiones deben coincidir; aquí lo practicas con una matriz y un vector.',
 }
 const VERIFICADO = ['[13, 31]', '[5, 7]', '[6]', '[6.0]', '[0, 3, 7]']
+const GEN = { ...BASE, PYDEFENSE_REFUERZO_GENERADO: 'activado' }
 // Routes by prompt: generator, verifier, practice review, otherwise the tutor.
-function simulador({ generar = () => GENERADO, verificar = () => VERIFICADO } = {}) {
-  const r = { generador: [], verificador: [], revision: [] }
-  const evaluador = tutor({ nivel: 1, veredicto: 'falsa' }), revisa = revisor()
+// Accepts chat completions (Groq) and Responses (OpenAI) requests.
+function simulador({ generar = () => GENERADO, verificar = () => VERIFICADO, nivel = 'similar', relacionado = true, tutorOpciones = { nivel: 1, veredicto: 'falsa' } } = {}) {
+  const r = { generador: [], verificador: [], revision: [], urls: [] }
+  const evaluador = tutor(tutorOpciones), revisa = revisor()
   r.transport = async (url, opciones) => {
     const body = JSON.parse(opciones.body)
-    const sistema = body.messages[0].content, datos = JSON.parse(body.messages[1].content)
-    const responder = (d) => Response.json({ choices: [{ message: { content: JSON.stringify(d) } }] })
-    if (sistema.includes('Ahora diseñas UN ejercicio')) { r.generador.push(datos); return responder(generar(datos)) }
-    if (sistema.includes('Ahora verificas un ejercicio')) { r.verificador.push(datos); const v = verificar(datos); return v instanceof Response ? v : responder({ ambiguo: false, razon: 'Determinado.', casos: datos.llamadas.map((l, i) => ({ id: l.id, resultado: v[i] })) }) }
-    if (datos.casosParaRevisionEstatica) { r.revision.push(datos); return responder(revisa(body)) }
-    return responder(evaluador(body))
+    r.urls.push({ url, model: body.model })
+    const chat = body.messages ? body : { messages: [{ content: body.instructions }, { content: body.input[0].content }] }
+    const sistema = chat.messages[0].content, datos = JSON.parse(chat.messages[1].content)
+    const responder = (d) => body.messages ? Response.json({ choices: [{ message: { content: JSON.stringify(d) } }] })
+      : Response.json({ status: 'completed', output: [{ type: 'message', content: [{ type: 'output_text', text: JSON.stringify(d) }] }], usage: { input_tokens: 2000, output_tokens: 500 } })
+    if (sistema.includes('Ahora diseñas UN ejercicio')) { r.generador.push(datos); return responder(generar(datos, r.generador.length)) }
+    if (sistema.includes('Ahora verificas un ejercicio')) {
+      r.verificador.push(datos); const v = verificar(datos, r.verificador.length)
+      return v instanceof Response ? v : responder({ ambiguo: false, razon: 'Determinado.', nivel: typeof nivel === 'function' ? nivel(r.verificador.length) : nivel, relacionado, casos: datos.llamadas.map((l, k) => ({ id: l.id, resultado: v[k] })) })
+    }
+    if (datos.casosParaRevisionEstatica) { r.revision.push(datos); return responder(revisa(chat)) }
+    return responder(evaluador(chat))
   }
   return r
 }
-async function hastaRefuerzo(comportamiento, codigo = PROGRAMAS.matrices) {
+async function hastaOfertaGenerada(comportamiento = {}, codigo = PROGRAMAS.matrices, env = GEN) {
   const r = simulador(comportamiento)
-  const e = await practica({ env: BASE, transport: r.transport })
+  const e = await practica({ env, transport: r.transport })
   let s = await e.iniciar(codigo)
   const respuesta = 'Multiplica dos matrices de cualquier tamaño, aunque no coincidan sus dimensiones, y devuelve otra matriz.'
   while (['confianza', 'pregunta'].includes(s.fase)) {
@@ -161,7 +169,11 @@ async function hastaRefuerzo(comportamiento, codigo = PROGRAMAS.matrices) {
     if (s.siguiente === 'cierre') break
     s = await e.paso(s, 'continuar')
   }
-  return { e, r, oferta: s.ofertaRefuerzo, s: await e.paso(s, 'refuerzo'), respuesta }
+  return { e, r, s, respuesta }
+}
+async function hastaRefuerzo(comportamiento, codigo, env) {
+  const x = await hastaOfertaGenerada(comportamiento, codigo, env)
+  return { ...x, oferta: x.s.ofertaRefuerzo, s: await x.e.paso(x.s, 'refuerzo') }
 }
 
 test('refuerzo generado: parte del programa inicial y de las respuestas, se valida, se verifica y se revisa con sus propios casos', async () => {
@@ -170,52 +182,72 @@ test('refuerzo generado: parte del programa inicial y de las respuestas, se vali
   // What the generator receives: the initial code, its structure and every answer with the tutor's observations.
   const g = r.generador[0]
   assert.equal(g.programa, PROGRAMAS.matrices); assert.equal(g.perfil.estructura, 'matriz'); assert.equal(g.perfil.profundidadCiclos, 3)
-  assert.equal(g.foco.huboError, true); assert.ok(g.observaciones.length >= 1)
+  assert.equal(g.foco.huboError, true); assert.equal(g.correccion, null); assert.ok(g.observaciones.length >= 1)
   assert.ok(g.observaciones.every((o) => o.respuesta === respuesta && Array.isArray(o.faltaOError) && o.afirmaciones.some((a) => a.veredicto === 'falsa')))
-  assert.ok(g.funcionesPrograma.includes('multiplicar_matrices'))
-  // The verifier never sees the expected results.
-  assert.equal(r.verificador.length, 1); assert.ok(!JSON.stringify(r.verificador[0]).includes('[13, 31]'))
+  assert.ok(g.funcionesPrograma.includes('multiplicar_matrices')); assert.equal(g.ejemploDeFormato, undefined, 'sin ejercicio de catálogo como referencia')
+  // The verifier never sees the expected results, but sees the original program to judge level and relation.
+  assert.equal(r.verificador.length, 1); assert.ok(!JSON.stringify(r.verificador[0]).includes('[13, 31]')); assert.equal(r.verificador[0].programaOriginal, PROGRAMAS.matrices)
   assert.equal(s.refuerzo.nombre, 'multiplicar_por_vector'); assert.equal(s.refuerzo.generado, true)
   assert.equal(s.refuerzo.motivo, `Opcional: ${GENERADO.relacion}`)
   assert.ok(!JSON.stringify(s).includes('[0, 3, 7]'), 'los casos de revisión no llegan al navegador')
   const [inicio] = await e.eventos('reinforcement_started')
-  assert.equal(inicio.datos.fuente, 'generado'); assert.equal(inicio.datos.familia, 'generado:matrices'); assert.equal(inicio.datos.motivoCatalogo, undefined)
+  assert.equal(inicio.datos.fuente, 'generado'); assert.equal(inicio.datos.familia, 'generado'); assert.equal(inicio.datos.intento, 1)
   const v = await e.paso(s, 'entregar', { codigo: 'def multiplicar_por_vector(matriz, vector):\n    return [sum(f[j] * vector[j] for j in range(len(vector))) for f in matriz]' })
   assert.equal(v.fase, 'refuerzo_revisado')
   const casos = r.revision[0].casosParaRevisionEstatica.map((c) => c.entrada)
   assert.ok(casos.includes('multiplicar_por_vector([[0, 0], [1, 2], [3, 4]], [1, 1])'), JSON.stringify(casos))
 })
 
-test('refuerzo generado: ante cualquier duda se usa el ejercicio revisado del catálogo y la práctica sigue', async () => {
+test('sin ejercicio por defecto: una propuesta rechazada se corrige en un segundo intento o no se muestra ningún ejercicio', async () => {
   const casos = [
     ['verificacion.discrepancia', { verificar: () => ['[13, 31]', '[5, 7]', '[6]', '[7]', '[0, 3, 7]'] }],
-    ['verificacion.ambiguo', { verificar: (d) => Response.json({ choices: [{ message: { content: JSON.stringify({ ambiguo: true, razon: 'No se sabe.', casos: d.llamadas.map((l) => ({ id: l.id, resultado: '0' })) }) } }] }) }],
+    ['verificacion.ambiguo', { verificar: (d) => Response.json({ choices: [{ message: { content: JSON.stringify({ ambiguo: true, razon: 'No se sabe.', nivel: 'similar', relacionado: true, casos: d.llamadas.map((l) => ({ id: l.id, resultado: '0' })) }) } }] }) }],
+    ['verificacion.relacion', { relacionado: false }],
     ['estructura.matriz', { generar: () => ({ ...GENERADO, nombre: 'total', parametros: ['a', 'b'], casos: [{ entrada: 'total(2, 3)', esperado: '6' }, { entrada: 'total(0, 3)', esperado: '0' }], casosRevision: [{ entrada: 'total(1, 1)', esperado: '1' }, { entrada: 'total(4, 2)', esperado: '8' }, { entrada: 'total(5, 0)', esperado: '0' }] }) }],
     ['revela_solucion', { generar: () => ({ ...GENERADO, enunciado: 'Completa: def multiplicar_por_vector(matriz, vector): return [...]' }) }],
     ['nombre', { generar: () => ({ ...GENERADO, nombre: 'multiplicar_matrices' }) }],
     ['casos.no_literal', { generar: () => ({ ...GENERADO, casos: [{ entrada: 'multiplicar_por_vector(m, v)', esperado: '[1]' }, GENERADO.casos[1]] }) }],
     ['casos.aridad', { generar: () => ({ ...GENERADO, casos: [{ entrada: 'multiplicar_por_vector([[1]])', esperado: '[1]' }, GENERADO.casos[1]] }) }],
-    ['LLM_SERVICIO', { generar: () => { throw new Error('caído') } }],
     ['estructura.diccionario', { codigo: 'def frecuencias(palabras):\n    conteo = {}\n    for p in palabras:\n        conteo[p] = conteo.get(p, 0) + 1\n    return conteo', generar: () => ({ ...GENERADO, nombre: 'contar_palabra', parametros: ['palabras'], casos: [{ entrada: "contar_palabra(['a', 'b'])", esperado: '2' }, { entrada: 'contar_palabra([])', esperado: '0' }], casosRevision: [{ entrada: "contar_palabra(['a'])", esperado: '1' }, { entrada: "contar_palabra(['a', 'a'])", esperado: '2' }, { entrada: "contar_palabra(['x', 'y', 'z'])", esperado: '3' }] }) }],
   ]
   for (const [motivo, comportamiento] of casos) {
-    const { e, r, s } = await hastaRefuerzo(motivo === 'LLM_SERVICIO' ? { generar: () => ({}) } : comportamiento, comportamiento.codigo)
-    const [inicio] = await e.eventos('reinforcement_started')
-    assert.equal(inicio.datos.fuente, 'catalogo', motivo)
-    if (motivo !== 'LLM_SERVICIO') assert.equal(inicio.datos.motivoCatalogo, motivo)
-    assert.equal(s.fase, 'refuerzo'); assert.equal(s.refuerzo.generado, false)
-    if (!comportamiento.codigo) assert.ok(MATRICES.includes(s.refuerzo.nombre), motivo)
-    if (motivo.startsWith('estructura') || motivo.startsWith('casos') || motivo === 'nombre' || motivo === 'revela_solucion') assert.equal(r.verificador.length, 0, motivo)
+    const { e, r, s } = await hastaOfertaGenerada(comportamiento, comportamiento.codigo)
+    await assert.rejects(e.paso(s, 'refuerzo'), { code: 'REFUERZO_NO_DISPONIBLE', detalle: motivo }, motivo)
+    // Two attempts, the second told why the first was rejected; no catalog task.
+    assert.equal(r.generador.length, 2, motivo); assert.equal(r.generador[1].correccion, motivo)
+    const v = await e.sustentar({ accion: 'recuperar', sesion: s.sesion })
+    assert.equal(v.fase, 'feedback'); assert.equal(v.refuerzo, null); assert.ok(v.ofertaRefuerzo, 'se puede reintentar')
+    assert.equal((await e.eventos('reinforcement_started')).length, 0)
   }
+  // A provider failure is also retried and never replaced by a default task.
+  const caido = await hastaOfertaGenerada({ generar: () => { throw new Error('caído') } })
+  await assert.rejects(caido.e.paso(caido.s, 'refuerzo'), { code: 'REFUERZO_NO_DISPONIBLE' })
+  // The second attempt can succeed.
+  const segunda = await hastaRefuerzo({ verificar: (d, n) => n === 1 ? ['[0]', '[5, 7]', '[6]', '[6]', '[0, 3, 7]'] : VERIFICADO })
+  assert.equal(segunda.s.refuerzo.nombre, 'multiplicar_por_vector')
+  assert.equal((await segunda.e.eventos('reinforcement_started'))[0].datos.intento, 2)
+})
+
+test('sin errores el nivel no puede ser inferior al programa; el segundo intento usa un modelo más capaz de OpenAI', async () => {
+  const bien = { tutorOpciones: { nivel: 2, veredicto: 'correcta' } }
+  const { e, r, s } = await hastaOfertaGenerada({ ...bien, nivel: 'inferior' })
+  assert.match(s.ofertaRefuerzo.motivo, /nivel similar o algo mayor/)
+  await assert.rejects(e.paso(s, 'refuerzo'), { code: 'REFUERZO_NO_DISPONIBLE', detalle: 'verificacion.nivel_inferior' })
+  assert.equal(r.generador[0].foco.huboError, false); assert.equal(r.generador[0].foco.sinErrores, true)
+  // With OpenAI configured, the retry goes to the stronger model directly.
+  const env = { ...GEN, OPENAI_API_KEY: 'sk-ficticia', OPENAI_MODEL: 'gpt-6-luna' }
+  const x = await hastaRefuerzo({ ...bien, nivel: (n) => n === 1 ? 'inferior' : 'superior' }, PROGRAMAS.matrices, env)
+  assert.equal(x.s.refuerzo.nombre, 'multiplicar_por_vector')
+  const sol = x.r.urls.filter((u) => u.model === 'gpt-6.2-sol')
+  assert.equal(sol.length, 2, 'generación y verificación del segundo intento'); assert.ok(sol.every((u) => u.url === 'https://api.openai.com/v1/responses'))
+  assert.equal((await x.e.eventos('reinforcement_started'))[0].datos.modeloAlternativo, 'gpt-6.2-sol')
 })
 
 test('refuerzo generado en otros programas: conserva la estructura de listas y se puede desactivar', async () => {
   const { r } = await hastaRefuerzo({ generar: () => ({ ...GENERADO, nombre: 'contar_altas', parametros: ['notas'], casos: [{ entrada: 'contar_altas([1, 4, 5])', esperado: '2' }, { entrada: 'contar_altas([])', esperado: '0' }], casosRevision: [{ entrada: 'contar_altas([3])', esperado: '1' }, { entrada: 'contar_altas([2, 2])', esperado: '0' }, { entrada: 'contar_altas([5, 5, 5])', esperado: '3' }] }), verificar: () => ['2', '0', '1', '0', '3'] }, PROGRAMAS.aprobados)
   assert.equal(r.generador[0].perfil.estructura, 'lista')
-  const sin = simulador(); const e = await practica({ env: { ...BASE, PYDEFENSE_REFUERZO_GENERADO: 'desactivado' }, transport: sin.transport })
-  let s = await e.iniciar(PROGRAMAS.matrices)
-  while (['confianza', 'pregunta'].includes(s.fase)) { s = await e.contestar(s, 'Multiplica matrices.'); if (s.siguiente === 'cierre') break; s = await e.paso(s, 'continuar') }
-  await e.paso(s, 'refuerzo'); assert.equal(sin.generador.length, 0)
+  const sin = await hastaRefuerzo({}, PROGRAMAS.matrices, { ...BASE, PYDEFENSE_REFUERZO_GENERADO: 'desactivado' })
+  assert.equal(sin.r.generador.length, 0); assert.ok(MATRICES.includes(sin.s.refuerzo.nombre), 'solo con la generación desactivada se usa el catálogo')
 })
 
 test('literales de Python: se leen sin evaluar y se comparan como en Python', async () => {

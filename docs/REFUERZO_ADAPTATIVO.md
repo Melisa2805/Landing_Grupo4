@@ -20,10 +20,16 @@ El ejercicio de práctica **se basa en el código inicial y se ajusta por las re
    - Hay 2 casos visibles y 3 de revisión, cada uno una llamada con **literales de Python que se leen sin evaluarse** (`lib/literales-python.js`), con el número de argumentos correcto y sin repetirse.
    - **La estructura del programa se conserva en todos los casos:** con matrices, alguna lista de listas; con listas, una secuencia; con diccionarios, un diccionario en la entrada o en el resultado.
 4. Una **segunda llamada independiente** recalcula el resultado de las 5 llamadas sin ver los esperados. Si alguno difiere (con la igualdad de Python, donde `3 == 3.0`) o el enunciado es ambiguo, se descarta.
-5. Cualquier error de validación, verificación, proveedor o tiempo deja la tarea del catálogo, y la práctica sigue. El evento `reinforcement_started` registra `fuente` (`generado`/`catalogo`) y `motivoCatalogo`.
+5. **No hay ejercicio por defecto.** La verificación también juzga el **nivel frente al programa** y si el ejercicio está **relacionado** con la técnica:
+   - Sin errores, se rechaza un nivel «inferior»: tiene que ser similar o ligeramente superior.
+   - Con errores, se rechaza uno «superior»: tiene que ser un paso más simple, sin cambiar de tema.
+
+   Si el primer intento se rechaza, el segundo va directamente a un modelo más capaz (`AI_REFUERZO_MODELO_ALTERNATIVO`, por defecto `gpt-6.2-sol`) y se le dice el motivo. Si ninguno pasa, el estudiante ve «No pudimos preparar un ejercicio a la altura de tu programa…» y puede reintentar o finalizar. Nunca recibe un ejercicio genérico. El evento `reinforcement_started` registra `intento`, `modeloAlternativo` y `rechazoPrevio`. El catálogo solo se usa si se desactiva la generación (`PYDEFENSE_REFUERZO_GENERADO=desactivado`).
 6. La revisión de la entrega usa los 3 casos de revisión generados, que nunca llegan al navegador. La pantalla indica: «Ejercicio creado por IA a partir de tu programa y tus respuestas. Una segunda revisión comprobó los resultados de los ejemplos; no se ejecutó código».
 
-Tiempos: el generador tiene 25 s y el verificador 20 s, dentro de los 60 s de la función.
+Tiempos: primer intento, 16 s para generar y 10 s para verificar; segundo intento, 15 s y 10 s. Todo cabe en los 60 s de la función.
+
+Caso real del programa de programación dinámica `costo_minimo` (escalera de costo mínimo), con respuestas correctas, en la configuración de producción: el ejercicio fue `costos_por_posicion(costos)`, que devuelve toda la tabla `dp`. Es la misma técnica, de nivel similar o superior, y sus resultados se comprobaron a mano. Lo resolvió el segundo intento con `gpt-6.2-sol`, en 36 s, porque Groq respondió 429 y Luna agotó su tiempo. Costo de toda la sesión: unos 0,024 USD.
 
 ## Pruebas reales (2026-11-18, `gpt-6-luna` low)
 
@@ -43,3 +49,16 @@ Con Groq (`openai/gpt-oss-120b`), el programa de matrices generó `dimensiones_p
 - Que el ejercicio quede dentro de los temas declarados depende de las instrucciones. El servidor solo comprueba la estructura de datos.
 - La relación con el error depende de que el tutor lo haya descrito en sus observaciones.
 - `PYDEFENSE_REFUERZO_GENERADO=desactivado` vuelve al catálogo. El manifiesto incluye los hashes de los dos prompts nuevos (es un cambio de tratamiento).
+
+## Preguntas redactadas por IA (`lib/generar-pregunta.js`)
+
+Antes, las preguntas eran plantillas fijas: la primera era siempre igual y la segunda de cada concepto casi siempre pedía «propón un caso válido». Ahora:
+
+- El servidor sigue eligiendo **qué** se pregunta (concepto, habilidad, criterios y temas). La IA redacta **cómo**: a partir del programa, sus funciones y las respuestas anteriores, y variando el tipo (explicar una línea, predecir con una entrada concreta, comparar, modificar, depurar, justificar o relacionar con el problema). Pedir ejemplos inventados queda limitado a una vez por práctica.
+- El servidor valida la propuesta:
+  - Lo que va entre «» debe estar en el programa o ser una llamada a una de sus funciones con literales.
+  - No puede pedir ejecutar el programa.
+  - No puede parecerse a una pregunta anterior.
+  - Debe tener un tipo y una longitud válidos.
+- Si se rechaza, se reintenta una vez indicando el motivo. Si vuelve a fallar, se usa la plantilla y el evento `question_prepared` registra `fuente`, `tipo` y `motivoPlantilla`.
+- Cuesta una llamada por pregunta y suma 2–5 s. `PYDEFENSE_PREGUNTAS_GENERADAS=desactivado` vuelve a las plantillas. Las suites anteriores usan las plantillas por defecto (`tests/entorno.cjs`); `tests/preguntas.test.cjs` prueba la redacción por IA.
