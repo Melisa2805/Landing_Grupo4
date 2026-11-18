@@ -1,0 +1,8 @@
+{
+  "version": "2.0.0",
+  "descripcion": "Esquema de competencias para generar y evaluar sustentaciones de código Python. No contiene enunciados de ejercicios.",
+  "campos_obligatorios": ["id", "lenguaje", "nivel_conocimiento", "dificultad", "tema", "indicadores_codigo", "competencias", "errores_frecuentes", "criterios_evaluacion"],
+  "niveles": {"1": "Fundamentos", "2": "Lógica y decisiones", "3": "Iteración y estructuras", "4": "Procesamiento de datos", "5": "Estructuras de datos", "6": "Análisis y diseño básico de algoritmos", "7": "Algoritmos sobre grafos", "8": "Diseño avanzado de algoritmos"},
+  "dificultades": ["basica", "intermedia", "avanzada"],
+  "nota": "El nivel indica los conocimientos observables en el código. La dificultad refleja el razonamiento requerido. Un mismo programa puede combinar niveles. Los indicadores son pistas, no reglas deterministas."
+}

@@ -174,18 +174,17 @@ function TerminalPreview() {
   }, [])
 
   return (
-      <figure ref={terminalRef} className={styles.terminal} aria-label="Terminal de ejemplo">
+      <figure ref={terminalRef} className={styles.terminal} aria-label="Ejemplo de una práctica en la web">
         <figcaption className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 px-4 py-3">
           <span className="flex gap-1.5" aria-hidden="true"><span className="h-2 w-2 rounded-full bg-slate-600" /><span className="h-2 w-2 rounded-full bg-slate-600" /><span className="h-2 w-2 rounded-full bg-blue-500/60" /></span>
-          <span className="text-xs text-slate-400">Ejemplo de simulación</span>
+          <span className="text-xs text-slate-400">Así avanza una práctica (ejemplo)</span>
         </figcaption>
-        <div className="font-mono text-xs sm:text-sm leading-relaxed p-4 sm:p-5 space-y-3 break-words">
-          <p className={`${styles.terminalLine} text-slate-200`} style={{ '--line-delay': '0ms' }}><span className="text-blue-400">$</span> pydefense codigo.py</p>
-          <p className={`${styles.terminalLine} text-slate-400`} style={{ '--line-delay': '500ms' }}>Preparando simulación...</p>
-          <p className={`${styles.terminalLine} text-green-300`} style={{ '--line-delay': '1100ms' }}>✓ Código cargado</p>
-          <p className={`${styles.terminalLine} text-green-300`} style={{ '--line-delay': '1700ms' }}>✓ Pregunta preparada</p>
-          <p className={`${styles.terminalLine} text-blue-300`} style={{ '--line-delay': '2300ms' }}>{'>'} ¿Por qué usaste un <span className="text-slate-100">`for`</span> en esta función?</p>
-          <span className={styles.cursor} aria-hidden="true">_</span>
+        <div className="text-xs sm:text-sm leading-relaxed p-4 sm:p-5 space-y-3 break-words">
+          <p className={`${styles.terminalLine} text-slate-200`} style={{ '--line-delay': '0ms' }}>1. Pegas tu código y eliges los temas que has visto.</p>
+          <p className={`${styles.terminalLine} text-slate-400`} style={{ '--line-delay': '500ms' }}>2. Indicas qué tan seguro te sientes con esa parte.</p>
+          <p className={`${styles.terminalLine} text-blue-300`} style={{ '--line-delay': '1100ms' }}>3. Pregunta: ¿qué representa el resultado de tu función?</p>
+          <p className={`${styles.terminalLine} text-green-300`} style={{ '--line-delay': '1700ms' }}>4. Lo que explicaste, lo que falta y un siguiente paso.</p>
+          <p className={`${styles.terminalLine} text-slate-300`} style={{ '--line-delay': '2300ms' }}>5. Sigues o cierras. Hasta tres preguntas.</p>
         </div>
       </figure>
   )

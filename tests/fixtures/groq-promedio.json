@@ -1,0 +1,65 @@
+{
+ "origen": "Salida real de Groq openai/gpt-oss-120b (2026-10-25), modo json_schema estricto, para la primera pregunta del programa de promedio.",
+ "codigo": "def calcular_promedio(notas):\n    total = sum(notas)\n    return total / len(notas) if notas else 0",
+ "respuesta": "la funcion saca el promedio de las notas\nsuma todo y lo divide por cuantas notas hay",
+ "uso": {
+  "prompt_tokens": 1943,
+  "completion_tokens": 1266,
+  "total_tokens": 3209,
+  "reasoning_tokens": 953
+ },
+ "contenido": {
+  "clasificacion": "evaluable",
+  "criterios": [
+   {
+    "id": "proposito",
+    "nivel": 2,
+    "cita": "la funcion saca el promedio de las notas",
+    "razon": "Explica claramente que el programa calcula el promedio de las notas",
+    "acierto": "Explica el propósito y el significado del resultado",
+    "pendiente": ""
+   },
+   {
+    "id": "datos",
+    "nivel": 1,
+    "cita": "la funcion saca el promedio de las notas",
+    "razon": "Menciona notas pero no indica que la entrada es una lista de números",
+    "acierto": "Identifica que la entrada son notas",
+    "pendiente": "No describe que la entrada es una lista de números"
+   },
+   {
+    "id": "idea",
+    "nivel": 2,
+    "cita": "suma todo y lo divide por cuantas notas hay",
+    "razon": "Describe la estrategia general de sumar y dividir",
+    "acierto": "Expone la idea general sin detallar código",
+    "pendiente": ""
+   }
+  ],
+  "revisionFragmentos": [
+   {
+    "id": "f1",
+    "afirmaciones": [
+     {
+      "concepto": "proposito",
+      "veredicto": "correcta",
+      "cita": "la funcion saca el promedio de las notas",
+      "razon": "Indica el objetivo del programa"
+     }
+    ]
+   },
+   {
+    "id": "f2",
+    "afirmaciones": [
+     {
+      "concepto": "promedio",
+      "veredicto": "correcta",
+      "cita": "suma todo y lo divide por cuantas notas hay",
+      "razon": "Describe la forma de obtener el promedio"
+     }
+    ]
+   }
+  ],
+  "sugerencia": ""
+ }
+}

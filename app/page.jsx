@@ -3,29 +3,31 @@ import { ShieldCheck, Code2, HelpCircle, ArrowRight } from 'lucide-react'
 import { HowItWorks, ExampleQuestion, MiniQuiz, Reveal } from './components/landing-interactions'
 import { HeroVisual, InteractiveComparison } from './components/landing-showcase'
 import ScrollToTop from './components/scroll-to-top'
+import MarcaLlegada from './components/marca-llegada'
 import styles from './components/landing.module.css'
 
 export default function LandingPage() {
   return (
     <main className="max-w-6xl mx-auto px-6 py-12 space-y-16 md:space-y-24">
       <ScrollToTop />
+      <MarcaLlegada />
       <Reveal className={`${styles.heroScene} grid lg:grid-cols-[1.2fr_1fr] items-center gap-10 lg:gap-12 pt-8 pb-10`}>
         <div className="text-center lg:text-left space-y-6 min-w-0">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-950/80 border border-blue-800 text-blue-400 text-xs font-semibold uppercase tracking-wider">
             <ShieldCheck aria-hidden="true" className="w-4 h-4" /> Grupo 4 - IA para Programación
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight">
-            Practica con tu código Python y <span className="text-blue-500">prepara tu sustentación</span>.
+            Descubre qué necesitas repasar para <span className="text-blue-500">explicar tu código</span>.
           </h1>
           <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto">
-            Practica con preguntas similares a las que podrían hacerte en una sustentación sobre código que desarrollaste con apoyo de IA. Detecta qué necesitas repasar y explica lo que entregas con más confianza.
+            Para programación inicial en Python. Pegas el código que hiciste, con o sin ayuda de IA, y respondes hasta tres preguntas sobre él. Recibes lo que explicaste, lo que falta y un siguiente paso; no hay nota.
           </p>
-          <p className="text-sm text-slate-400">Este MVP usa preguntas de ejemplo para simular una sustentación.</p>
+          <p className="text-sm text-slate-400">Puedes cerrar después de cada explicación. Necesitas iniciar sesión para que tu práctica quede guardada.</p>
           <div className="pt-4 flex flex-col justify-center items-center lg:items-start gap-3">
             <Link href="/simulador" className={`${styles.primaryAction} group w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-4 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30`}>
-              Simular mi código ahora <ArrowRight aria-hidden="true" className="w-5 h-5 shrink-0 motion-safe:group-hover:translate-x-1 motion-safe:transition-transform" />
+              Practicar con mi código <ArrowRight aria-hidden="true" className="w-5 h-5 shrink-0 motion-safe:group-hover:translate-x-1 motion-safe:transition-transform" />
             </Link>
-            <p className="text-sm text-slate-400">Práctica rápida de sustentación</p>
+            <p className="text-sm text-slate-400">Hasta tres preguntas sobre tu propio programa</p>
           </div>
         </div>
         <HeroVisual />
@@ -82,10 +84,10 @@ function ProductPreview() {
         </div>
         <div className={styles.questionPane}>
           <p className="flex items-center gap-2 text-xs font-semibold text-blue-400 uppercase tracking-wider"><HelpCircle aria-hidden="true" className="w-4 h-4" /> Pregunta de sustentación</p>
-          <blockquote className="text-xl sm:text-2xl font-semibold leading-relaxed text-slate-100">¿Por qué verificas que la lista no esté vacía antes de dividir?</blockquote>
+          <blockquote className="text-xl sm:text-2xl font-semibold leading-relaxed text-slate-100">Para [2, 4], ¿qué representan la suma 6 y la cantidad 2 en el resultado 3?</blockquote>
           <div className={styles.sampleAnswer}>
-            <p className="text-xs font-semibold uppercase tracking-wider text-green-400 mb-2">Una respuesta de ejemplo</p>
-            <p className="text-sm text-slate-300 leading-relaxed">Esta validación evita dividir entre cero cuando la lista está vacía.</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-green-400 mb-2">Retroalimentación de ejemplo</p>
+            <p className="text-sm text-slate-300 leading-relaxed">Explicaste cómo sumas las notas. Falta relacionar esa suma con cuántas notas hay. Siguiente paso: compara [2, 4] con [1, 2, 3].</p>
           </div>
         </div>
       </div>
