@@ -8,6 +8,7 @@ import { ArrowRight, CheckCircle2, Lock, PlayCircle, Sparkles, Flame } from 'luc
 import { RUTA, unidadDe } from '../../lib/aprender/ruta'
 import { Actividad, Codigo, Texto, primario, secundario } from './actividad'
 import InvitacionPersonal from '../components/invitacion-personal'
+import Encuesta from '../components/encuesta'
 
 export const CATALOGO = RUTA
 const MOTIVOS = { repaso_vencido: 'Repaso: toca recordar esta idea.', error_pendiente: 'Repaso: la última vez esta idea te costó.', mantenimiento: 'Repaso de mantenimiento.' }
@@ -131,6 +132,7 @@ export function Resumen({ vista, credito, racha, siguiente, onSiguiente, demostr
       <button type="button" className={siguiente ? secundario : primario} onClick={() => onSiguiente(null)}>Volver a la ruta</button>
       <Link href="/simulador" className={secundario}>Explicar mi propio código en Sustentar</Link>
     </div>
+    {!demostracion && <Encuesta modulo="aprender" />}
     {!demostracion && <InvitacionPersonal texto="Estoy aprendiendo Python con lecciones cortas en PyDefense. ¡Pruébalo!" invitacion="¿Conoces a alguien que esté empezando con Python? Invítalo a probar la lección." />}
   </section>
 }

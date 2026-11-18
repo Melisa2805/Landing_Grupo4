@@ -7,6 +7,7 @@ import { Retroalimentacion, Resumen, EvaluacionRefuerzo } from './components'
 import { Progreso, CodigoResaltado, Procesando, GuardarResumen } from './ux'
 import Compartir from '../components/compartir'
 import AvisoNavegador from '../components/aviso-navegador'
+import Encuesta from '../components/encuesta'
 import { CLAVE_ORIGEN, leerOrigen, origenVigente } from '../../lib/origen'
 import { PUNTOS_CONSENTIMIENTO, VERSION_CONSENTIMIENTO } from '../../lib/consentimiento'
 import { CODIGO_EJEMPLO, esEjemplo } from '../../lib/ejemplo'
@@ -509,6 +510,7 @@ export default function SimuladorPage() {
         </div>}
         {!!sesion?.historial.length && <details className="border-t border-slate-700 pt-3"><summary className="cursor-pointer">Tus respuestas en esta práctica</summary><ol className="space-y-5 mt-3">{sesion.historial.map((h, i) => <li key={h.instancia || i} className="text-sm space-y-2"><p className="font-semibold">{i + 1}. {h.pregunta}</p>{h.respuesta && <p className="whitespace-pre-wrap text-slate-300">{h.respuesta}</p>}<p>{h.feedback.estado}</p><Retroalimentacion registro={h} /></li>)}</ol></details>}
         {sesion?.resumen && ['cierre', 'refuerzo', 'refuerzo_revisado'].includes(fase) && <Compartir key={sesion.sesion} />}
+        {sesion?.resumen && fase === 'cierre' && <Encuesta modulo="sustentar" />}
       </section>
     </div>
     <details className="text-sm text-slate-400"><summary className="cursor-pointer">Retirar mi participación</summary>

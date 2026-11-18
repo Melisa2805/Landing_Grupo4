@@ -161,3 +161,21 @@ test('medición de visitas: solo adultos que aceptan, primer toque, sin autorref
   assert.equal(json(await purgarInvitaciones(e.db, ahora.t)), json({ visitas: 2, enlaces: 2 }))
   assert.equal((await e.db.query('SELECT count(*)::int AS n FROM ref_hitos')).rows[0].n, 0)
 })
+
+test('encuesta voluntaria: categorías cerradas, sin identidad, mismo origen y resumen agregado con supresión', async () => {
+  const e = await practica({ consentir: false })
+  const { POST } = await e.importar('app/api/encuesta/route.js')
+  const responder = (body, origen = ORIGEN) => POST(pedir('/api/encuesta', { body, origen }))
+  const valida = { modulo: 'aprender', rol: 'estudiante', situacion: 'curso_actual', decisor: 'institucion', alternativa: 'chat_ia' }
+  assert.equal((await responder(valida, 'https://otro.test')).status, 403)
+  assert.equal((await responder({ ...valida, situacion: 'texto libre con mi nombre' })).status, 400)
+  for (let i = 0; i < 6; i++) assert.equal((await responder(valida)).status, 200)
+  await responder({ ...valida, modulo: 'sustentar', rol: 'docente', decisor: 'yo' })
+  const filas = (await e.db.query('SELECT * FROM encuestas')).rows
+  assert.equal(filas.length, 7)
+  assert.equal(JSON.stringify(Object.keys(filas[0]).sort()), JSON.stringify(['alternativa', 'campana', 'creada_en', 'decisor', 'id', 'modulo', 'rol', 'situacion']), 'ninguna columna de identidad')
+  const { reporteExpo } = await e.importar('lib/reporte-expo.js')
+  const hoy = new Date().toISOString().slice(0, 10)
+  const r = await reporteExpo(e.db, { desde: `${hoy}T00:00:00Z`, hasta: '2100-01-01T00:00:00Z' })
+  assert.equal(r.encuestas.respuestas, 7); assert.equal(r.encuestas.rol.estudiante, 6); assert.equal(r.encuestas.rol.docente, '<5'); assert.equal(r.encuestas.decisor.institucion, 6)
+})
