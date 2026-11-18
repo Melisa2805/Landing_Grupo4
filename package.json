@@ -18,7 +18,8 @@
     "test:medicion": "node --experimental-vm-modules tests/medicion.test.cjs",
     "experimento": "node --experimental-vm-modules scripts/experimento.cjs",
     "test:postgres": "node --experimental-vm-modules tests/postgres.test.cjs",
-    "reporte-expo": "node --experimental-vm-modules scripts/reporte-expo.cjs"
+    "reporte-expo": "node --experimental-vm-modules scripts/reporte-expo.cjs",
+    "calibracion": "node --experimental-vm-modules scripts/calibracion.cjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.22",

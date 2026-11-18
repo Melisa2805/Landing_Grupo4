@@ -374,3 +374,35 @@ test('recorrido completo del promedio: correcta, parcial, fallo recuperable y fa
   assert.equal(s.fase, 'refuerzo_revisado'); assert.equal(s.evaluacionRefuerzo.pruebasEjecutadas, false)
   await assert.rejects(e.paso(s, 'entregar', { codigo: 'x' }), { code: 'PASO_INVALIDO' })
 })
+
+test('calibración: categorías de dos ejes, métricas y puertas del plan sobre el corpus, sin llamadas reales', async () => {
+  const fs = require('node:fs')
+  const corpus = JSON.parse(fs.readFileSync('tests/fixtures/calibracion/corpus.json', 'utf8'))
+  assert.equal(corpus.casos.length, 60); assert.equal(corpus.robustez.length, 20)
+  assert.equal(corpus.casos.filter((c) => c.particion === 'retenido').length, 20)
+  for (const cat of corpus.categorias) assert.equal(corpus.casos.filter((c) => c.etiquetaPropuesta === cat).length, 12, cat)
+  const e = await preparar()
+  const { categoriaDe, metricas, afirmaEjecucion } = await e.importar('lib/calibracion.js')
+  const vista = (h, extra = {}) => ({ fase: 'feedback', historial: [h], ...extra })
+  const crit = (...estados) => estados.map((estado, i) => ({ id: `c${i}`, estado }))
+  assert.equal(categoriaDe(vista({ clasificacion: 'evaluable', criterios: crit('cumplido', 'cumplido', 'cumplido'), evidencias: [] })), 'correcta')
+  assert.equal(categoriaDe(vista({ clasificacion: 'evaluable', criterios: crit('cumplido', 'parcial', 'cumplido'), evidencias: [] })), 'parcial')
+  assert.equal(categoriaDe(vista({ clasificacion: 'evaluable', criterios: crit('cumplido', 'no_cumplido', 'parcial'), evidencias: [] })), 'incompleta')
+  assert.equal(categoriaDe(vista({ clasificacion: 'evaluable', criterios: crit('cumplido'), evidencias: [{ veredicto: 'falsa' }] })), 'error_conceptual')
+  assert.equal(categoriaDe(vista({ clasificacion: 'sin_evidencia', criterios: [] })), 'insuficiente')
+  assert.equal(categoriaDe({ fase: 'pregunta', aclaracion: 'Explica solo esa idea.', historial: [] }), 'insuficiente')
+  assert.equal(afirmaEjecucion(vista({ feedback: { aciertos: ['Al ejecutar con [2, 4] da 3.'] } })), true)
+  // Perfect agreement passes every gate; a false conceptual error on a correct answer does not.
+  const perfecto = [...corpus.casos.map((c) => ({ id: c.id, categorias: Array(3).fill(c.etiquetaPropuesta) })),
+    ...corpus.robustez.map((r) => ({ id: r.id, categorias: Array(3).fill({ no_correcta: 'parcial', no_error_conceptual: 'parcial', error_conceptual: 'error_conceptual', no_penalizar_no_solicitado: 'correcta', insuficiente: 'insuficiente', no_inventar_ejecucion: 'correcta' }[r.regla]), ejecucion: [false, false, false] }))]
+  const ok = metricas(corpus, perfecto)
+  assert.equal(ok.aprobado, true); assert.equal(ok.acuerdoRetenido, 1); assert.equal(ok.consistencia, 1); assert.equal(ok.robustez, 1)
+  const mal = perfecto.map((r) => r.id.includes('-correcta-') ? { ...r, categorias: ['error_conceptual', 'correcta', 'correcta'] } : r.id === 'robustez-01' ? { ...r, categorias: ['correcta', 'parcial', 'parcial'] } : r)
+  const m = metricas(corpus, mal)
+  assert.equal(m.aprobado, false); assert.equal(m.puertas.falsosErroresConceptuales, false); assert.equal(m.puertas.consistencia, false)
+  assert.equal(JSON.stringify(m.fallosRobustez), JSON.stringify(['robustez-01']))
+  // End to end with the simulated tutor: a complete paraphrase is «correcta».
+  const caso = corpus.casos.find((c) => c.id === 'compra-correcta-2')
+  const v = await e.contestar(await e.iniciar(corpus.programas.compra), caso.respuesta, tutor({ nivel: 2, cita: caso.respuesta.slice(0, 20) }))
+  assert.equal(categoriaDe(v), 'correcta')
+})
