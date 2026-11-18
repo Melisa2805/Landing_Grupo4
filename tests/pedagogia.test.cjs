@@ -225,8 +225,8 @@ test('recorrido entre instancias frías: inicio, respuesta, reintento, cierre y 
   assert.equal((await a.sustentar(envio)).revision, s.revision)
   assert.equal(a.llamadas.length, 1)
   const fria = await practica({ env, pythonDisponible: false, db: a.db, consentir: false })
-  s = await fria.paso(s, 'cerrar')
-  assert.equal(s.fase, 'cierre')
+  s = await fria.ultimaRetroalimentacion(s)
+  assert.equal(s.resumen, null)
   s = await fria.paso(s, 'refuerzo')
   // Only the purpose was observed: the transfer task relates inputs and result.
   assert.equal(s.refuerzo.nombre, 'total_compra')

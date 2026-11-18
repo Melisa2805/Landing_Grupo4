@@ -95,7 +95,7 @@ test('t0 al cerrar la sesión inicial válida; ventana de 168 h; ni otra sesión
   assert.equal(p.ventana_fin.getTime() - p.t0.getTime(), 168 * HORA)
   assert.equal(p.sesion_inicial_id, inicial.sesion)
   reloj.ahora += HORA
-  if (inicial.resumen.refuerzoDisponible) await e.paso(await e.paso(inicial, 'refuerzo', {}, 'user_p1'), 'entregar', { codigo: 'def x(:' }, 'user_p1').catch(() => {})
+  await assert.rejects(e.paso(inicial, 'refuerzo', {}, 'user_p1'), { code: 'PASO_INVALIDO' })
   reloj.ahora += HORA
   await e.sesionValida('user_p1', { codigo: otroPrograma, tarea: nueva(1) })
   assert.equal((await e.participante('user_p1')).t0.getTime(), p.t0.getTime())
