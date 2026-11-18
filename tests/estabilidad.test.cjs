@@ -436,3 +436,38 @@ test('refuerzo correcto sin ejecución: no es «insuficiente», el siguiente pas
   const enviada = JSON.parse(e.llamadas.at(-1).messages[1].content).casosParaRevisionEstatica
   assert.ok(enviada.every((c) => c.entrada.startsWith('contar_pendientes(')))
 })
+
+test('cierre tras el ejercicio: una cita parafraseada no oculta el progreso; un ejercicio con errores se resume sin detalles técnicos', async () => {
+  const codigo = 'def contar_grandes(numeros, limite):\n    total = 0\n    for n in numeros:\n        if n > limite:\n            total += 1\n    return total'
+  const respuesta = 'Recibe una lista de números y un límite. Recorre la lista y cuenta cuántos superan el límite; devuelve esa cantidad.'
+  async function hastaEjercicio() {
+    const e = await preparar()
+    let s = await e.iniciar(codigo)
+    for (let i = 0; ; i++) {
+      s = await e.contestar(s, i === 1 ? 'Cada vuelta produce directamente el total final.' : respuesta, tutor(i === 1 ? { veredicto: 'falsa', nivel: 1 } : {}))
+      if (s.siguiente === 'cierre') break
+      s = await e.paso(s, 'continuar')
+    }
+    assert.ok(s.ofertaRefuerzo)
+    return { e, s: await e.paso(s, 'refuerzo') }
+  }
+  // Progress: correct solution, concept judged as met, quote not locatable (as seen with Groq).
+  let { e, s } = await hastaEjercicio()
+  const nombre = s.refuerzo.nombre
+  const solucion = nombre === 'costo_envio' ? 'def costo_envio(unidades):\n    if unidades >= 4:\n        return 8\n    if unidades >= 1:\n        return 5\n    return 0'
+    : 'def contar_pendientes(estados):\n    pendientes = 0\n    for estado in estados:\n        if estado == 0:\n            pendientes += 1\n    return pendientes'
+  e.responder((req) => { const d = revisor({ cita: solucion.split('\n')[1].trim() })(req); d.criterios.find((c) => c.id === 'concepto').cita = 'usa la idea correctamente en cada caso'; return d })
+  s = await e.paso(await e.paso(s, 'entregar', { codigo: solucion }), 'cerrar')
+  assert.equal(s.resumen.practica.titulo, 'Qué mejoró')
+  assert.match(s.resumen.practica.texto, /primera evidencia de progreso, no de dominio/)
+  assert.equal(s.resumen.duda, null, 'no se contradice con el ejercicio resuelto')
+  assert.ok(s.resumen.conceptos.some((c) => c.estado === 'aplicada'))
+  // Errors in the exercise: plain language, no analyzer details, closing still reachable.
+  ;({ e, s } = await hastaEjercicio())
+  e.responder(revisor({ conclusion: 'difiere', nivel: 1, cita: 'return 0' }))
+  s = await e.paso(await e.paso(s, 'entregar', { codigo: `def ${s.refuerzo.nombre}(${s.refuerzo.parametros.join(', ')}):\n    return 0` }), 'cerrar')
+  assert.equal(s.fase, 'cierre'); assert.equal(s.resumen.practica.titulo, 'Qué mostró el ejercicio')
+  assert.ok(!/argumentos posicionales|firmas complejas|AST/.test(s.resumen.practica.texto), s.resumen.practica.texto)
+  assert.match(s.resumen.practica.texto, /La IA estimó una diferencia en .+ \(se esperaba .+\)\./)
+  assert.ok(s.resumen.duda, 'la dificultad sin corregir se mantiene')
+})
