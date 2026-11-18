@@ -2,7 +2,7 @@
 // The normal test suites never import this script or contact a real provider.
 // Storage is a throwaway in-memory database: nothing reaches DATABASE_URL.
 if (!process.argv.includes('--live')) {
-  console.error('Esta comprobación consume una llamada de tu API. Ejecuta npm run test:proveedor -- --live para realizarla conscientemente.')
+  console.error('Esta comprobación consume una llamada de tu API. Ejecuta npm run test:proveedor -- --live [--proveedor groq|openai] para realizarla conscientemente.')
   process.exit(1)
 }
 require('@next/env').loadEnvConfig(process.cwd(), true)
@@ -10,19 +10,15 @@ const { randomUUID } = require('node:crypto')
 const { entorno } = require('../tests/entorno.cjs')
 ;(async () => {
   let llamadas = 0
-  const e = await entorno({ env: {
-    LLM_BASE_URL: process.env.LLM_BASE_URL, LLM_MODEL: process.env.LLM_MODEL,
-    LLM_API_KEY: process.env.LLM_API_KEY, LLM_RESPONSE_FORMAT: process.env.LLM_RESPONSE_FORMAT,
-  }, transport: async (url, opciones) => {
+  // Only the AI configuration reaches the throwaway environment. `--proveedor X`
+  // checks one provider alone (no fallback), e.g. the OpenAI fallback model.
+  const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => /^(LLM_|AI_|GROQ_|OPENAI_)/.test(k)))
+  const solo = process.argv.includes('--proveedor') ? process.argv[process.argv.indexOf('--proveedor') + 1] : null
+  if (solo) Object.assign(env, { AI_PRIMARY_PROVIDER: solo, AI_FALLBACK_ENABLED: 'false' })
+  const e = await entorno({ env, transport: async (url, opciones) => {
     llamadas++
     const res = await fetch(url, opciones)
-    console.log(JSON.stringify({ http: res.status, retryAfter: res.headers.get('retry-after') }))
-    if (res.ok) {
-      const data = await res.clone().json()
-      const u = data.usage
-      console.log(JSON.stringify({ finishReason: data.choices?.[0]?.finish_reason, modelo: data.model,
-        tokens: u ? { entrada: u.prompt_tokens, salida: u.completion_tokens } : undefined }))
-    }
+    console.log(JSON.stringify({ destino: new URL(url).hostname, http: res.status, retryAfter: res.headers.get('retry-after') }))
     return res
   } })
   try {
@@ -36,10 +32,13 @@ const { entorno } = require('../tests/entorno.cjs')
     const r = await sustentar({ accion: 'responder', sesion: s.sesion, revision: s.revision,
       respuesta: 'Mi función calcula el promedio de una lista de notas numéricas. Suma las notas y divide el total entre la cantidad de notas. Devuelve cero si la lista está vacía.' }, usuario)
     if (r.fase !== 'feedback') throw Object.assign(new Error(), { code: 'NO_EVALUADA' })
-    console.log(JSON.stringify({ resultado: 'Evaluación válida recibida y guardada', fase: r.fase, estado: r.historial.at(-1)?.feedback.estado, llamadas }))
+    const intentos = (await e.db.query("SELECT datos FROM eventos WHERE tipo = 'llm_request_finished' ORDER BY secuencia")).rows.map((f) => f.datos)
+    console.log(JSON.stringify({ resultado: 'Evaluación válida recibida y guardada', fase: r.fase, estado: r.historial.at(-1)?.feedback.estado, llamadas,
+      intentos: intentos.map(({ proveedor, papel, modelo, estado, ms, tokensEntrada, tokensSalida, tokensRazonamiento, costoEstimadoUSD }) => ({ proveedor, papel, modelo, estado, ms, tokensEntrada, tokensSalida, tokensRazonamiento, costoEstimadoUSD })) }))
   } catch (error) {
     // Never log error.message, request headers, the response body or credentials.
-    console.error(JSON.stringify({ resultado: 'No se completó la evaluación', codigo: error.code || 'ERROR_INTERNO', campo: error.detalle, retryAfter: error.retryAfter, llamadas }))
+    const intentos = e.db ? (await e.db.query("SELECT datos FROM eventos WHERE tipo = 'llm_request_finished' ORDER BY secuencia")).rows.map(({ datos: { proveedor, papel, modelo, estado, detalle } }) => ({ proveedor, papel, modelo, estado, detalle })) : []
+    console.error(JSON.stringify({ resultado: 'No se completó la evaluación', codigo: error.code || 'ERROR_INTERNO', campo: error.detalle, retryAfter: error.retryAfter, llamadas, intentos }))
     process.exitCode = 1
   }
 })().catch(() => { console.error('No fue posible preparar la comprobación.'); process.exitCode = 1 })

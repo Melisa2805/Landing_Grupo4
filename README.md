@@ -78,6 +78,11 @@ Usa [.env.example](./.env.example) como referencia y guarda los valores privados
 | `LLM_MODEL` | Modelo del proveedor. La plantilla usa `openai/gpt-oss-120b`. |
 | `LLM_API_KEY` | Clave del proveedor, si requiere autenticación. |
 | `LLM_RESPONSE_FORMAT` | Opcional, `auto` por defecto. También admite `json_schema`, `json_object` y `text`. |
+| `AI_FALLBACK_ENABLED` | `true` activa el respaldo automático de IA; por defecto está desactivado. Ver [docs/IA_MULTIPROVEEDOR.md](./docs/IA_MULTIPROVEEDOR.md). |
+| `AI_PRIMARY_PROVIDER` / `AI_FALLBACK_PROVIDER` | `groq` y `openai` por defecto; pueden intercambiarse. |
+| `OPENAI_API_KEY` | Clave de OpenAI para el respaldo. Solo en el servidor. |
+| `OPENAI_MODEL` / `OPENAI_REASONING_EFFORT` | Modelo de respaldo (`gpt-6-luna`) y esfuerzo de razonamiento opcional (`low`). |
+| `OPENAI_MONTHLY_BUDGET_USD` | Presupuesto interno mensual estimado para OpenAI; `5` por defecto, `0` bloquea las llamadas. |
 | `PYDEFENSE_SESSION_SECRET` | Secreto para cifrar el contenido de las prácticas. |
 | `PYDEFENSE_HUELLA_SECRET` | Secreto para las huellas del código. |
 | `DATABASE_URL` | Conexión PostgreSQL; obligatoria en Vercel y para compartir datos entre varias instancias. Puede dejarse vacía para usar PGlite localmente. |
@@ -85,7 +90,7 @@ Usa [.env.example](./.env.example) como referencia y guarda los valores privados
 | `PYDEFENSE_DB_POOL` | Máximo de conexiones PostgreSQL; por defecto `3`. |
 | `PYDEFENSE_CONTACTO` | Contacto opcional del responsable mostrado en el consentimiento. |
 
-Configura los dos secretos siguiendo la plantilla: al menos 16 caracteres, distintos entre sí y de `LLM_API_KEY`. El proveedor y el modelo del ejemplo no acreditan la configuración del despliegue público.
+Configura los dos secretos siguiendo la plantilla: al menos 16 caracteres, distintos entre sí y de las claves de IA. El proveedor y el modelo del ejemplo no acreditan la configuración del despliegue público.
 
 Las opciones de almacenamiento, cuotas y experimento están documentadas en [.env.example](./.env.example); no es necesario habilitar un experimento para practicar en local.
 

@@ -21,7 +21,8 @@
     "test:postgres": "node --experimental-vm-modules tests/postgres.test.cjs",
     "reporte-expo": "node --experimental-vm-modules scripts/reporte-expo.cjs",
     "calibracion": "node --experimental-vm-modules scripts/calibracion.cjs",
-    "capacidad": "node --experimental-vm-modules scripts/capacidad.cjs"
+    "capacidad": "node --experimental-vm-modules scripts/capacidad.cjs",
+    "comparar": "node --experimental-vm-modules scripts/comparar-proveedores.cjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.22",
