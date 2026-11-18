@@ -299,6 +299,32 @@ test('refuerzo: la cita de código tolera indentación distinta; una conclusión
   assert.equal(metodoAnalisis({ estado: 'no_disponible' }), 'aproximado'); assert.equal(metodoAnalisis({ estado: 'invalida' }), 'ast')
 })
 
+test('refuerzo: prácticas consecutivas rotan variantes de la misma idea; agotadas, se identifica el repaso; otra cuenta no influye', async () => {
+  const e = await preparar()
+  await e.consentir('user_prueba_b')
+  const contar = 'def contar(estados):\n    n = 0\n    for e in estados:\n        n += 1\n    return n'
+  async function abrirRefuerzo(usuario) {
+    let s = await e.contestar(await e.iniciar(contar, {}, usuario), 'Recorre la lista y cuenta cuántos estados hay, devolviendo ese número.', tutor({ concepto: 'recorridos' }), usuario)
+    s = await e.paso(await e.paso(s, 'cerrar', {}, usuario), 'refuerzo', {}, usuario)
+    return s
+  }
+  const vistas = []
+  for (let i = 0; i < 4; i++) {
+    const s = await abrirRefuerzo()
+    vistas.push([s.refuerzo.nombre, s.refuerzo.repeticion])
+    // Reloading keeps the task chosen for this practice.
+    assert.equal((await e.sustentar({ accion: 'recuperar', sesion: s.sesion })).refuerzo.nombre, s.refuerzo.nombre)
+  }
+  assert.equal(JSON.stringify(vistas), JSON.stringify([['contar_pendientes', false], ['contar_mayores', false], ['sumar_pares', false], ['contar_pendientes', true]]))
+  const otra = await abrirRefuerzo('user_prueba_b')
+  assert.equal(otra.refuerzo.nombre, 'contar_pendientes'); assert.equal(otra.refuerzo.repeticion, false)
+  const { elegirRefuerzo } = await e.importar('lib/pedagogia.js')
+  const politica = { permitidos: ['operaciones'] }
+  const forzado = { conceptos: [{ concepto: 'operaciones', nombre: 'Operaciones', estado: 'pendiente', evidencia: [{ pregunta: 1 }] }] }
+  assert.equal(elegirRefuerzo(forzado, politica, ['segundos_totales', 'total_compra', 'costo_taxi']).nombre, 'costo_taxi')
+  assert.equal(elegirRefuerzo(forzado, politica, ['costo_taxi']).nombre, 'total_compra')
+})
+
 test('recorrido completo del promedio: correcta, parcial, fallo recuperable y falsa hasta el cierre y el refuerzo', async () => {
   const e = await preparar(); let s = await e.iniciar(codigo, { temas: 'ciclos_listas' })
   const vistas = new Set()
